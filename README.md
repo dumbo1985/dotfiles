@@ -14,7 +14,7 @@ Open a terminal window on your mac. Recommend Item2 and oh-my-zsh.
    ```
 4. Install A Nerd Font
 5. Install Nvim
-6. Install Nevide
+6. Install Neovide
 7. Install Ripgrep
 8. Install Node
 9. Install lazygit

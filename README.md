@@ -7,7 +7,7 @@ Dotfiles on my mac. I'll create a branch for Ubuntu.
 Open a terminal window on your mac. Recommend Item2 and oh-my-zsh.
 
 1. Install Homebrew
-2. Install Item2
+2. Install Item2  
    You will need a true color terminal for the colorscheme to work properly.
    ```shell
    brew install --cask iterm2

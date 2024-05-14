@@ -1,6 +1,6 @@
 # dotfiles
 
-Dotfiles for my development on mac. I'll create a branch for Ubuntu.
+Dotfiles on my mac. I'll create a branch for Ubuntu.
 
 ## 一、Install
 

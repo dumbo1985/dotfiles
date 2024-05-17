@@ -18,6 +18,12 @@ Open a terminal window on your mac. Recommend Item2 and oh-my-zsh.
 7. Install Ripgrep
 8. Install Node
 9. Install lazygit
+10. Install python3.10-venv on Ubuntu (NO NEED ON MAC)
+    ```shell
+    sudo apt update
+    sudo apt install python3.10
+    sudo apt install python3.10-venv
+    ```
 
 ## 二、Usage
 

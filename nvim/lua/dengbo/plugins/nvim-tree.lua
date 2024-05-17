@@ -9,6 +9,9 @@ return {
 		vim.g.loaded_netrwPlugin = 1
 
 		nvimtree.setup({
+			filesystem_watchers = {
+				enable = false,
+			},
 			view = {
 				width = 35,
 				relativenumber = true,

@@ -9,29 +9,88 @@ return {
 	},
 
 	config = function()
-		local dap = require("dap")
-		local dapui = require("dapui")
-		dapui.setup()
+		require("nvim-dap-virtual-text").setup({
+			commented = true,
+		})
+
+		local dap, dapui = require("dap"), require("dapui")
+		dapui.setup({
+			expand_lines = true,
+			icons = { expanded = "", collapsed = "", circular = "" },
+			mappings = {
+				-- Use a table to apply multiple mappings
+				expand = { "<CR>", "<2-LeftMouse>" },
+				open = "o",
+				remove = "d",
+				edit = "e",
+				repl = "r",
+				toggle = "t",
+			},
+			layouts = {
+				{
+					elements = {
+						{ id = "scopes", size = 0.33 },
+						{ id = "breakpoints", size = 0.17 },
+						{ id = "stacks", size = 0.25 },
+						{ id = "watches", size = 0.25 },
+					},
+					size = 0.33,
+					position = "right",
+				},
+				{
+					elements = {
+						{ id = "repl", size = 0.45 },
+						{ id = "console", size = 0.55 },
+					},
+					size = 0.27,
+					position = "bottom",
+				},
+			},
+			floating = {
+				max_height = 0.9,
+				max_width = 0.5, -- Floats will be treated as percentage of your screen.
+				border = vim.g.border_chars, -- Border style. Can be 'single', 'double' or 'rounded'
+				mappings = {
+					close = { "q", "<Esc>" },
+				},
+			},
+		}) -- use default
+
 		dap.listeners.after.event_initialized["dapui_config"] = function()
-			dapui.open()
+			dapui.open({})
 		end
 
 		dap.listeners.before.event_terminated["dapui_config"] = function()
-			dapui.close()
+			dapui.close({})
 		end
 
 		dap.listeners.before.event_exited["dapui_config"] = function()
-			dapui.close()
+			dapui.close({})
 		end
 
-		-- set keymaps
-		local keymap = vim.keymap -- for conciseness
+		local dap_breakpoint = {
+			breakpoint = {
+				text = "",
+				texthl = "LspDiagnosticsSignError",
+				linehl = "",
+				numhl = "",
+			},
+			rejected = {
+				text = "",
+				texthl = "LspDiagnosticsSignHint",
+				linehl = "",
+				numhl = "",
+			},
+			stopped = {
+				text = "",
+				texthl = "LspDiagnosticsSignInformation",
+				linehl = "DiagnosticUnderlineInfo",
+				numhl = "LspDiagnosticsSignInformation",
+			},
+		}
 
-		keymap.set("n", "<leader>db", "<cmd>DapToggleBreakpoint<CR>", { desc = "Add breakpoint at line" })
-		keymap.set("n", "<leader>dr", "<cmd>DapContinue<CR>", { desc = "Start or continue the debugger" })
-		keymap.set("n", "<leader>ds", "<cmd>DapStepInto<CR>", { desc = "Step into" })
-		keymap.set("n", "<leader>dn", "<cmd>DapStepOver<CR>", { desc = "Step over" })
-		keymap.set("n", "<leader>do", "<cmd>DapStepOut<CR>", { desc = "Step out" })
-		keymap.set("n", "<leader>dt", "<cmd>DapTerminal<CR>", { desc = "Terminal" })
+		vim.fn.sign_define("DapBreakpoint", dap_breakpoint.breakpoint)
+		vim.fn.sign_define("DapStopped", dap_breakpoint.stopped)
+		vim.fn.sign_define("DapBreakpointRejected", dap_breakpoint.rejected)
 	end,
 }

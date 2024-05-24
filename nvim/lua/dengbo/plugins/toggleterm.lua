@@ -3,7 +3,7 @@ return {
 
 	config = function()
 		require("toggleterm").setup({
-			open_mapping = [[<C-t>]],
+			open_mapping = [[<C-y>]],
 			direction = "float",
 			shade_filetypes = {},
 			hide_numbers = true,

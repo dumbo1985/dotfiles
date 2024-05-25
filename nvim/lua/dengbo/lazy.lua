@@ -22,7 +22,7 @@ require("lazy").setup({ { import = "dengbo.plugins" }, { import = "dengbo.plugin
 })
 
 ----- Neovide GUI -----
-vim.opt.guifont = { "MesloLGS Nerd Font", ":h11" }
+vim.opt.guifont = { "MesloLGS Nerd Font Mono", ":h11" }
 vim.g.transparency = 0.8
 
 vim.g.neovide_transparency = 0.8

@@ -29,16 +29,16 @@ return {
 				"StatusLine",
 				"StatusLineNC",
 				"EndOfBuffer",
-				"NvimTree", -- NvimTree
 				"NormalFloat", -- plugins which have float panel such as Lazy, Mason, LspInfo
+			},
+			extra_groups = {
 				"NvimTreeNormal", -- NvimTree
 				"NvimTreeNormalNC", -- NvimTree
 				"NvimTreeNormalFloat", -- NvimTree
 				"TelescopeNormal",
 				"TelescopeNormalFloat",
 				"TelescopeNormalNC",
-			},
-			extra_groups = {}, -- table: additional groups that should be cleared
+			}, -- table: additional groups that should be cleared
 			exclude_groups = {}, -- table: groups you don't want to clear
 		})
 	end,

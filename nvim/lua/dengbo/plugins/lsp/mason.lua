@@ -52,6 +52,10 @@ return {
 				"clang-format",
 				"codelldb",
 				"cpplint",
+				"python-lsp-server",
+				"debugpy",
+				"flake8",
+				"mypy",
 			},
 		})
 	end,

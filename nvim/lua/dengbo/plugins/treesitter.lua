@@ -11,6 +11,7 @@ return {
 
 		-- configure treesitter
 		treesitter.setup({ -- enable syntax highlighting
+			auto_install = true,
 			highlight = {
 				enable = true,
 			},
@@ -43,6 +44,7 @@ return {
 				"vimdoc",
 				"c",
 				"cpp",
+				"python",
 			},
 			incremental_selection = {
 				enable = true,

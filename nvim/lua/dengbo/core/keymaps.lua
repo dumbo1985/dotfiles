@@ -40,9 +40,11 @@ keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>", { desc = "toggle maximize 
 -- Tab management
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
 keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
-keymap.set("n", "<leader>bn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
-keymap.set("n", "<leader>bp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
+-- keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
+-- keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
+keymap.set("n", "<leader>tp", ":BufferLineCyclePrev<CR>", { desc = "Go to next tab" }) --  go to next tab
+keymap.set("n", "<leader>tn", ":BufferLineCycleNext<CR>", { desc = "Go to previous tab" }) --  go to previous tab
 
 -- Diff keymaps
 keymap.set("n", "<leader>cc", ":diffput<CR>", { desc = "put diff from current to other during diff" }) -- put diff from current to other during diff
@@ -67,7 +69,7 @@ keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find s
 keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
 
 -- Quickfix keymaps
-keymap.set("n", "<leader>qo", ":copen<CR>", { desc = "oopen quickfix list" }) -- open quickfix list
+keymap.set("n", "<leader>qo", ":copen<CR>", { desc = "open quickfix list" }) -- open quickfix list
 keymap.set("n", "<leader>qf", ":cfirst<CR>", { desc = "jump to first quickfix list item" }) -- jump to first quickfix list item
 keymap.set("n", "<leader>qn", ":cnext<CR>", { desc = "jump to next quickfix list item" }) -- jump to next quickfix list item
 keymap.set("n", "<leader>qp", ":cprev<CR>", { desc = "jump to prev quickfix list item" }) -- jump to prev quickfix list item
@@ -77,26 +79,22 @@ keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "close quickfix list" }) -
 -- Git-blame
 keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "toggle git blame" }) -- toggle git blame
 
--- keybindings.lua
-keymap.set("n", "<leader>bp", ":BufferLineCyclePrev<CR>", { desc = "Go to next tab" }) --  go to next tab
-keymap.set("n", "<leader>bn", ":BufferLineCycleNext<CR>", { desc = "Go to previous tab" }) --  go to previous tab
-
 -- LSP
-keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>")
-keymap.set("n", "<leader>gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "goto definition" })
-keymap.set("n", "<leader>gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "goto declaration" })
-keymap.set("n", "<leader>gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "goto implementation" })
-keymap.set("n", "<leader>gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", { desc = "type definition" })
-keymap.set("n", "<leader>gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "references" })
-keymap.set("n", "<leader>gs", "<cmd>lua vim.lsp.buf.signature_help()<CR>", { desc = "signature help" })
-keymap.set("n", "<leader>rr", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "rename" })
-keymap.set("n", "<leader>gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "normal mode format" })
-keymap.set("v", "<leader>gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "visual mode format" })
-keymap.set("n", "<leader>ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "code action" })
-keymap.set("n", "<leader>gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "open float" })
-keymap.set("n", "<leader>gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "goto prev" })
-keymap.set("n", "<leader>gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "goto next" })
-keymap.set("n", "<leader>tr", "<cmd>lua vim.lsp.buf.document_symbol()<CR>", { desc = "document symbol" })
+keymap.set("n", "gg", "<cmd>lua vim.lsp.buf.hover()<CR>")
+keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "goto definition" })
+keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "goto declaration" })
+keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "goto implementation" })
+keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", { desc = "type definition" })
+keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "references" })
+keymap.set("n", "gs", "<cmd>lua vim.lsp.buf.signature_help()<CR>", { desc = "signature help" })
+keymap.set("n", "rr", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "rename" })
+keymap.set("n", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "normal mode format" })
+keymap.set("v", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "visual mode format" })
+keymap.set("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "code action" })
+keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "open float" })
+keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "goto prev" })
+keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "goto next" })
+keymap.set("n", "tr", "<cmd>lua vim.lsp.buf.document_symbol()<CR>", { desc = "document symbol" })
 keymap.set("i", "<C-Space>", "<cmd>lua vim.lsp.buf.completion()<CR>", { desc = "completion" })
 
 -- Filetype-specific keymaps (these can be done in the ftplugin directory instead if you prefer)
@@ -141,7 +139,7 @@ keymap.set("n", "<leader>do", "<cmd>lua require'dap'.step_out()<cr>", { desc = "
 keymap.set("n", "<leader>dd", function()
 	require("dap").disconnect()
 	require("dapui").close()
-end, { desc = { "disconnect dap" } })
+end, { desc = "disconnect dap" })
 keymap.set("n", "<leader>dt", function()
 	require("dap").terminate()
 	require("dapui").close()

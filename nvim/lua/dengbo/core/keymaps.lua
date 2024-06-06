@@ -32,7 +32,7 @@ keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }
 keymap.set("n", "<leader>sj", "<C-w>-", { desc = " make split window height shorter" }) -- make split window height shorter
 keymap.set("n", "<leader>sk", "<C-w>+", { desc = "make split windows height taller" }) -- make split windows height taller
 keymap.set("n", "<leader>sl", "<C-w>>5", { desc = "make split windows width bigger" }) -- make split windows width bigger
-keymap.set("n", "<leader>sh", "<C-w><5", { desc = "make split windows width smaller" }) -- make split windows width smaller
+keymap.set("n", "<leader>ss", "<C-w><5", { desc = "make split windows width smaller" }) -- make split windows width smaller
 
 -- Vim-maximizer
 keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>", { desc = "toggle maximize tab" }) -- toggle maximize tab
@@ -80,7 +80,7 @@ keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "close quickfix list" }) -
 keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "toggle git blame" }) -- toggle git blame
 
 -- LSP
-keymap.set("n", "gg", "<cmd>lua vim.lsp.buf.hover()<CR>")
+keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "hover" })
 keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "goto definition" })
 keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "goto declaration" })
 keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "goto implementation" })
@@ -108,7 +108,7 @@ keymap.set("n", "<leader>tc", function()
 	if vim.bo.filetype == "python" then
 		require("dap-python").test_class()
 	end
-end, { desc = { "test class" } })
+end, { desc = "test class" })
 
 keymap.set("n", "<leader>tm", function()
 	if vim.bo.filetype == "python" then

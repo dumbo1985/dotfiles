@@ -80,7 +80,7 @@ keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "close quickfix list" }) -
 keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "toggle git blame" }) -- toggle git blame
 
 -- LSP
-keymap.set("n", "gg", "<cmd>lua vim.lsp.buf.hover()<CR>")
+keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "hover" })
 keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "goto definition" })
 keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "goto declaration" })
 keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "goto implementation" })
@@ -108,7 +108,7 @@ keymap.set("n", "<leader>tc", function()
 	if vim.bo.filetype == "python" then
 		require("dap-python").test_class()
 	end
-end, { desc = { "test class" } })
+end, { desc = "test class" })
 
 keymap.set("n", "<leader>tm", function()
 	if vim.bo.filetype == "python" then

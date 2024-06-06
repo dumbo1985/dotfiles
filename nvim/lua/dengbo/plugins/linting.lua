@@ -17,6 +17,8 @@ return {
 			},
 		}
 
+		-- 设置 flake8 的参数
+		lint.linters.flake8.args = { "--config", ".flake8" }
 		local lint_augroup = vim.api.nvim_create_augroup("lint", { clear = true })
 
 		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost", "InsertLeave" }, {

@@ -6,7 +6,13 @@ return {
 		"mfussenegger/nvim-dap",
 	},
 
+	cmd = { "DapInstall", "DapUninstall" },
+
 	opts = {
+		automatic_installation = true,
 		handlers = {},
+		ensure_installed = {
+			"delve",
+		},
 	},
 }

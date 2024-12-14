@@ -8,6 +8,12 @@ return {
 			module = { "nvim-dap-virtual-text" },
 		},
 		{
+			"leoluz/nvim-dap-go",
+			config = function()
+				require("dap-go").setup()
+			end,
+		},
+		{
 			"rcarriga/nvim-dap-ui",
 			module = { "dapui" },
 		},

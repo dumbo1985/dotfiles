@@ -43,9 +43,11 @@ return {
 				"query",
 				"vimdoc",
 				"c",
+				"go",
 				"cpp",
 				"python",
 			},
+			sync_install = false,
 			incremental_selection = {
 				enable = true,
 				keymaps = {

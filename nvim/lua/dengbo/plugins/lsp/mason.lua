@@ -38,11 +38,16 @@ return {
 				"prismals",
 				"pyright",
 				"clangd",
+				"gopls",
 			},
 		})
 
 		mason_tool_installer.setup({
 			ensure_installed = {
+				"beautysh",
+				"buf",
+				"rustfmt",
+				"htmlbeautifier",
 				"prettier", -- prettier formatter
 				"stylua", -- lua formatter
 				"isort", -- python formatter
@@ -56,6 +61,11 @@ return {
 				"debugpy",
 				"flake8",
 				"mypy",
+				"yamlfix",
+				"taplo",
+				"shellcheck",
+				"gopls",
+				"delve",
 			},
 		})
 	end,

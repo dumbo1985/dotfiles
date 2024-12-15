@@ -5,62 +5,32 @@ return {
 		vim.o.timeout = true
 		vim.o.timeoutlen = 500
 	end,
-
 	config = function()
 		local whichkey = require("which-key")
-		-- local legendary = require "legendary"
 
-		-- local function keymap(lhs, rhs, desc)
-		--   vim.keymap.set("n", lhs, rhs, { silent = true, desc = desc })
-		-- end
+		whichkey.setup({
+			-- 其他配置选项
+		})
 
-		whichkey.setup()
-		local keymap = {
-			b = { name = "Breakpoint" },
-			c = { name = "Diff" },
-			d = { name = "Debug" },
-			e = { name = "File Explorer" },
-			f = { name = "Find" },
-			g = { name = "Blame" },
-			h = { name = "Hunk" },
-			l = { name = "LazyGit" },
-			m = { name = "Format" },
-			n = { name = "Highlights" },
-			q = { name = "Quickfix" },
-			r = { name = "Redo" },
-			s = { name = "Splite" },
-			t = { name = "Tab" },
-			x = { name = "Trouble" },
-			w = { name = "Session" },
-		}
+		-- Normal mode keymaps
+		vim.keymap.set("n", "<leader>b", function() end, { desc = "Breakpoint" })
+		vim.keymap.set("n", "<leader>c", function() end, { desc = "Diff" })
+		vim.keymap.set("n", "<leader>d", function() end, { desc = "Debug" })
+		vim.keymap.set("n", "<leader>e", function() end, { desc = "File Explorer" })
+		vim.keymap.set("n", "<leader>f", function() end, { desc = "Find" })
+		vim.keymap.set("n", "<leader>g", function() end, { desc = "Blame" })
+		vim.keymap.set("n", "<leader>h", function() end, { desc = "Hunk" })
+		vim.keymap.set("n", "<leader>l", function() end, { desc = "LazyGit" })
+		vim.keymap.set("n", "<leader>m", function() end, { desc = "Format" })
+		vim.keymap.set("n", "<leader>n", function() end, { desc = "Highlights" })
+		vim.keymap.set("n", "<leader>q", function() end, { desc = "Quickfix" })
+		vim.keymap.set("n", "<leader>r", function() end, { desc = "Redo" })
+		vim.keymap.set("n", "<leader>s", function() end, { desc = "Splite" })
+		vim.keymap.set("n", "<leader>t", function() end, { desc = "Tab" })
+		vim.keymap.set("n", "<leader>w", function() end, { desc = "Session" })
+		vim.keymap.set("n", "<leader>x", function() end, { desc = "Trouble" })
 
-		local opts = {
-			mode = "n",
-			prefix = "<leader>",
-			buffer = nil,
-			silent = true,
-			noremap = true,
-			nowait = false,
-		}
-
-		whichkey.register(keymap, opts)
-		--- require("legendary.integrations.which-key").bind_whichkey(keymap, opts, false)
-
-		local keymap_v = {
-			d = {
-				name = "Debug",
-				e = { "<cmd>lua require'dapui'.eval()<cr>", "Evaluate" },
-			},
-		}
-		opts = {
-			mode = "v",
-			prefix = "<leader>",
-			buffer = nil,
-			silent = true,
-			noremap = true,
-			nowait = false,
-		}
-		whichkey.register(keymap_v, opts)
-		--- require("legendary.integrations.which-key").bind_whichkey(keymap_v, opts, false)
+		-- Visual mode keymaps
+		vim.keymap.set("v", "<leader>de", "<cmd>lua require'dapui'.eval()<cr>", { desc = "Evaluate" })
 	end,
 }

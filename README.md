@@ -25,6 +25,10 @@ Open a terminal window on your mac. Recommend Item2 and oh-my-zsh.
    tar xf lazygit.tar.gz
    sudo install lazygit /usr/local/bin
    ```
+10. Install ruby
+    ```shell
+    sudo apt install ruby-full
+   ```
 
 ## 二、Usage
 

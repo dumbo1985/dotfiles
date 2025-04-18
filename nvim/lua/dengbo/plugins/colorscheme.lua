@@ -1,45 +1,45 @@
--- return {
--- 	{
--- 		"folke/tokyonight.nvim",
--- 		priority = 1000, -- make sure to load this before all the other start plugins
--- 		config = function()
--- 			local bg = "#011628"
--- 			local bg_dark = "#011423"
--- 			local bg_highlight = "#143652"
--- 			local bg_search = "#0A64AC"
--- 			local bg_visual = "#275378"
--- 			local fg = "#CBE0F0"
--- 			local fg_dark = "#B4D0E9"
--- 			local fg_gutter = "#627E97"
--- 			local border = "#547998"
---
--- 			require("tokyonight").setup({
--- 				style = "night",
--- 				transparent = true,
--- 				tokyonight_dark_float = false,
--- 				on_colors = function(colors)
--- 					colors.bg = bg
--- 					colors.bg_dark = bg_dark
--- 					colors.bg_float = bg_dark
--- 					colors.bg_highlight = bg_highlight
--- 					colors.bg_popup = bg_dark
--- 					colors.bg_search = bg_search
--- 					colors.bg_sidebar = bg_dark
--- 					colors.bg_statusline = bg_dark
--- 					colors.bg_visual = bg_visual
--- 					colors.border = border
--- 					colors.fg = fg
--- 					colors.fg_dark = fg_dark
--- 					colors.fg_float = fg
--- 					colors.fg_gutter = fg_gutter
--- 					colors.fg_sidebar = fg_dark
--- 				end,
--- 			})
--- 			-- load the colorscheme here
--- 			vim.cmd([[colorscheme tokyonight]])
--- 		end,
--- 	},
--- }
+return {
+	{
+		"folke/tokyonight.nvim",
+		priority = 1000, -- make sure to load this before all the other start plugins
+		config = function()
+			local bg = "#011628"
+			local bg_dark = "#011423"
+			local bg_highlight = "#143652"
+			local bg_search = "#0A64AC"
+			local bg_visual = "#275378"
+			local fg = "#CBE0F0"
+			local fg_dark = "#B4D0E9"
+			local fg_gutter = "#627E97"
+			local border = "#547998"
+
+			require("tokyonight").setup({
+				style = "night",
+				transparent = true,
+				tokyonight_dark_float = false,
+				on_colors = function(colors)
+					colors.bg = bg
+					colors.bg_dark = bg_dark
+					colors.bg_float = bg_dark
+					colors.bg_highlight = bg_highlight
+					colors.bg_popup = bg_dark
+					colors.bg_search = bg_search
+					colors.bg_sidebar = bg_dark
+					colors.bg_statusline = bg_dark
+					colors.bg_visual = bg_visual
+					colors.border = border
+					colors.fg = fg
+					colors.fg_dark = fg_dark
+					colors.fg_float = fg
+					colors.fg_gutter = fg_gutter
+					colors.fg_sidebar = fg_dark
+				end,
+			})
+			-- load the colorscheme here
+			vim.cmd([[colorscheme tokyonight]])
+		end,
+	},
+}
 
 -- Theme/Colorscheme (uncomment section for whichever theme you prefer or use your own)
 -- Kanagawa Theme (Custom Palette)
@@ -151,38 +151,38 @@
 -- }
 
 -- Tokyo Night Theme
-return {
-	-- https://github.com/folke/tokyonight.nvim
-	"folke/tokyonight.nvim", -- You can replace this with your favorite colorscheme
-	lazy = false, -- We want the colorscheme to load immediately when starting Neovim
-	priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
-	opts = {
-		-- Replace this with your scheme-specific settings or remove to use the defaults
-		-- transparent = true,
-		style = "night", -- other variations "storm, night, moon, day"
-	},
-	config = function(_, opts)
-		require("tokyonight").setup(opts) -- Replace this with your favorite colorscheme
-		vim.cmd("colorscheme tokyonight") -- Replace this with your favorite colorscheme
-	end,
-}
+-- return {
+-- 	-- https://github.com/folke/tokyonight.nvim
+-- 	"folke/tokyonight.nvim", -- You can replace this with your favorite colorscheme
+-- 	lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+-- 	priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+-- 	opts = {
+-- 		-- Replace this with your scheme-specific settings or remove to use the defaults
+-- 		-- transparent = true,
+-- 		style = "night", -- other variations "storm, night, moon, day"
+-- 	},
+-- 	config = function(_, opts)
+-- 		require("tokyonight").setup(opts) -- Replace this with your favorite colorscheme
+-- 		vim.cmd("colorscheme tokyonight") -- Replace this with your favorite colorscheme
+-- 	end,
+-- }
 
 -- Catppuccin Theme
 -- return {
---   -- https://github.com/catppuccin/nvim
---   'catppuccin/nvim',
---   name = "catppuccin", -- name is needed otherwise plugin shows up as "nvim" due to github URI
---   lazy = false, -- We want the colorscheme to load immediately when starting Neovim
---   priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
---   opts = {
---   --   -- Replace this with your scheme-specific settings or remove to use the defaults
---     -- transparent = true,
---     flavour = "mocha", -- "latte, frappe, macchiato, mocha"
---   },
---   config = function(_, opts)
---     require('catppuccin').setup(opts) -- Replace this with your favorite colorscheme
---     vim.cmd("colorscheme catppuccin") -- Replace this with your favorite colorscheme
---   end
+-- 	-- https://github.com/catppuccin/nvim
+-- 	"catppuccin/nvim",
+-- 	name = "catppuccin", -- name is needed otherwise plugin shows up as "nvim" due to github URI
+-- 	lazy = false, -- We want the colorscheme to load immediately when starting Neovim
+-- 	priority = 1000, -- Load the colorscheme before other non-lazy-loaded plugins
+-- 	opts = {
+-- 		--   -- Replace this with your scheme-specific settings or remove to use the defaults
+-- 		-- transparent = true,
+-- 		flavour = "mocha", -- "latte, frappe, macchiato, mocha"
+-- 	},
+-- 	config = function(_, opts)
+-- 		require("catppuccin").setup(opts) -- Replace this with your favorite colorscheme
+-- 		vim.cmd("colorscheme catppuccin") -- Replace this with your favorite colorscheme
+-- 	end,
 -- }
 
 -- Sonokai Theme

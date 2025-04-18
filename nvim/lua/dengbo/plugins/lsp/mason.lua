@@ -15,6 +15,14 @@ return {
 
 		-- enable mason and configure icons
 		mason.setup({
+			-- pip = {
+			-- 	install_args = { "--user" },
+			-- 	pip_path = "~/.mason-python-env/bin/pip3", -- 使用虚拟环境的 pip
+			-- },
+			-- PATH = {
+			-- 	python = "~/.mason-python-env/bin/python3", -- 使用虚拟环境的 python
+			-- },
+
 			ui = {
 				icons = {
 					package_installed = "✓",

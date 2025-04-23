@@ -52,6 +52,11 @@ return {
 
 		mason_tool_installer.setup({
 			ensure_installed = {
+				"codelldb", -- LLDB 调试器适配器
+				"clangd", -- C/C++ LSP 服务器
+				"clang-format", -- 代码格式化
+				"cpptools", -- 备用调试适配器
+				"cpplint", -- 代码风格检查
 				"beautysh",
 				"buf",
 				"rustfmt",
@@ -62,9 +67,6 @@ return {
 				"black", -- python formatter
 				"pylint", -- python linter
 				"eslint_d", -- js linter
-				"clang-format",
-				"codelldb",
-				"cpplint",
 				"python-lsp-server",
 				"debugpy",
 				"flake8",

@@ -52,20 +52,21 @@ return {
 
 		mason_tool_installer.setup({
 			ensure_installed = {
-				-- formatter / linter / debugger / DAP / LSP 工具
+				"codelldb", -- LLDB 调试器适配器
+				"clangd", -- C/C++ LSP 服务器
+				"clang-format", -- 代码格式化
+				"cpptools", -- 备用调试适配器
+				"cpplint", -- 代码风格检查
 				"beautysh",
 				"buf",
 				"rustfmt",
 				"htmlbeautifier",
-				"prettier",
-				"stylua",
-				"isort",
-				"black",
-				"pylint",
-				"eslint_d",
-				"clang-format",
-				"codelldb",
-				"cpplint",
+				"prettier", -- prettier formatter
+				"stylua", -- lua formatter
+				"isort", -- python formatter
+				"black", -- python formatter
+				"pylint", -- python linter
+				"eslint_d", -- js linter
 				"python-lsp-server",
 				"debugpy",
 				"flake8",

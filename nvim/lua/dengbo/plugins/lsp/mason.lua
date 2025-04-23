@@ -16,11 +16,11 @@ return {
 		-- enable mason and configure icons
 		mason.setup({
 			-- pip = {
-			-- 	install_args = { "--user" },
-			-- 	pip_path = "~/.mason-python-env/bin/pip3", -- 使用虚拟环境的 pip
+			--     install_args = { "--user" },
+			--     pip_path = "~/.mason-python-env/bin/pip3", -- 使用虚拟环境的 pip
 			-- },
 			-- PATH = {
-			-- 	python = "~/.mason-python-env/bin/python3", -- 使用虚拟环境的 python
+			--     python = "~/.mason-python-env/bin/python3", -- 使用虚拟环境的 python
 			-- },
 
 			ui = {
@@ -33,7 +33,7 @@ return {
 		})
 
 		mason_lspconfig.setup({
-			-- list of servers for mason to install
+			-- list of servers for mason to install (lspconfig server 名称)
 			ensure_installed = {
 				"tsserver",
 				"html",
@@ -43,25 +43,26 @@ return {
 				"lua_ls",
 				"graphql",
 				"emmet_ls",
-				"prismals",
 				"pyright",
 				"clangd",
 				"gopls",
 			},
+			automatic_installation = true,
 		})
 
 		mason_tool_installer.setup({
 			ensure_installed = {
+				-- formatter / linter / debugger / DAP / LSP 工具
 				"beautysh",
 				"buf",
 				"rustfmt",
 				"htmlbeautifier",
-				"prettier", -- prettier formatter
-				"stylua", -- lua formatter
-				"isort", -- python formatter
-				"black", -- python formatter
-				"pylint", -- python linter
-				"eslint_d", -- js linter
+				"prettier",
+				"stylua",
+				"isort",
+				"black",
+				"pylint",
+				"eslint_d",
 				"clang-format",
 				"codelldb",
 				"cpplint",
@@ -74,6 +75,8 @@ return {
 				"shellcheck",
 				"gopls",
 				"delve",
+				"prisma-language-server", -- ✅ 添加 Prisma LSP（在 mason-tool-installer 中安装）
+				"typescript-language-server",
 			},
 		})
 	end,

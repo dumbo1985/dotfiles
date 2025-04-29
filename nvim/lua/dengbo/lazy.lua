@@ -81,3 +81,46 @@ vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true 
 vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 
 vim.g.transparent_groups = vim.list_extend(vim.g.transparent_groups or {}, { "ExtraGroup" })
+
+-- plugins/colorscheme.lua 末尾添加以下代码
+vim.schedule(function()
+	local themes = {
+		{
+			name = "tokyonight",
+			setup = function()
+				require("tokyonight").setup({ style = "night" })
+			end,
+		},
+		{
+			name = "kanagawa",
+			setup = function()
+				require("kanagawa").setup({ background = { dark = "wave" } })
+			end,
+		},
+		{
+			name = "catppuccin",
+			setup = function()
+				require("catppuccin").setup({ flavour = "mocha" })
+			end,
+		},
+		{
+			name = "rose-pine",
+			setup = function()
+				require("rose-pine").setup({ variant = "main" })
+			end,
+		},
+		{
+			name = "sonokai",
+			setup = function()
+				vim.g.sonokai_style = "default"
+			end,
+		},
+		{ name = "onenord", setup = function() end },
+	}
+
+	math.randomseed(os.time())
+	local theme = themes[math.random(#themes)]
+	theme.setup()
+	vim.cmd("colorscheme " .. theme.name)
+	vim.notify("🎨 Loaded random theme: " .. theme.name)
+end)

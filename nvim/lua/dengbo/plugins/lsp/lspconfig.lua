@@ -13,7 +13,7 @@ return {
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
 		local schemastore = require("schemastore")
 
-		-- 诊断图标配置（类型安全版本）
+		-- 诊断图标配置
 		local severity_icons = {
 			[vim.diagnostic.severity.ERROR] = { icon = " ", hl = "DiagnosticSignError" },
 			[vim.diagnostic.severity.WARN] = { icon = " ", hl = "DiagnosticSignWarn" },
@@ -84,6 +84,19 @@ return {
 
 		-- 特殊服务器配置
 		local server_configs = {
+			-- 🔥 新增 clangd 配置！
+			clangd = {
+				cmd = {
+					"clangd",
+					"--background-index",
+					"--pch-storage=memory",
+					"--suggest-missing-includes",
+					"--clang-tidy",
+					"--compile-commands-dir=build",
+					"--completion-style=detailed",
+					"--header-insertion=never",
+				},
+			},
 			lua_ls = {
 				settings = {
 					Lua = {

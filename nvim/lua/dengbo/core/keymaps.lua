@@ -7,154 +7,157 @@ local keymap = vim.keymap -- for conciseness
 -- General Keymaps -------------------
 
 -- General keymaps
-keymap.set("i", "jk", "<ESC>") -- exit insert mode with jk
-keymap.set("i", "ii", "<ESC>") -- exit insert mode with ii
-keymap.set("n", "<leader>wq", ":wq<CR>", { desc = "save and quit" }) -- save and quit
-keymap.set("n", "<leader>qq", ":q!<CR>", { desc = "quit without saving" }) -- quit without saving
-keymap.set("n", "<leader>ww", ":w<CR>", { desc = "save" }) -- save
-keymap.set("n", "gx", ":!open <c-r><c-a><CR>") -- open URL under cursor
+keymap.set("i", "jk", "<ESC>") -- 通过 jk 退出插入模式
+keymap.set("i", "ii", "<ESC>") -- 通过 ii 退出插入模式
+keymap.set("n", "<leader>wq", ":wq<CR>", { desc = "保存并退出" })
+keymap.set("n", "<leader>qq", ":q!<CR>", { desc = "强制退出不保存" })
+keymap.set("n", "<leader>ww", ":w<CR>", { desc = "保存" })
+keymap.set("n", "gx", ":!open <c-r><c-a><CR>") -- 打开光标下的链接
 
--- clear search highlights
-keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
+-- 清除搜索高亮
+keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "清除搜索高亮" })
 
--- delete single character without copying into register
--- keymap.set("n", "x", '"_x')
+-- 增加/减少数字
+keymap.set("n", "<leader>+", "<C-a>", { desc = "数字加一" })
+keymap.set("n", "<leader>-", "<C-x>", { desc = "数字减一" })
 
--- increment/decrement numbers
-keymap.set("n", "<leader>+", "<C-a>", { desc = "Increment number" }) -- increment
-keymap.set("n", "<leader>-", "<C-x>", { desc = "Decrement number" }) -- decrement
+-- 分屏管理
+keymap.set("n", "<leader>sv", "<C-w>v", { desc = "垂直分屏" })
+keymap.set("n", "<leader>sh", "<C-w>s", { desc = "水平分屏" })
+keymap.set("n", "<leader>se", "<C-w>=", { desc = "使分屏大小相等" })
+keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "关闭当前分屏" })
+keymap.set("n", "<leader>sj", "<C-w>-", { desc = "减小分屏高度" })
+keymap.set("n", "<leader>sk", "<C-w>+", { desc = "增加分屏高度" })
+keymap.set("n", "<leader>sl", "<C-w>>5", { desc = "增加分屏宽度" })
+keymap.set("n", "<leader>ss", "<C-w><5", { desc = "减小分屏宽度" })
 
--- Split window management
-keymap.set("n", "<leader>sv", "<C-w>v", { desc = "Split window vertically" }) -- split window vertically
-keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" }) -- split window horizontally
-keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make splits equal size" }) -- make split windows equal width & height
-keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current split" }) -- close current split window
-keymap.set("n", "<leader>sj", "<C-w>-", { desc = " make split window height shorter" }) -- make split window height shorter
-keymap.set("n", "<leader>sk", "<C-w>+", { desc = "make split windows height taller" }) -- make split windows height taller
-keymap.set("n", "<leader>sl", "<C-w>>5", { desc = "make split windows width bigger" }) -- make split windows width bigger
-keymap.set("n", "<leader>ss", "<C-w><5", { desc = "make split windows width smaller" }) -- make split windows width smaller
+-- 最大化窗口
+keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>", { desc = "切换最大化窗口" })
 
--- Vim-maximizer
-keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>", { desc = "toggle maximize tab" }) -- toggle maximize tab
+-- 标签页管理
+keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "打开新标签页" })
+keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "关闭当前标签页" })
+keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "当前缓冲区新开标签页" })
+keymap.set("n", "<leader>tp", ":BufferLineCyclePrev<CR>", { desc = "切换到上一个标签页(左上角)" })
+keymap.set("n", "<leader>tn", ":BufferLineCycleNext<CR>", { desc = "切换到下一个标签页（左上角）" })
+keymap.set("n", "<leader>t]", "gt", { desc = "切换到下一个标签页(右上角)" })
+keymap.set("n", "<leader>t[", "gT", { desc = "切换到上一个标签页(右上角)" })
 
--- Tab management
-keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" }) -- open new tab
-keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" }) -- close current tab
--- keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" }) --  go to next tab
--- keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" }) --  go to previous tab
-keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" }) --  move current buffer to new tab
-keymap.set("n", "<leader>tp", ":BufferLineCyclePrev<CR>", { desc = "Go to next tab" }) --  go to next tab
-keymap.set("n", "<leader>tn", ":BufferLineCycleNext<CR>", { desc = "Go to previous tab" }) --  go to previous tab
+-- Diff操作
+keymap.set("n", "<leader>cc", ":diffput<CR>", { desc = "把改动放到另一个缓冲区" })
+keymap.set("n", "<leader>cj", ":diffget 1<CR>", { desc = "从左边取改动" })
+keymap.set("n", "<leader>ck", ":diffget 3<CR>", { desc = "从右边取改动" })
+keymap.set("n", "<leader>cn", "]c", { desc = "跳转到下一个差异块" })
+keymap.set("n", "<leader>cp", "[c", { desc = "跳转到上一个差异块" })
 
--- Diff keymaps
-keymap.set("n", "<leader>cc", ":diffput<CR>", { desc = "put diff from current to other during diff" }) -- put diff from current to other during diff
-keymap.set("n", "<leader>cj", ":diffget 1<CR>", { desc = "get diff from left (local) during merge" }) -- get diff from left (local) during merge
-keymap.set("n", "<leader>ck", ":diffget 3<CR>", { desc = "get diff from right (remote) during merge" }) -- get diff from right (remote) during merge
-keymap.set("n", "<leader>cn", "]c", { desc = "next diff hunk" }) -- next diff hunk
-keymap.set("n", "<leader>cp", "[c", { desc = "previous diff hunk" }) -- previous diff hunk
+-- NvimTree 文件树
+keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "切换文件资源管理器" })
+keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "收起文件资源管理器" })
+keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "刷新文件资源管理器" })
+keymap.set("n", "<leader>eo", ":NvimTreeFocus<CR>", { desc = "聚焦文件资源管理器" })
+keymap.set("n", "<leader>ef", ":NvimTreeFindFile<CR>", { desc = "在文件资源管理器中定位文件" })
 
--- Nvim-tree
-keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
--- keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
-keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
-keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
-keymap.set("n", "<leader>eo", ":NvimTreeFocus<CR>", { desc = "toggle focus to file explorer" }) -- toggle focus to file explorer
-keymap.set("n", "<leader>ef", ":NvimTreeFindFile<CR>", { desc = "find file in file explorer" }) -- find file in file explorer
+-- Telescope 模糊搜索
+keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "查找文件" })
+keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "查找最近打开的文件" })
+keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "全局搜索字符串" })
+keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "搜索光标下的字符串" })
+keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "查找 TODO" })
 
--- Telescope
-keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
-keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
-keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
-keymap.set("n", "<leader>ft", "<cmd>TodoTelescope<cr>", { desc = "Find todos" })
+-- Quickfix
+keymap.set("n", "<leader>qo", ":copen<CR>", { desc = "打开 quickfix 列表" })
+keymap.set("n", "<leader>qf", ":cfirst<CR>", { desc = "跳转到第一个 quickfix 项" })
+keymap.set("n", "<leader>qn", ":cnext<CR>", { desc = "跳转到下一个 quickfix 项" })
+keymap.set("n", "<leader>qp", ":cprev<CR>", { desc = "跳转到上一个 quickfix 项" })
+keymap.set("n", "<leader>ql", ":clast<CR>", { desc = "跳转到最后一个 quickfix 项" })
+keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "关闭 quickfix 列表" })
 
--- Quickfix keymaps
-keymap.set("n", "<leader>qo", ":copen<CR>", { desc = "open quickfix list" }) -- open quickfix list
-keymap.set("n", "<leader>qf", ":cfirst<CR>", { desc = "jump to first quickfix list item" }) -- jump to first quickfix list item
-keymap.set("n", "<leader>qn", ":cnext<CR>", { desc = "jump to next quickfix list item" }) -- jump to next quickfix list item
-keymap.set("n", "<leader>qp", ":cprev<CR>", { desc = "jump to prev quickfix list item" }) -- jump to prev quickfix list item
-keymap.set("n", "<leader>ql", ":clast<CR>", { desc = "jump to last quickfix list item" }) -- jump to last quickfix list item
-keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "close quickfix list" }) -- close quickfix list
-
--- Git-blame
-keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "toggle git blame" }) -- toggle git blame
+-- Git blame
+keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "切换 Git 责任人显示" })
 
 -- LSP
-keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "hover" })
-keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "goto definition" })
-keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "goto declaration" })
-keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "goto implementation" })
-keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", { desc = "type definition" })
-keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "references" })
-keymap.set("n", "gs", "<cmd>lua vim.lsp.buf.signature_help()<CR>", { desc = "signature help" })
-keymap.set("n", "rr", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "rename" })
-keymap.set("n", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "normal mode format" })
-keymap.set("v", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "visual mode format" })
-keymap.set("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "code action" })
-keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "open float" })
-keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "goto prev" })
-keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "goto next" })
-keymap.set("n", "tr", "<cmd>lua vim.lsp.buf.document_symbol()<CR>", { desc = "document symbol" })
-keymap.set("i", "<C-Space>", "<cmd>lua vim.lsp.buf.completion()<CR>", { desc = "completion" })
+keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "悬停提示" })
+keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "跳转到定义" })
+keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "跳转到声明" })
+keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "跳转到实现" })
+keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", { desc = "跳转到类型定义" })
+keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "查找引用" })
+keymap.set("n", "gs", "<cmd>lua vim.lsp.buf.signature_help()<CR>", { desc = "函数签名提示" })
+keymap.set("n", "rr", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "重命名" })
+keymap.set("n", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "格式化文件" })
+keymap.set("v", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "格式化选中内容" })
+keymap.set("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "代码操作" })
+keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "显示诊断信息" })
+keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "跳转到上一个诊断" })
+keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "跳转到下一个诊断" })
+keymap.set("n", "tr", "<cmd>lua vim.lsp.buf.document_symbol()<CR>", { desc = "文档符号列表" })
+keymap.set("i", "<C-Space>", "<cmd>lua vim.lsp.buf.completion()<CR>", { desc = "补全" })
 
--- Filetype-specific keymaps (these can be done in the ftplugin directory instead if you prefer)
+-- 文件类型特定操作
 keymap.set("n", "<leader>go", function()
 	if vim.bo.filetype == "python" then
 		vim.api.nvim_command("PyrightOrganizeImports")
 	end
-end, { desc = "Pyright Organize Imports" })
+end, { desc = "整理导入 (Python)" })
 
 keymap.set("n", "<leader>tc", function()
 	if vim.bo.filetype == "python" then
 		require("dap-python").test_class()
 	end
-end, { desc = "test class" })
+end, { desc = "测试当前类 (Python)" })
 
 keymap.set("n", "<leader>tm", function()
 	if vim.bo.filetype == "python" then
 		require("dap-python").test_method()
 	end
-end, { desc = "test method" })
+end, { desc = "测试当前方法 (Python)" })
 
--- Debugging
-keymap.set("n", "<leader>bb", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", { desc = "toggle breakpoint" })
+-- 调试相关
+keymap.set("n", "<leader>bb", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", { desc = "切换断点" })
 keymap.set(
 	"n",
 	"<leader>bc",
-	"<cmd>lua require'dap'.set_breakpoint(vim.fn.input('Breakpoint condition: '))<cr>",
-	{ desc = "condition breakpoint" }
+	"<cmd>lua require'dap'.set_breakpoint(vim.fn.input('断点条件: '))<cr>",
+	{ desc = "设置条件断点" }
 )
 keymap.set(
 	"n",
 	"<leader>bl",
-	"<cmd>lua require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))<cr>",
-	{ desc = "log point message" }
+	"<cmd>lua require'dap'.set_breakpoint(nil, nil, vim.fn.input('日志点信息: '))<cr>",
+	{ desc = "设置日志点" }
 )
-keymap.set("n", "<leader>br", "<cmd>lua require'dap'.clear_breakpoints()<cr>", { desc = "clear breakpoint" })
-keymap.set("n", "<leader>ba", "<cmd>Telescope dap list_breakpoints<cr>", { desc = "list breakpoint" })
-keymap.set("n", "<leader>dc", "<cmd>lua require'dap'.continue()<cr>", { desc = "continue" })
-keymap.set("n", "<leader>dj", "<cmd>lua require'dap'.step_over()<cr>", { desc = "step over" })
-keymap.set("n", "<leader>dk", "<cmd>lua require'dap'.step_into()<cr>", { desc = "step into" })
-keymap.set("n", "<leader>do", "<cmd>lua require'dap'.step_out()<cr>", { desc = "step out" })
+keymap.set("n", "<leader>br", "<cmd>lua require'dap'.clear_breakpoints()<cr>", { desc = "清除所有断点" })
+keymap.set("n", "<leader>ba", "<cmd>Telescope dap list_breakpoints<cr>", { desc = "列出所有断点" })
+keymap.set("n", "<leader>dc", "<cmd>lua require'dap'.continue()<cr>", { desc = "继续运行" })
+keymap.set("n", "<leader>dj", "<cmd>lua require'dap'.step_over()<cr>", { desc = "单步跳过" })
+keymap.set("n", "<leader>dk", "<cmd>lua require'dap'.step_into()<cr>", { desc = "单步进入" })
+keymap.set("n", "<leader>do", "<cmd>lua require'dap'.step_out()<cr>", { desc = "跳出函数" })
 keymap.set("n", "<leader>dd", function()
 	require("dap").disconnect()
 	require("dapui").close()
-end, { desc = "disconnect dap" })
+end, { desc = "断开调试" })
 keymap.set("n", "<leader>dt", function()
 	require("dap").terminate()
 	require("dapui").close()
-end, { desc = "terminate" })
-keymap.set("n", "<leader>dr", "<cmd>lua require'dap'.repl.toggle()<cr>", { desc = "repl toggle" })
-keymap.set("n", "<leader>dl", "<cmd>lua require'dap'.run_last()<cr>", { desc = "run last" })
+end, { desc = "结束调试" })
+keymap.set("n", "<leader>dr", "<cmd>lua require'dap'.repl.toggle()<cr>", { desc = "切换 REPL" })
+keymap.set("n", "<leader>dl", "<cmd>lua require'dap'.run_last()<cr>", { desc = "运行上一次调试" })
 keymap.set("n", "<leader>di", function()
 	require("dap.ui.widgets").hover()
-end, { desc = "hover" })
+end, { desc = "调试悬停变量" })
 keymap.set("n", "<leader>d?", function()
 	local widgets = require("dap.ui.widgets")
 	widgets.centered_float(widgets.scopes)
-end, { desc = "widget centered float" })
-keymap.set("n", "<leader>df", "<cmd>Telescope dap frames<cr>", { desc = "telescope dap frames" })
-keymap.set("n", "<leader>dh", "<cmd>Telescope dap commands<cr>", { desc = "telescope dap commands" })
+end, { desc = "浮动显示变量作用域" })
+keymap.set("n", "<leader>df", "<cmd>Telescope dap frames<cr>", { desc = "查看调用栈" })
+keymap.set("n", "<leader>dh", "<cmd>Telescope dap commands<cr>", { desc = "查看调试命令" })
 keymap.set("n", "<leader>de", function()
 	require("telescope.builtin").diagnostics({ default_text = ":E:" })
-end, { desc = "telescope builtin" })
+end, { desc = "查找调试错误信息" })
+
+---------------------
+-- ✨ 头文件和 CPP 文件跳转 ✨
+---------------------
+keymap.set("n", "<leader>ch", function()
+	vim.cmd("ClangdSwitchSourceHeader")
+end, { desc = "切换源文件/头文件" })

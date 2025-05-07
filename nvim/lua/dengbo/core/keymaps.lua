@@ -5,6 +5,11 @@ local keymap = vim.keymap -- for conciseness
 
 ---------------------
 -- General Keymaps -------------------
+keymap.set("n", "n", "nzzzv", { desc = "跳转下一个搜索项并居中" })
+keymap.set("n", "N", "Nzzzv", { desc = "跳转上一个搜索项并居中" })
+keymap.set("n", "G", "Gzz", { desc = "跳转文件末尾并居中" })
+keymap.set("n", "<C-d>", "<C-d>zz", { desc = "向下滚动并居中" })
+keymap.set("n", "<C-u>", "<C-u>zz", { desc = "向上滚动并居中" })
 
 -- General keymaps
 keymap.set("i", "jk", "<ESC>") -- 通过 jk 退出插入模式
@@ -35,6 +40,8 @@ keymap.set("n", "<leader>ss", "<C-w><5", { desc = "减小分屏宽度" })
 keymap.set("n", "<leader>sm", ":MaximizerToggle<CR>", { desc = "切换最大化窗口" })
 
 -- 标签页管理
+keymap.set("n", "<leader>td", ":bp | bd #<CR>", { desc = "关闭当前缓冲区但保留标签页" })
+keymap.set("n", "<leader>tl", ":Telescope buffers<CR>", { desc = "列出所有缓冲区" })
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "打开新标签页" })
 keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "关闭当前标签页" })
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "当前缓冲区新开标签页" })
@@ -42,6 +49,8 @@ keymap.set("n", "<leader>tp", ":BufferLineCyclePrev<CR>", { desc = "切换到上
 keymap.set("n", "<leader>tn", ":BufferLineCycleNext<CR>", { desc = "切换到下一个标签页（左上角）" })
 keymap.set("n", "<leader>t]", "gt", { desc = "切换到下一个标签页(右上角)" })
 keymap.set("n", "<leader>t[", "gT", { desc = "切换到上一个标签页(右上角)" })
+keymap.set("n", "<leader>th", ":BufferLineMovePrev<CR>", { desc = "缓冲区向左移动" })
+keymap.set("n", "<leader>tr", ":BufferLineMoveNext<CR>", { desc = "缓冲区向右移动" })
 
 -- Diff操作
 keymap.set("n", "<leader>cc", ":diffput<CR>", { desc = "把改动放到另一个缓冲区" })
@@ -113,7 +122,7 @@ keymap.set("n", "<leader>tm", function()
 end, { desc = "测试当前方法 (Python)" })
 
 -- 调试相关
-keymap.set("n", "<leader>bb", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", { desc = "切换断点" })
+keymap.set("n", "<leader>db", "<cmd>lua require'dap'.toggle_breakpoint()<cr>", { desc = "切换断点" })
 keymap.set(
 	"n",
 	"<leader>bc",
@@ -140,7 +149,7 @@ keymap.set("n", "<leader>dt", function()
 	require("dap").terminate()
 	require("dapui").close()
 end, { desc = "结束调试" })
-keymap.set("n", "<leader>dr", "<cmd>lua require'dap'.repl.toggle()<cr>", { desc = "切换 REPL" })
+keymap.set("n", "<leader>dp", "<cmd>lua require'dap'.repl.toggle()<cr>", { desc = "切换 REPL" })
 keymap.set("n", "<leader>dl", "<cmd>lua require'dap'.run_last()<cr>", { desc = "运行上一次调试" })
 keymap.set("n", "<leader>di", function()
 	require("dap.ui.widgets").hover()

@@ -21,6 +21,12 @@ require("lazy").setup({ { import = "dengbo.plugins" }, { import = "dengbo.plugin
 	},
 })
 
+-- 启用缩进折叠（或切换为 marker/syntax 等）
+vim.opt.foldmethod = "expr" -- 使用 treesitter 的 expr 折叠
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldlevel = 99 -- 默认不折叠
+vim.opt.foldtext = "v:lua.vim.treesitter.foldtext()" -- 美化折叠显示
+
 ----- Neovide GUI -----
 vim.o.guifont = "MesloLGS Nerd Font Mono:h12"
 

@@ -4,6 +4,13 @@ vim.g.mapleader = " "
 local keymap = vim.keymap -- for conciseness
 
 ---------------------
+-- 代码折叠快捷键
+vim.keymap.set("n", "<leader>zc", "zc", { desc = "Fold current block" }) -- 折叠
+vim.keymap.set("n", "<leader>zo", "zo", { desc = "Unfold current block" }) -- 展开
+vim.keymap.set("n", "<leader>za", "za", { desc = "Toggle fold" }) -- 切换折叠
+vim.keymap.set("n", "<leader>zR", "zR", { desc = "Unfold all" }) -- 展开所有
+vim.keymap.set("n", "<leader>zM", "zM", { desc = "Fold all" }) -- 折叠所有
+
 -- General Keymaps -------------------
 keymap.set("n", "n", "nzzzv", { desc = "跳转下一个搜索项并居中" })
 keymap.set("n", "N", "Nzzzv", { desc = "跳转上一个搜索项并居中" })

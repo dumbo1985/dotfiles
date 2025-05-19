@@ -11,6 +11,26 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+local last_input_method = nil
+
+vim.api.nvim_create_autocmd("InsertLeave", {
+	callback = function()
+		-- 记录当前输入法
+		last_input_method = vim.fn.system("im-select"):gsub("\n", "")
+		-- 切换为英文
+		vim.fn.system("im-select com.apple.keylayout.ABC")
+	end,
+})
+
+vim.api.nvim_create_autocmd("InsertEnter", {
+	callback = function()
+		-- 恢复之前的输入法（如果记录了）
+		if last_input_method then
+			vim.fn.system("im-select " .. last_input_method)
+		end
+	end,
+})
+
 require("lazy").setup({ { import = "dengbo.plugins" }, { import = "dengbo.plugins.lsp" } }, {
 	checker = {
 		enabled = true,

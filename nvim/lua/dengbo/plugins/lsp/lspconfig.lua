@@ -4,14 +4,23 @@ return {
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
-		{ "folke/neodev.nvim", opts = {} },
+		{ "folke/neodev.nvim", opts = {} }, -- ✅ 提供 Neovim API 类型支持
 		{ "b0o/schemastore.nvim" }, -- JSON schema 支持
+		"williamboman/mason.nvim",
+		"williamboman/mason-lspconfig.nvim",
 	},
 	config = function()
+		-- 初始化 Mason
+		require("mason").setup()
+		require("mason-lspconfig").setup()
+
 		local lspconfig = require("lspconfig")
 		local mason_lspconfig = require("mason-lspconfig")
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
 		local schemastore = require("schemastore")
+
+		-- 初始化 Neodev（必须在 lua_ls.setup 之前）
+		require("neodev").setup({})
 
 		-- 诊断图标配置
 		local severity_icons = {
@@ -21,12 +30,10 @@ return {
 			[vim.diagnostic.severity.INFO] = { icon = " ", hl = "DiagnosticSignInfo" },
 		}
 
-		-- 设置诊断符号
 		for _, config in pairs(severity_icons) do
 			vim.fn.sign_define(config.hl, { text = config.icon, texthl = config.hl, numhl = "" })
 		end
 
-		-- 诊断显示配置
 		vim.diagnostic.config({
 			virtual_text = {
 				spacing = 2,
@@ -52,14 +59,11 @@ return {
 			},
 		})
 
-		-- 通用 on_attach 函数
 		local on_attach = function(client, bufnr)
-			-- 设置格式化快捷键
 			vim.keymap.set("n", "<leader>cf", function()
 				vim.lsp.buf.format({ async = true })
 			end, { buffer = bufnr, desc = "[C]ode [F]ormat" })
 
-			-- 其他常用快捷键
 			local opts = { buffer = bufnr, silent = true }
 			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
 			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -67,7 +71,6 @@ return {
 			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
 		end
 
-		-- 增强的 LSP 能力配置
 		local capabilities = vim.tbl_deep_extend("force", cmp_nvim_lsp.default_capabilities(), {
 			textDocument = {
 				foldingRange = {
@@ -82,9 +85,7 @@ return {
 			},
 		})
 
-		-- 特殊服务器配置
 		local server_configs = {
-			-- 🔥 新增 clangd 配置！
 			clangd = {
 				cmd = {
 					"clangd",
@@ -100,7 +101,7 @@ return {
 			lua_ls = {
 				settings = {
 					Lua = {
-						diagnostics = { globals = { "vim" } },
+						diagnostics = { globals = { "vim" } }, -- ✅ 告诉 LSP 这个是全局变量
 						completion = { callSnippet = "Replace" },
 						workspace = { checkThirdParty = false },
 						telemetry = { enable = false },
@@ -143,14 +144,17 @@ return {
 			},
 		}
 
-		-- Mason LSP 处理器配置
-		mason_lspconfig.setup_handlers({
-			function(server_name)
-				local config = server_configs[server_name] or {}
-				config.capabilities = capabilities
-				config.on_attach = config.on_attach or on_attach
-				lspconfig[server_name].setup(config)
-			end,
-		})
+		-- 	mason_lspconfig.setup({
+		-- 		ensure_installed = vim.tbl_keys(server_configs),
+		-- 		automatic_installation = true,
+		-- 	})
+		--
+		-- 	local servers = mason_lspconfig.get_installed_servers()
+		-- 	for _, server_name in ipairs(servers) do
+		-- 		local config = server_configs[server_name] or {}
+		-- 		config.capabilities = capabilities
+		-- 		config.on_attach = config.on_attach or on_attach
+		-- 		lspconfig[server_name].setup(config)
+		-- 	end
 	end,
 }

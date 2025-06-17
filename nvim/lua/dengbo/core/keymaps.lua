@@ -11,6 +11,16 @@ vim.keymap.set("n", "<leader>za", "za", { desc = "Toggle fold" }) -- 切换折�
 vim.keymap.set("n", "<leader>zR", "zR", { desc = "Unfold all" }) -- 展开所有
 vim.keymap.set("n", "<leader>zM", "zM", { desc = "Fold all" }) -- 折叠所有
 
+-- 跳转到下一个 Error（仅 error，不是 warning）
+vim.keymap.set("n", "<leader>en", function()
+	vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "跳转到下一个 Error" })
+
+-- 跳转到上一个 Error
+vim.keymap.set("n", "<leader>ep", function()
+	vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })
+end, { desc = "跳转到上一个 Error" })
+
 -- General Keymaps -------------------
 keymap.set("n", "n", "nzzzv", { desc = "跳转下一个搜索项并居中" })
 keymap.set("n", "N", "Nzzzv", { desc = "跳转上一个搜索项并居中" })

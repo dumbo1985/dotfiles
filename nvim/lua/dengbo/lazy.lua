@@ -1,3 +1,6 @@
+-- ========================================
+-- lazy.nvim bootstrap
+-- ========================================
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -11,47 +14,106 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- ========================================
+-- 输入法切换模块
+-- ========================================
 local last_input_method = nil
 
-vim.api.nvim_create_autocmd("InsertLeave", {
-	callback = function()
-		-- 记录当前输入法
-		last_input_method = vim.fn.system("im-select"):gsub("\n", "")
-		-- 切换为英文
-		vim.fn.system("im-select com.apple.keylayout.ABC")
-	end,
-})
+-- 异步执行 system 命令，避免阻塞
+local function run_async(cmd, args, callback)
+	local handle
+	handle = vim.loop.spawn(cmd, { args = args }, function(code, signal)
+		if callback then
+			callback(code, signal)
+		end
+		if handle then
+			handle:close()
+		end
+	end)
+end
 
+-- 获取当前输入法（异步）
+local function get_current_input_method(callback)
+	local stdout = vim.loop.new_pipe(false)
+	local handle
+	handle = vim.loop.spawn("im-select", { stdio = { nil, stdout, nil } }, function()
+		stdout:close()
+		if handle then
+			handle:close()
+		end
+	end)
+
+	local chunks = {}
+	stdout:read_start(function(err, data)
+		assert(not err, err)
+		if data then
+			table.insert(chunks, data)
+		else
+			local result = table.concat(chunks):gsub("\n", "")
+			if callback then
+				callback(result)
+			end
+		end
+	end)
+end
+
+-- 自动切换：进入 Insert 恢复原输入法
 vim.api.nvim_create_autocmd("InsertEnter", {
 	callback = function()
-		-- 恢复之前的输入法（如果记录了）
-		if last_input_method then
-			vim.fn.system("im-select " .. last_input_method)
+		if not last_input_method then
+			get_current_input_method(function(method)
+				last_input_method = method
+			end)
+		elseif last_input_method then
+			run_async("im-select", { last_input_method })
 		end
 	end,
 })
 
-require("lazy").setup({ { import = "dengbo.plugins" }, { import = "dengbo.plugins.lsp" } }, {
-	checker = {
-		enabled = true,
-		notify = false,
-	},
-	change_detection = {
-		notify = false,
-	},
+-- 自动切换：退出 Insert 统一切到英文
+vim.api.nvim_create_autocmd("InsertLeave", {
+	callback = function()
+		run_async("im-select", { "com.apple.keylayout.ABC" })
+	end,
 })
 
--- 启用缩进折叠（或切换为 marker/syntax 等）
-vim.opt.foldmethod = "expr" -- 使用 treesitter 的 expr 折叠
+-- 提供手动命令 :IMToggle
+vim.api.nvim_create_user_command("IMToggle", function()
+	get_current_input_method(function(method)
+		if method == "com.apple.keylayout.ABC" and last_input_method then
+			run_async("im-select", { last_input_method })
+			vim.notify("切换到上次输入法: " .. last_input_method, vim.log.levels.INFO)
+		else
+			run_async("im-select", { "com.apple.keylayout.ABC" })
+			vim.notify("切换到英文输入法", vim.log.levels.INFO)
+		end
+	end)
+end, {})
+
+-- ========================================
+-- lazy.nvim 插件管理
+-- ========================================
+require("lazy").setup({
+	{ import = "dengbo.plugins" },
+	{ import = "dengbo.plugins.lsp" },
+}, {
+	checker = { enabled = true, notify = false },
+	change_detection = { notify = false },
+})
+
+-- ========================================
+-- 折叠设置
+-- ========================================
+vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
-vim.opt.foldlevel = 99 -- 默认不折叠
-vim.opt.foldtext = "v:lua.vim.treesitter.foldtext()" -- 美化折叠显示
+vim.opt.foldlevel = 99
+vim.opt.foldtext = "v:lua.vim.treesitter.foldtext()"
 
------ Neovide GUI -----
+-- ========================================
+-- Neovide 配置
+-- ========================================
 vim.o.guifont = "MesloLGS Nerd Font Mono:h12"
-
 vim.g.transparency = 0.6
-
 vim.g.neovide_transparency = 0.8
 vim.g.neovide_window_blurred = true
 vim.g.neovide_floating_blur_amount_x = 2.0
@@ -65,7 +127,6 @@ vim.g.neovide_scroll_animation_length = 0.3
 vim.g.neovide_scroll_animation_far_lines = 1
 vim.g.neovide_hide_mouse_when_typing = false
 vim.g.neovide_underline_stroke_scale = 1.0
--- vim.g.neovide_theme = "auto"
 vim.g.neovide_theme = "dark"
 vim.g.neovide_unlink_border_highlights = true
 vim.g.neovide_refresh_rate = 60
@@ -73,10 +134,8 @@ vim.g.neovide_fullscreen = false
 vim.g.neovide_confirm_quit = true
 vim.g.neovide_remember_window_size = true
 vim.g.neovide_profiler = false
-
 vim.g.neovide_input_macos_alt_is_meta = false
 vim.g.neovide_input_ime = true
-
 vim.g.neovide_cursor_animation_length = 0.13
 vim.g.neovide_cursor_trail_size = 0.8
 vim.g.neovide_cursor_antialiasing = true
@@ -92,15 +151,14 @@ vim.g.neovide_cursor_vfx_particle_lifetime = 1.2
 vim.g.neovide_cursor_vfx_opacity = 200.0
 
 if vim.g.neovide then
-	vim.keymap.set("n", "<D-s>", ":w<CR>") -- Save
-	vim.keymap.set("v", "<D-c>", '"+y') -- Copy
-	vim.keymap.set("n", "<D-v>", '"+P') -- Paste normal mode
-	vim.keymap.set("v", "<D-v>", '"+P') -- Paste visual mode
-	vim.keymap.set("c", "<D-v>", "<C-R>+") -- Paste command mode
-	vim.keymap.set("i", "<D-v>", '<ESC>l"+Pli') -- Paste insert mode
+	vim.keymap.set("n", "<D-s>", ":w<CR>")
+	vim.keymap.set("v", "<D-c>", '"+y')
+	vim.keymap.set("n", "<D-v>", '"+P')
+	vim.keymap.set("v", "<D-v>", '"+P')
+	vim.keymap.set("c", "<D-v>", "<C-R>+")
+	vim.keymap.set("i", "<D-v>", '<ESC>l"+Pli')
 end
 
--- Allow clipboard copy paste in neovim
 vim.api.nvim_set_keymap("", "<D-v>", "+p<CR>", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("!", "<D-v>", "<C-R>+", { noremap = true, silent = true })
 vim.api.nvim_set_keymap("t", "<D-v>", "<C-R>+", { noremap = true, silent = true })
@@ -108,7 +166,9 @@ vim.api.nvim_set_keymap("v", "<D-v>", "<C-R>+", { noremap = true, silent = true 
 
 vim.g.transparent_groups = vim.list_extend(vim.g.transparent_groups or {}, { "ExtraGroup" })
 
--- plugins/colorscheme.lua 末尾添加以下代码
+-- ========================================
+-- 随机主题加载
+-- ========================================
 vim.schedule(function()
 	local themes = {
 		{

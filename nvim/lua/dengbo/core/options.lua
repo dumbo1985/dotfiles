@@ -42,3 +42,11 @@ opt.splitbelow = true -- split horizontal window to the bottom
 
 -- turn off swapfile
 opt.swapfile = false
+
+-- ========================================
+-- 折叠设置
+-- ========================================
+opt.foldmethod = "expr"
+opt.foldexpr = "nvim_treesitter#foldexpr()"
+opt.foldlevel = 99
+opt.foldtext = "v:lua.vim.treesitter.foldtext()"

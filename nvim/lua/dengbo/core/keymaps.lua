@@ -101,23 +101,11 @@ keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "关闭 quickfix 列表" }
 -- Git blame
 keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "切换 Git 责任人显示" })
 
--- LSP
-keymap.set("n", "<leader>gg", "<cmd>lua vim.lsp.buf.hover()<CR>", { desc = "悬停提示" })
-keymap.set("n", "gd", "<cmd>lua vim.lsp.buf.definition()<CR>", { desc = "跳转到定义" })
-keymap.set("n", "gD", "<cmd>lua vim.lsp.buf.declaration()<CR>", { desc = "跳转到声明" })
-keymap.set("n", "gi", "<cmd>lua vim.lsp.buf.implementation()<CR>", { desc = "跳转到实现" })
-keymap.set("n", "gt", "<cmd>lua vim.lsp.buf.type_definition()<CR>", { desc = "跳转到类型定义" })
-keymap.set("n", "gr", "<cmd>lua vim.lsp.buf.references()<CR>", { desc = "查找引用" })
-keymap.set("n", "gs", "<cmd>lua vim.lsp.buf.signature_help()<CR>", { desc = "函数签名提示" })
-keymap.set("n", "rr", "<cmd>lua vim.lsp.buf.rename()<CR>", { desc = "重命名" })
-keymap.set("n", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "格式化文件" })
-keymap.set("v", "gf", "<cmd>lua vim.lsp.buf.format({async = true})<CR>", { desc = "格式化选中内容" })
-keymap.set("n", "ga", "<cmd>lua vim.lsp.buf.code_action()<CR>", { desc = "代码操作" })
+-- LSP (这些键位映射在 lspconfig.lua 的 on_attach 中设置，这里只保留全局诊断相关的)
+-- 注意：LSP 相关的键位映射（如 gd, gr, K 等）应该在 lspconfig.lua 的 on_attach 中设置为 buffer-local
 keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "显示诊断信息" })
 keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "跳转到上一个诊断" })
 keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "跳转到下一个诊断" })
-keymap.set("n", "tr", "<cmd>lua vim.lsp.buf.document_symbol()<CR>", { desc = "文档符号列表" })
-keymap.set("i", "<C-Space>", "<cmd>lua vim.lsp.buf.completion()<CR>", { desc = "补全" })
 
 -- 文件类型特定操作
 keymap.set("n", "<leader>go", function()

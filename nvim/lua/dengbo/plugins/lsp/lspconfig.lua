@@ -60,15 +60,25 @@ return {
 		})
 
 		local on_attach = function(client, bufnr)
+			local opts = { buffer = bufnr, silent = true }
+
+			-- LSP 键位映射（buffer-local，只在有 LSP 客户端时生效）
+			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
+			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+			vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
+			vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
+			vim.keymap.set("n", "gt", vim.lsp.buf.type_definition, opts)
+			vim.keymap.set("n", "gr", require("telescope.builtin").lsp_references, opts)
+			vim.keymap.set("n", "gs", vim.lsp.buf.signature_help, opts)
+			vim.keymap.set("n", "rr", vim.lsp.buf.rename, opts)
 			vim.keymap.set("n", "<leader>cf", function()
 				vim.lsp.buf.format({ async = true })
 			end, { buffer = bufnr, desc = "[C]ode [F]ormat" })
-
-			local opts = { buffer = bufnr, silent = true }
-			vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-			vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
-			vim.keymap.set("n", "gr", require("telescope.builtin").lsp_references, opts)
-			vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
+			vim.keymap.set("v", "<leader>cf", function()
+				vim.lsp.buf.format({ async = true })
+			end, { buffer = bufnr, desc = "[C]ode [F]ormat selection" })
+			vim.keymap.set("n", "ga", vim.lsp.buf.code_action, opts)
+			vim.keymap.set("n", "tr", vim.lsp.buf.document_symbol, opts)
 		end
 
 		local capabilities = vim.tbl_deep_extend("force", cmp_nvim_lsp.default_capabilities(), {
@@ -144,17 +154,19 @@ return {
 			},
 		}
 
-		-- 	mason_lspconfig.setup({
-		-- 		ensure_installed = vim.tbl_keys(server_configs),
-		-- 		automatic_installation = true,
-		-- 	})
-		--
-		-- 	local servers = mason_lspconfig.get_installed_servers()
-		-- 	for _, server_name in ipairs(servers) do
-		-- 		local config = server_configs[server_name] or {}
-		-- 		config.capabilities = capabilities
-		-- 		config.on_attach = config.on_attach or on_attach
-		-- 		lspconfig[server_name].setup(config)
-		-- 	end
+		-- 自动安装配置的 LSP 服务器
+		mason_lspconfig.setup({
+			ensure_installed = vim.tbl_keys(server_configs),
+			automatic_installation = true,
+		})
+
+		-- 设置所有配置的 LSP 服务器
+		local servers = mason_lspconfig.get_installed_servers()
+		for _, server_name in ipairs(servers) do
+			local config = server_configs[server_name] or {}
+			config.capabilities = capabilities
+			config.on_attach = config.on_attach or on_attach
+			lspconfig[server_name].setup(config)
+		end
 	end,
 }

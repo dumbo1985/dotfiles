@@ -118,7 +118,7 @@ return {
 					},
 				},
 			},
-			tsserver = {
+			ts_ls = {
 				settings = {
 					typescript = {
 						inlayHints = {
@@ -155,18 +155,37 @@ return {
 		}
 
 		-- 自动安装配置的 LSP 服务器
+		-- 注意：mason.lua 中配置的服务器会自动安装，这里只确保 server_configs 中的服务器被安装
 		mason_lspconfig.setup({
 			ensure_installed = vim.tbl_keys(server_configs),
 			automatic_installation = true,
 		})
 
-		-- 设置所有配置的 LSP 服务器
-		local servers = mason_lspconfig.get_installed_servers()
-		for _, server_name in ipairs(servers) do
-			local config = server_configs[server_name] or {}
-			config.capabilities = capabilities
-			config.on_attach = config.on_attach or on_attach
-			lspconfig[server_name].setup(config)
-		end
+		-- 设置处理器：为所有服务器配置
+		mason_lspconfig.setup_handlers({
+			-- 默认处理器：为没有在 server_configs 中配置的服务器使用默认设置
+			function(server_name)
+				-- 如果服务器在 server_configs 中有自定义配置，使用自定义配置
+				if server_configs[server_name] then
+					local config = vim.deepcopy(server_configs[server_name])
+					config.capabilities = capabilities
+					config.on_attach = config.on_attach or on_attach
+					-- 检查服务器是否存在
+					local server = lspconfig[server_name]
+					if server and server.setup then
+						server.setup(config)
+					end
+				else
+					-- 否则使用默认配置
+					local server = lspconfig[server_name]
+					if server and server.setup then
+						server.setup({
+							capabilities = capabilities,
+							on_attach = on_attach,
+						})
+					end
+				end
+			end,
+		})
 	end,
 }

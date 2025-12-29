@@ -34,8 +34,8 @@ return {
 
 		mason_lspconfig.setup({
 			-- list of servers for mason to install
+			-- 注意：使用正确的 lspconfig 服务器名称
 			ensure_installed = {
-				"tsserver",
 				"html",
 				"cssls",
 				"tailwindcss",
@@ -47,6 +47,8 @@ return {
 				"pyright",
 				"clangd",
 				"gopls",
+				"ts_ls", -- TypeScript/JavaScript (tsserver 已弃用)
+				"jsonls", -- JSON
 			},
 		})
 

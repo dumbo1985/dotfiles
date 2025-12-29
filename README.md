@@ -184,57 +184,221 @@ nvim/
 - **sonokai**
 - **onenord.nvim**
 
-## ⌨️ 主要快捷键
+## ⌨️ 快捷键参考
 
 ### Leader 键
 默认 Leader 键为 `<Space>`
 
-### 文件操作
-- `<leader>ww` - 保存文件
-- `<leader>wq` - 保存并退出
-- `<leader>qq` - 强制退出
+### 📁 文件操作
 
-### 文件导航
-- `<leader>ee` - 切换文件树
-- `<leader>ff` - 查找文件 (Telescope)
-- `<leader>fr` - 最近打开的文件
-- `<leader>fs` - 全局搜索
-- `<leader>fc` - 搜索光标下的字符串
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>ww` | n | 保存文件 |
+| `<leader>wq` | n | 保存并退出 |
+| `<leader>qq` | n | 强制退出不保存 |
+| `<leader>wr` | n | 恢复会话 |
+| `<leader>ws` | n | 保存会话 |
 
-### 代码编辑
-- `<leader>mp` - 格式化文件/选中区域
-- `<leader>l` - 触发代码检查
-- `gf` - 格式化 (LSP)
-- `jk` / `ii` - 退出插入模式
+### 📂 文件导航
 
-### LSP
-- `K` - 显示函数文档
-- `gd` - 跳转到定义
-- `gr` - 查找引用
-- `rr` - 重命名
-- `ga` - 代码操作
-- `<leader>ca` - 代码操作
-- `<leader>cf` - 格式化代码
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>ee` | n | 切换文件树 |
+| `<leader>ec` | n | 收起文件树 |
+| `<leader>er` | n | 刷新文件树 |
+| `<leader>eo` | n | 聚焦文件树 |
+| `<leader>ef` | n | 在文件树中定位文件 |
+| `<leader>ff` | n | 查找文件 (Telescope) |
+| `<leader>fr` | n | 最近打开的文件 |
+| `<leader>fs` | n | 全局搜索字符串 |
+| `<leader>fc` | n | 搜索光标下的字符串 |
+| `<leader>ft` | n | 查找 TODO |
 
-### 调试
-- `<leader>db` - 切换断点
-- `<leader>dc` - 继续运行
-- `<leader>dj` - 单步跳过
-- `<leader>dk` - 单步进入
-- `<leader>do` - 跳出函数
-- `<leader>dd` - 断开调试
+### 🎯 代码折叠
 
-### 窗口管理
-- `<leader>sv` - 垂直分屏
-- `<leader>sh` - 水平分屏
-- `<leader>sx` - 关闭当前分屏
-- `<leader>sm` - 最大化窗口
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>zc` | n | 折叠当前块 |
+| `<leader>zo` | n | 展开当前块 |
+| `<leader>za` | n | 切换折叠 |
+| `<leader>zR` | n | 展开所有 |
+| `<leader>zM` | n | 折叠所有 |
 
-### 其他
-- `<leader>es` - 符号大纲
-- `<leader>gb` - Git blame
-- `<leader>nh` - 清除搜索高亮
-- `gx` - 打开光标下的链接（跨平台）
+### ✏️ 代码编辑
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `jk` | i | 退出插入模式 |
+| `ii` | i | 退出插入模式 |
+| `<leader>mp` | n, v | 格式化文件/选中区域 |
+| `<leader>l` | n | 触发代码检查 |
+| `<leader>s` | n | 替换（配合 motion） |
+| `<leader>ss` | n | 替换整行 |
+| `<leader>S` | n | 替换到行尾 |
+| `<leader>s` | v | 替换选中内容 |
+| `<leader>+` | n | 数字加一 |
+| `<leader>-` | n | 数字减一 |
+
+### 🔍 搜索和导航
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `n` | n | 跳转下一个搜索项并居中 |
+| `N` | n | 跳转上一个搜索项并居中 |
+| `G` | n | 跳转文件末尾并居中 |
+| `<C-d>` | n | 向下滚动并居中 |
+| `<C-u>` | n | 向上滚动并居中 |
+| `<leader>nh` | n | 清除搜索高亮 |
+| `f` | n, x, o | Lightspeed 快速跳转 |
+| `F` | n, x, o | Lightspeed 反向跳转 |
+| `]t` | n | 跳转到下一个 TODO |
+| `[t` | n | 跳转到上一个 TODO |
+
+### 🪟 窗口管理
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>sv` | n | 垂直分屏 |
+| `<leader>sh` | n | 水平分屏 |
+| `<leader>se` | n | 使分屏大小相等 |
+| `<leader>sx` | n | 关闭当前分屏 |
+| `<leader>sj` | n | 减小分屏高度 |
+| `<leader>sk` | n | 增加分屏高度 |
+| `<leader>sl` | n | 增加分屏宽度 |
+| `<leader>ss` | n | 减小分屏宽度 |
+| `<leader>sm` | n | 切换最大化窗口 |
+| `,w` | n | 选择窗口 |
+| `,W` | n | 交换窗口 |
+
+### 📑 标签页和缓冲区
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>td` | n | 关闭当前缓冲区但保留标签页 |
+| `<leader>tl` | n | 列出所有缓冲区 |
+| `<leader>to` | n | 打开新标签页 |
+| `<leader>tx` | n | 关闭当前标签页 |
+| `<leader>tf` | n | 当前缓冲区新开标签页 |
+| `<leader>tp` | n | 切换到上一个标签页（BufferLine） |
+| `<leader>tn` | n | 切换到下一个标签页（BufferLine） |
+| `<leader>t]` | n | 切换到下一个标签页（原生） |
+| `<leader>t[` | n | 切换到上一个标签页（原生） |
+| `<leader>th` | n | 缓冲区向左移动 |
+| `<leader>tr` | n | 缓冲区向右移动 |
+
+### 🔧 LSP (Language Server Protocol)
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `K` | n | 显示函数文档（悬停） |
+| `<leader>gg` | n | 悬停提示 |
+| `gd` | n | 跳转到定义 |
+| `gD` | n | 跳转到声明 |
+| `gi` | n | 跳转到实现 |
+| `gt` | n | 跳转到类型定义 |
+| `gr` | n | 查找引用（Telescope） |
+| `gs` | n | 函数签名提示 |
+| `rr` | n | 重命名 |
+| `ga` | n | 代码操作 |
+| `<leader>ca` | n | 代码操作 |
+| `gf` | n, v | 格式化（LSP） |
+| `<leader>cf` | n | 格式化代码 |
+| `gl` | n | 显示诊断信息 |
+| `gp` | n | 跳转到上一个诊断 |
+| `gn` | n | 跳转到下一个诊断 |
+| `tr` | n | 文档符号列表 |
+| `<leader>en` | n | 跳转到下一个 Error |
+| `<leader>ep` | n | 跳转到上一个 Error |
+| `<leader>ch` | n | 切换源文件/头文件（C/C++） |
+| `<leader>go` | n | 整理导入（Python） |
+
+### 🐛 调试 (DAP)
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>db` | n | 切换断点 |
+| `<leader>bc` | n | 设置条件断点 |
+| `<leader>bl` | n | 设置日志点 |
+| `<leader>br` | n | 清除所有断点 |
+| `<leader>ba` | n | 列出所有断点 |
+| `<leader>dc` | n | 继续运行 |
+| `<leader>dj` | n | 单步跳过 |
+| `<leader>dk` | n | 单步进入 |
+| `<leader>do` | n | 跳出函数 |
+| `<leader>dd` | n | 断开调试 |
+| `<leader>dt` | n | 结束调试 |
+| `<leader>dp` | n | 切换 REPL |
+| `<leader>dl` | n | 运行上一次调试 |
+| `<leader>di` | n | 调试悬停变量 |
+| `<leader>d?` | n | 浮动显示变量作用域 |
+| `<leader>df` | n | 查看调用栈 |
+| `<leader>dh` | n | 查看调试命令 |
+| `<leader>de` | n | 查找调试错误信息 |
+| `<leader>de` | v | 评估表达式 |
+| `<leader>tc` | n | 测试当前类（Python） |
+| `<leader>tm` | n | 测试当前方法（Python） |
+
+### 🔀 Git 操作
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>gb` | n | 切换 Git 责任人显示 |
+| `<leader>lg` | n | 打开 LazyGit |
+| `]h` | n | 跳转到下一个 Git hunk |
+| `[h` | n | 跳转到上一个 Git hunk |
+| `<leader>hs` | n, v | Stage hunk |
+| `<leader>hr` | n, v | Reset hunk |
+| `<leader>hS` | n | Stage buffer |
+| `<leader>hR` | n | Reset buffer |
+| `<leader>hu` | n | Undo stage hunk |
+| `<leader>hp` | n | Preview hunk |
+| `<leader>hb` | n | Blame line |
+| `<leader>hB` | n | Toggle line blame |
+| `<leader>hd` | n | Diff this |
+| `<leader>hD` | n | Diff this ~ |
+| `ih` | o, x | 选择 Git hunk（文本对象） |
+
+### 📋 Diff 操作
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>cc` | n | 把改动放到另一个缓冲区 |
+| `<leader>cj` | n | 从左边取改动 |
+| `<leader>ck` | n | 从右边取改动 |
+| `<leader>cn` | n | 跳转到下一个差异块 |
+| `<leader>cp` | n | 跳转到上一个差异块 |
+
+### 📝 Quickfix 和诊断
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>qo` | n | 打开 quickfix 列表 |
+| `<leader>qf` | n | 跳转到第一个 quickfix 项 |
+| `<leader>qn` | n | 跳转到下一个 quickfix 项 |
+| `<leader>qp` | n | 跳转到上一个 quickfix 项 |
+| `<leader>ql` | n | 跳转到最后一个 quickfix 项 |
+| `<leader>qc` | n | 关闭 quickfix 列表 |
+| `<leader>xx` | n | 打开/关闭 Trouble 列表 |
+| `<leader>xw` | n | 打开 Trouble 工作区诊断 |
+| `<leader>xd` | n | 打开 Trouble 文档诊断 |
+| `<leader>xq` | n | 打开 Trouble quickfix 列表 |
+| `<leader>xl` | n | 打开 Trouble location 列表 |
+| `<leader>xt` | n | 在 Trouble 中打开 TODOs |
+
+### 🎨 其他工具
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<leader>es` | n | 打开符号大纲 |
+| `gx` | n | 打开光标下的链接（跨平台） |
+
+### 🍎 Neovide (macOS 专用)
+
+| 快捷键 | 模式 | 功能 |
+|--------|------|------|
+| `<D-s>` | n | 保存（Command+S） |
+| `<D-c>` | v | 复制（Command+C） |
+| `<D-v>` | n, v, c, i | 粘贴（Command+V） |
 
 ## 🎨 主题
 

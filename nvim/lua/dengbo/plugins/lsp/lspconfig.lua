@@ -30,10 +30,7 @@ return {
 			[vim.diagnostic.severity.INFO] = { icon = " ", hl = "DiagnosticSignInfo" },
 		}
 
-		for _, config in pairs(severity_icons) do
-			vim.fn.sign_define(config.hl, { text = config.icon, texthl = config.hl, numhl = "" })
-		end
-
+		-- 使用新的 API 配置诊断符号（避免弃用警告）
 		vim.diagnostic.config({
 			virtual_text = {
 				spacing = 2,
@@ -43,7 +40,15 @@ return {
 					return string.format("%s %s", config.icon, diagnostic.message)
 				end,
 			},
-			signs = true,
+			signs = {
+				-- 使用新的 signs 配置方式
+				text = {
+					[vim.diagnostic.severity.ERROR] = severity_icons[vim.diagnostic.severity.ERROR].icon,
+					[vim.diagnostic.severity.WARN] = severity_icons[vim.diagnostic.severity.WARN].icon,
+					[vim.diagnostic.severity.HINT] = severity_icons[vim.diagnostic.severity.HINT].icon,
+					[vim.diagnostic.severity.INFO] = severity_icons[vim.diagnostic.severity.INFO].icon,
+				},
+			},
 			underline = { severity = { min = vim.diagnostic.severity.WARN } },
 			severity_sort = true,
 			float = {

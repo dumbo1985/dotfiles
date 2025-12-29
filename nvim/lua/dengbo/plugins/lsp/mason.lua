@@ -35,7 +35,6 @@ return {
 		mason_lspconfig.setup({
 			-- list of servers for mason to install (lspconfig server 名称)
 			ensure_installed = {
-				"tsserver",
 				"html",
 				"cssls",
 				"tailwindcss",
@@ -48,6 +47,7 @@ return {
 				"gopls",
 			},
 			automatic_installation = true,
+			-- handlers 将在 lspconfig.lua 中设置
 		})
 
 		mason_tool_installer.setup({

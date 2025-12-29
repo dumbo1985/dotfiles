@@ -36,8 +36,6 @@ return {
 				unfold_all = "E",
 				fold_reset = "R",
 			},
-			vim.keymap.set("n", "<leader>es", "<cmd>SymbolsOutlineOpen<CR>", { desc = "Toggle symbol outline" }),
-
 			lsp_blacklist = {},
 			symbol_blacklist = {},
 			symbols = {
@@ -71,5 +69,7 @@ return {
 				Fragment = { icon = "", hl = "@constant" },
 			},
 		})
+
+		vim.keymap.set("n", "<leader>es", "<cmd>SymbolsOutlineOpen<CR>", { desc = "Toggle symbol outline" })
 	end,
 }

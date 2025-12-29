@@ -22,9 +22,7 @@ return {
 			})
 
 			-- 手动设置高亮组（替代旧版 highlight_unique_chars）
-			vim.cmd([[
-        highlight! link LightspeedUniqueChar LightspeedLabel
-      ]])
+			vim.api.nvim_set_hl(0, "LightspeedUniqueChar", { link = "LightspeedLabel" })
 
 			-- 强化键位映射
 			vim.keymap.set({ "n", "x", "o" }, "f", "<Plug>Lightspeed_s", {

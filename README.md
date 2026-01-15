@@ -47,8 +47,8 @@
 推荐使用 iTerm2 以获得更好的颜色支持：
 
 ```bash
-brew install --cask iterm2
-```
+   brew install --cask iterm2
+   ```
 
 ### 3. 安装 Nerd Font
 
@@ -177,7 +177,8 @@ nvim/
 - **nvim-autopairs** - 自动配对括号
 - **nvim-surround** - 快速操作包围符号
 - **Comment.nvim** - 代码注释
-- **lightspeed.nvim** - 快速跳转
+- **lightspeed.nvim** - 快速跳转（需要输入字符）
+- **flash.nvim** - 一键全窗口跳转（无需输入字符，使用 `<leader>j`）
 
 ### 主题
 
@@ -429,8 +430,13 @@ Leader 键设置为 `<Space>`（空格键）
 | `<leader>ss` | 替换整行 | Normal |
 | `<leader>S` | 替换到行尾 | Normal |
 | `<leader>s` | 替换选中内容 | Visual |
-| `f` | 向前搜索并跳转 | Normal/Visual/Operator |
-| `F` | 向后搜索并跳转 | Normal/Visual/Operator |
+| `<leader>j` | Flash 跳转（全窗口，无需输入字符） | Normal/Visual/Operator |
+| `<leader>J` | Flash 跳转（向后，全窗口） | Normal/Visual/Operator |
+| `<leader>jr` | Flash 远程操作 | Operator |
+| `<leader>jR` | Flash Treesitter 搜索 | Operator/Visual |
+| `<C-s>` | 切换 Flash 搜索 | Command |
+| `f` | 向前搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
+| `F` | 向后搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
 | `<C-space>` | 初始化选择/增量选择节点 | Tree-sitter |
 | `<BS>` | 递减选择节点 | Tree-sitter |
 | `<C-k>` | 上一个补全项 | Insert（nvim-cmp） |
@@ -443,7 +449,8 @@ Leader 键设置为 `<Space>`（空格键）
 
 > 📍 TODO 配置：`lua/dengbo/plugins/todo-comments.lua`  
 > 📍 替换配置：`lua/dengbo/plugins/substitute.lua`  
-> 📍 Lightspeed 配置：`lua/dengbo/plugins/lightspeed.lua` ⚠️ 覆盖原生 `f`/`F`  
+> 📍 Flash 配置：`lua/dengbo/plugins/flash.lua` 💡 使用 `<leader>j` 一键全窗口跳转（推荐，不冲突）  
+> 📍 Lightspeed 配置：`lua/dengbo/plugins/lightspeed.lua` ⚠️ 覆盖原生 `f`/`F`，需要输入字符  
 > 📍 Tree-sitter 配置：`lua/dengbo/plugins/treesitter.lua`  
 > 📍 补全配置：`lua/dengbo/plugins/nvim-cmp.lua`
 

@@ -103,6 +103,8 @@ keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "切换 Git 责任
 
 -- LSP (这些键位映射在 lspconfig.lua 的 on_attach 中设置，这里只保留全局诊断相关的)
 -- 注意：LSP 相关的键位映射（如 gd, gr, K 等）应该在 lspconfig.lua 的 on_attach 中设置为 buffer-local
+-- 不设置全局 gd，让原生的 gd（跳转到局部定义）在没有 LSP 时工作，LSP 附加时会设置 buffer-local 的 gd
+
 keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "显示诊断信息" })
 keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "跳转到上一个诊断" })
 keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "跳转到下一个诊断" })

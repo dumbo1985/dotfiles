@@ -1,496 +1,610 @@
-# Neovim 配置
+# dotfiles
 
-一个现代化、模块化的 Neovim 配置，遵循 SOLID 原则设计，支持跨平台使用（Linux、macOS、Windows）。
+个人 Neovim 配置文件集合，适用于 macOS 系统。包含完整的 LSP、调试、格式化、代码补全等功能配置。
 
-## ✨ 特性
+> 💡 注意：本项目主要针对 macOS 系统配置，Ubuntu 分支请查看相应分支。
 
-- 🎨 **现代化 UI**：支持多种主题（tokyonight、kanagawa、catppuccin、rose-pine、sonokai、onenord），随机主题选择
-- 🚀 **高性能**：使用 lazy.nvim 进行插件懒加载，优化启动速度
-- 🔧 **LSP 支持**：完整的 Language Server Protocol 支持，包括 Mason 自动安装
-- 🎯 **代码补全**：nvim-cmp 提供强大的自动补全功能
-- 🌳 **语法高亮**：Treesitter 提供精确的语法高亮和代码折叠
-- 🔍 **模糊搜索**：Telescope 提供强大的文件搜索和内容搜索
-- 🐛 **调试支持**：nvim-dap 提供完整的调试功能（Python、C++）
-- 📝 **代码格式化**：Conform.nvim 和多种格式化工具支持
-- 🎨 **Neovide 支持**：完整的 Neovide GUI 配置
-- 🏗️ **模块化设计**：遵循 SOLID 原则，代码结构清晰，易于维护
+## 📋 目录
 
-## 📋 系统要求
+- [功能特性](#功能特性)
+- [安装步骤](#安装步骤)
+- [配置结构](#配置结构)
+- [主要插件](#主要插件)
+- [键位映射](#键位映射)
+- [使用说明](#使用说明)
+- [故障排除](#故障排除)
 
-- **Neovim**: 0.12.0+ (推荐使用最新版本)
-- **操作系统**: Linux、macOS 或 Windows
-- **终端**: 支持真彩色的终端（推荐使用 Neovide 或 iTerm2）
+## ✨ 功能特性
 
-## 🚀 快速开始
+- 🎨 **多主题支持**：随机加载主题（tokyonight, kanagawa, catppuccin, rose-pine, sonokai, onenord）
+- 🔧 **LSP 支持**：完整的语言服务器协议支持，自动安装和配置
+- 🐛 **调试功能**：支持 Python、C/C++、Go 等语言的调试
+- 📝 **代码格式化**：自动格式化，支持多种语言
+- 🔍 **模糊搜索**：Telescope 强大的文件搜索和内容搜索
+- 🌳 **语法高亮**：Tree-sitter 提供更好的语法高亮
+- 📋 **自动补全**：nvim-cmp 提供智能代码补全
+- 🎯 **输入法切换**：自动在插入模式和普通模式间切换输入法
+- 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
 
-### 1. 克隆仓库
+## 🚀 安装步骤
+
+### 前置要求
+
+1. **macOS 系统**（推荐 macOS 12+）
+2. **Homebrew** 包管理器
+3. **支持真彩色的终端**（如 iTerm2）
+
+### 1. 安装 Homebrew
+
+如果还没有安装 Homebrew：
 
 ```bash
-git clone <your-repo-url> ~/dotfiles
-cd ~/dotfiles
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-### 2. 创建符号链接
+### 2. 安装 iTerm2
+
+推荐使用 iTerm2 以获得更好的颜色支持：
 
 ```bash
-# Linux/macOS
-ln -s ~/dotfiles/nvim ~/.config/nvim
+   brew install --cask iterm2
+   ```
 
-# 或者使用绝对路径
-ln -s /home/pnd-humanoid/dotfiles/nvim ~/.config/nvim
-```
+### 3. 安装 Nerd Font
 
-### 3. 安装依赖
-
-#### Linux
+安装一个 Nerd Font 以支持图标显示：
 
 ```bash
-# 基础工具
-sudo apt update
-sudo apt install -y git curl build-essential
-
-# Ripgrep (用于 Telescope)
-sudo apt install -y ripgrep
-
-# Node.js (用于某些 LSP 服务器)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-
-# lazygit
-LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v*([^"]+)".*/\1/')
-curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-tar xf lazygit.tar.gz
-sudo install lazygit /usr/local/bin
-
-# Ruby (某些工具需要)
-sudo apt install -y ruby-full
-
-# Nerd Font (推荐)
-# 下载并安装 MesloLGS Nerd Font 或其他 Nerd Font
-```
-
-#### macOS
-
-```bash
-# 使用 Homebrew
-brew install git ripgrep node lazygit
-
-# 安装 Nerd Font
+# 使用 Homebrew 安装 MesloLGS Nerd Font
 brew install --cask font-meslo-lg-nerd-font
 
-# 输入法切换工具 (可选，仅 macOS)
-# 下载 im-select: https://github.com/daipeihust/im-select
-# 将 im-select-mac 放入 /usr/local/bin
+# 或者手动下载安装其他 Nerd Font
+# https://www.nerdfonts.com/font-downloads
 ```
 
-### 4. 启动 Neovim
+在 iTerm2 中设置字体：`Preferences > Profiles > Text > Font` 选择安装的 Nerd Font。
+
+### 4. 安装 Neovim
+
+```bash
+brew install neovim
+```
+
+### 5. 安装 Neovide（可选，GUI 编辑器）
+
+```bash
+brew install --cask neovide
+```
+
+### 6. 安装其他依赖工具
+
+```bash
+# Ripgrep（用于文件搜索）
+brew install ripgrep
+
+# Node.js（用于某些 LSP 服务器）
+brew install node
+
+# LazyGit（Git 工具）
+brew install lazygit
+
+# Ruby（用于某些格式化工具）
+brew install ruby
+
+# im-select（输入法切换工具，macOS）
+# 访问 https://github.com/daipeihust/im-select
+# 下载 macOS 版本并放入 PATH（如 /usr/local/bin）
+```
+
+### 7. 配置 Neovim
+
+```bash
+# 克隆或下载此仓库
+cd ~/dotfiles
+
+# 创建符号链接
+ln -s ~/dotfiles/nvim ~/.config/nvim
+```
+
+### 8. 启动 Neovim
+
+首次启动 Neovim 时，插件会自动安装：
 
 ```bash
 nvim
 ```
 
-首次启动时，lazy.nvim 会自动安装所有插件。这可能需要几分钟时间。
+等待插件安装完成（可能需要几分钟）。
 
 ## 📁 配置结构
 
-配置采用模块化设计，遵循 SOLID 原则：
-
 ```
 nvim/
-├── init.lua                    # 主入口文件
-├── lazy-lock.json             # 插件版本锁定文件
-└── lua/
-    └── dengbo/
-        ├── core/              # 核心功能模块
-        │   ├── init.lua       # 核心模块初始化
-        │   ├── options.lua    # Neovim 选项配置
-        │   ├── keymaps.lua    # 键位映射
-        │   ├── lazy_init.lua  # Lazy.nvim 初始化
-        │   ├── folding.lua    # 代码折叠配置
-        │   └── deprecated_fix.lua  # 弃用 API 兼容性补丁
-        ├── ui/                # UI 相关模块
-        │   ├── neovide.lua    # Neovide GUI 配置
-        │   ├── theme.lua      # 主题配置
-        │   └── transparent.lua # 透明背景配置
-        ├── platform/          # 平台特定模块
-        │   └── input_method.lua  # 输入法切换 (macOS)
-        ├── plugins/           # 插件配置
-        │   ├── init.lua       # 基础插件
-        │   ├── lsp/          # LSP 相关插件
-        │   │   ├── mason.lua  # Mason 配置
-        │   │   └── lspconfig.lua  # LSP 服务器配置
-        │   ├── nvim-cmp.lua  # 代码补全
-        │   ├── telescope.lua  # 模糊搜索
-        │   ├── treesitter.lua # 语法高亮
-        │   └── ...           # 其他插件配置
-        └── lazy.lua          # Lazy.nvim 协调器
+├── init.lua                    # 入口文件
+├── lazy-lock.json              # 插件版本锁定文件
+└── lua/dengbo/
+    ├── core/                   # 核心配置
+    │   ├── init.lua           # 核心配置入口
+    │   ├── options.lua        # Neovim 选项配置
+    │   ├── keymaps.lua         # 全局键位映射
+    │   ├── neovide.lua         # Neovide GUI 配置
+    │   └── input_method.lua    # 输入法自动切换
+    ├── lazy.lua                # 插件管理和主题加载
+    └── plugins/                # 插件配置
+        ├── init.lua           # 基础插件
+        ├── lsp/               # LSP 相关插件
+        │   ├── mason.lua      # Mason 包管理器
+        │   └── lspconfig.lua   # LSP 服务器配置
+        ├── nvim-cmp.lua       # 代码补全
+        ├── telescope.lua      # 模糊搜索
+        ├── treesitter.lua      # 语法高亮
+        ├── nvim-dap.lua       # 调试器
+        ├── formatting.lua     # 代码格式化
+        ├── linting.lua        # 代码检查
+        └── ...                # 其他插件配置
 ```
-
-### 设计原则
-
-- **单一职责原则 (SRP)**: 每个模块只负责一个功能
-- **开闭原则 (OCP)**: 易于扩展，无需修改现有代码
-- **依赖倒置原则 (DIP)**: 高层模块不依赖低层模块，都依赖抽象
 
 ## 🔌 主要插件
 
 ### 核心功能
-- **lazy.nvim**: 插件管理器
-- **plenary.nvim**: Lua 工具库
 
-### LSP 和补全
-- **nvim-lspconfig**: LSP 配置
-- **mason.nvim**: LSP 服务器管理器
-- **nvim-cmp**: 代码补全引擎
-- **LuaSnip**: 代码片段引擎
-- **lsp_signature.nvim**: 函数签名提示
+- **lazy.nvim** - 插件管理器
+- **nvim-lspconfig** - LSP 配置
+- **mason.nvim** - LSP/DAP/格式化工具管理器
+- **nvim-cmp** - 代码补全引擎
+- **telescope.nvim** - 模糊搜索
+- **nvim-treesitter** - 语法高亮和代码解析
 
 ### UI 增强
-- **lualine.nvim**: 状态栏
-- **bufferline.nvim**: 标签页栏
-- **nvim-tree.lua**: 文件树
-- **alpha-nvim**: 启动界面
-- **noice.nvim**: 现代化 UI
-- **which-key.nvim**: 快捷键提示
 
-### 搜索和导航
-- **telescope.nvim**: 模糊搜索
-- **lightspeed.nvim**: 快速跳转
-- **nvim-treesitter**: 语法高亮
+- **alpha-nvim** - 启动界面
+- **bufferline.nvim** - 缓冲区标签栏
+- **lualine.nvim** - 状态栏
+- **nvim-tree** - 文件树
+- **which-key.nvim** - 键位提示
+- **noice.nvim** - 现代化 UI
 
-### 代码编辑
-- **nvim-autopairs**: 自动配对
-- **nvim-surround**: 括号操作
-- **Comment.nvim**: 代码注释
-- **conform.nvim**: 代码格式化
-- **nvim-lint**: 代码检查
+### 开发工具
 
-### Git 集成
-- **gitsigns.nvim**: Git 状态显示
-- **git-blame.nvim**: Git 责任显示
-- **lazygit.nvim**: Git 终端界面
+- **nvim-dap** - 调试器
+- **conform.nvim** - 代码格式化
+- **nvim-lint** - 代码检查
+- **gitsigns.nvim** - Git 集成
+- **todo-comments.nvim** - TODO 高亮
 
-### 调试
-- **nvim-dap**: 调试适配器协议
-- **nvim-dap-ui**: 调试界面
-- **nvim-dap-python**: Python 调试
-- **nvim-dap-virtual-text**: 调试虚拟文本
+### 编辑增强
+
+- **nvim-autopairs** - 自动配对括号
+- **nvim-surround** - 快速操作包围符号
+- **Comment.nvim** - 代码注释
+- **lightspeed.nvim** - 快速跳转（需要输入字符）
+- **flash.nvim** - 一键全窗口跳转（无需输入字符，使用 `<leader>j`）
 
 ### 主题
-- **tokyonight.nvim**
-- **kanagawa.nvim**
-- **catppuccin**
-- **rose-pine**
-- **sonokai**
-- **onenord.nvim**
 
-## ⌨️ 快捷键参考
+支持的主题（随机加载）：
+- tokyonight
+- kanagawa
+- catppuccin
+- rose-pine
+- sonokai
+- onenord
+
+## ⌨️ 键位映射
 
 ### Leader 键
-默认 Leader 键为 `<Space>`
 
-### 📁 文件操作
+Leader 键设置为 `<Space>`（空格键）
 
-| 快捷键 | 模式 | 功能 |
+> 💡 **提示**：在 Neovim 中按 `<Space>` 后稍等片刻，会显示所有可用的快捷键提示（需要 which-key 插件）
+
+### 基础操作
+
+| 快捷键 | 功能 | 模式 |
 |--------|------|------|
-| `<leader>ww` | n | 保存文件 |
-| `<leader>wq` | n | 保存并退出 |
-| `<leader>qq` | n | 强制退出不保存 |
-| `<leader>wr` | n | 恢复会话 |
-| `<leader>ws` | n | 保存会话 |
+| `<leader>ww` | 保存文件 | Normal |
+| `<leader>wq` | 保存并退出 | Normal |
+| `<leader>qq` | 强制退出不保存 | Normal |
+| `jk` / `ii` | 退出插入模式 | Insert |
+| `n` | 跳转下一个搜索项并居中 | Normal |
+| `N` | 跳转上一个搜索项并居中 | Normal |
+| `G` | 跳转文件末尾并居中 | Normal |
+| `<C-d>` | 向下滚动并居中 | Normal |
+| `<C-u>` | 向上滚动并居中 | Normal |
+| `<leader>nh` | 清除搜索高亮 | Normal |
+| `gx` | 打开光标下的链接 | Normal |
+| `<leader>+` | 数字加一 | Normal |
+| `<leader>-` | 数字减一 | Normal |
 
-### 📂 文件导航
+### 文件搜索（Telescope）
 
-| 快捷键 | 模式 | 功能 |
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>ff` | 查找文件 |
+| `<leader>fr` | 最近打开的文件 |
+| `<leader>fs` | 全局搜索字符串 |
+| `<leader>fc` | 搜索光标下的字符串 |
+| `<leader>ft` | 查找 TODO |
+
+**Telescope 内部**（在 Telescope 窗口中）：
+| 快捷键 | 功能 |
+|--------|------|
+| `<C-k>` | 上一个结果 |
+| `<C-j>` | 下一个结果 |
+| `<C-q>` | 发送选中项到 quickfix 列表并打开 |
+
+> 📍 配置：`lua/dengbo/plugins/telescope.lua`
+
+### 文件树（NvimTree）
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>ee` | 切换文件树 |
+| `<leader>ec` | 收起文件树 |
+| `<leader>er` | 刷新文件树 |
+| `<leader>eo` | 聚焦文件树 |
+| `<leader>ef` | 在文件树中定位当前文件 |
+
+### 缓冲区/标签页管理
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>td` | 关闭当前缓冲区但保留标签页 |
+| `<leader>tl` | 列出所有缓冲区（Telescope） |
+| `<leader>to` | 打开新标签页 |
+| `<leader>tx` | 关闭当前标签页 |
+| `<leader>tf` | 当前缓冲区新开标签页 |
+| `<leader>tp` | 切换到上一个标签页（BufferLine） |
+| `<leader>tn` | 切换到下一个标签页（BufferLine） |
+| `<leader>t]` | 切换到下一个标签页（原生） |
+| `<leader>t[` | 切换到上一个标签页（原生） |
+| `<leader>th` | 缓冲区向左移动 |
+| `<leader>tr` | 缓冲区向右移动 |
+
+### 分屏管理
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>sv` | 垂直分屏 |
+| `<leader>sh` | 水平分屏 |
+| `<leader>se` | 使分屏大小相等 |
+| `<leader>sx` | 关闭当前分屏 |
+| `<leader>sj` | 减小分屏高度 |
+| `<leader>sk` | 增加分屏高度 |
+| `<leader>sl` | 增加分屏宽度 |
+| `<leader>ss` | 减小分屏宽度 |
+| `<leader>sm` | 切换最大化窗口 |
+| `,w` | 选择窗口（Window Picker） |
+| `,W` | 交换两个窗口（Window Picker） |
+
+> 📍 Window Picker 配置：`lua/dengbo/plugins/window-picker.lua`
+
+### LSP（语言服务器协议）
+
+> ⚠️ **注意**：以下快捷键仅在 LSP 客户端激活时生效（buffer-local）
+
+| 快捷键 | 功能 | 模式 |
 |--------|------|------|
-| `<leader>ee` | n | 切换文件树 |
-| `<leader>ec` | n | 收起文件树 |
-| `<leader>er` | n | 刷新文件树 |
-| `<leader>eo` | n | 聚焦文件树 |
-| `<leader>ef` | n | 在文件树中定位文件 |
-| `<leader>ff` | n | 查找文件 (Telescope) |
-| `<leader>fr` | n | 最近打开的文件 |
-| `<leader>fs` | n | 全局搜索字符串 |
-| `<leader>fc` | n | 搜索光标下的字符串 |
-| `<leader>ft` | n | 查找 TODO |
+| `K` | 显示悬停信息 | Normal |
+| `gd` | 跳转到定义 | Normal |
+| `gD` | 跳转到声明 | Normal |
+| `gi` | 跳转到实现 | Normal |
+| `gt` | 跳转到类型定义 | Normal |
+| `gr` | 查找引用（Telescope） | Normal |
+| `gs` | 函数签名提示 | Normal |
+| `rr` | 重命名 | Normal |
+| `<leader>cf` | 格式化代码 | Normal |
+| `<leader>cf` | 格式化选中内容 | Visual |
+| `ga` | 代码操作 | Normal |
+| `tr` | 文档符号列表 | Normal |
 
-### 🎯 代码折叠
+> 📍 配置：`lua/dengbo/plugins/lsp/lspconfig.lua`
 
-| 快捷键 | 模式 | 功能 |
+### 诊断（Diagnostics）
+
+| 快捷键 | 功能 |
+|--------|------|
+| `gl` | 显示诊断信息（浮动窗口） |
+| `gp` | 跳转到上一个诊断 |
+| `gn` | 跳转到下一个诊断 |
+| `<leader>en` | 跳转到下一个错误（仅错误） |
+| `<leader>ep` | 跳转到上一个错误（仅错误） |
+
+### 代码格式化与检查
+
+| 快捷键 | 功能 | 模式 |
 |--------|------|------|
-| `<leader>zc` | n | 折叠当前块 |
-| `<leader>zo` | n | 展开当前块 |
-| `<leader>za` | n | 切换折叠 |
-| `<leader>zR` | n | 展开所有 |
-| `<leader>zM` | n | 折叠所有 |
+| `<leader>mp` | 手动格式化文件或选中内容 | Normal/Visual |
+| `<leader>l` | 触发当前文件的代码检查 | Normal |
 
-### ✏️ 代码编辑
+> 📍 格式化配置：`lua/dengbo/plugins/formatting.lua`  
+> 📍 检查配置：`lua/dengbo/plugins/linting.lua`  
+> 💡 代码会在保存时自动格式化，在进入缓冲区、写入后、离开插入模式时自动检查
 
-| 快捷键 | 模式 | 功能 |
+### 调试（DAP）
+
+| 快捷键 | 功能 | 分类 |
 |--------|------|------|
-| `jk` | i | 退出插入模式 |
-| `ii` | i | 退出插入模式 |
-| `<leader>mp` | n, v | 格式化文件/选中区域 |
-| `<leader>l` | n | 触发代码检查 |
-| `<leader>s` | n | 替换（配合 motion） |
-| `<leader>ss` | n | 替换整行 |
-| `<leader>S` | n | 替换到行尾 |
-| `<leader>s` | v | 替换选中内容 |
-| `<leader>+` | n | 数字加一 |
-| `<leader>-` | n | 数字减一 |
+| `<leader>db` | 切换断点 | 断点管理 |
+| `<leader>bc` | 设置条件断点 | 断点管理 |
+| `<leader>bl` | 设置日志点 | 断点管理 |
+| `<leader>br` | 清除所有断点 | 断点管理 |
+| `<leader>ba` | 列出所有断点（Telescope） | 断点管理 |
+| `<leader>dc` | 继续运行 | 调试控制 |
+| `<leader>dj` | 单步跳过（Step Over） | 调试控制 |
+| `<leader>dk` | 单步进入（Step Into） | 调试控制 |
+| `<leader>do` | 跳出函数（Step Out） | 调试控制 |
+| `<leader>dd` | 断开调试 | 调试控制 |
+| `<leader>dt` | 结束调试 | 调试控制 |
+| `<leader>dl` | 运行上一次调试 | 调试控制 |
+| `<leader>dp` | 切换 REPL | 调试控制 |
+| `<leader>di` | 调试悬停变量 | 调试信息 |
+| `<leader>d?` | 浮动显示变量作用域 | 调试信息 |
+| `<leader>df` | 查看调用栈（Telescope） | 调试信息 |
+| `<leader>dh` | 查看调试命令（Telescope） | 调试信息 |
+| `<leader>de` | 查找调试错误信息（Telescope） | 调试信息 |
+| `<leader>de` | 评估表达式（在 DAP UI 中） | Visual 模式 |
 
-### 🔍 搜索和导航
+> 📍 配置：`lua/dengbo/plugins/nvim-dap*.lua`
 
-| 快捷键 | 模式 | 功能 |
+### 代码折叠
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>zc` | 折叠当前块 |
+| `<leader>zo` | 展开当前块 |
+| `<leader>za` | 切换折叠 |
+| `<leader>zR` | 展开所有 |
+| `<leader>zM` | 折叠所有 |
+
+### Diff 操作
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>cc` | 把改动放到另一个缓冲区 |
+| `<leader>cj` | 从左边取改动 |
+| `<leader>ck` | 从右边取改动 |
+| `<leader>cn` | 跳转到下一个差异块 |
+| `<leader>cp` | 跳转到上一个差异块 |
+
+### Quickfix 列表
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>qo` | 打开 quickfix 列表 |
+| `<leader>qf` | 跳转到第一个 quickfix 项 |
+| `<leader>qn` | 跳转到下一个 quickfix 项 |
+| `<leader>qp` | 跳转到上一个 quickfix 项 |
+| `<leader>ql` | 跳转到最后一个 quickfix 项 |
+| `<leader>qc` | 关闭 quickfix 列表 |
+
+### Trouble（诊断列表）
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>xx` | 打开/关闭 Trouble 列表 |
+| `<leader>xw` | 打开工作区诊断 |
+| `<leader>xd` | 打开文档诊断 |
+| `<leader>xq` | 打开 quickfix 列表 |
+| `<leader>xl` | 打开位置列表 |
+| `<leader>xt` | 在 Trouble 中打开 TODO |
+
+> 📍 配置：`lua/dengbo/plugins/trouble.lua`
+
+### Git 操作
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>gb` | 切换 Git Blame 显示 |
+| `<leader>lg` | 打开 LazyGit |
+
+> 📍 LazyGit 配置：`lua/dengbo/plugins/lazygit.lua`
+
+### 符号大纲（Symbols Outline）
+
+| 快捷键 | 功能 | 位置 |
 |--------|------|------|
-| `n` | n | 跳转下一个搜索项并居中 |
-| `N` | n | 跳转上一个搜索项并居中 |
-| `G` | n | 跳转文件末尾并居中 |
-| `<C-d>` | n | 向下滚动并居中 |
-| `<C-u>` | n | 向上滚动并居中 |
-| `<leader>nh` | n | 清除搜索高亮 |
-| `f` | n, x, o | Lightspeed 快速跳转 |
-| `F` | n, x, o | Lightspeed 反向跳转 |
-| `]t` | n | 跳转到下一个 TODO |
-| `[t` | n | 跳转到上一个 TODO |
+| `<leader>es` | 切换符号大纲 | 全局 |
+| `<Esc>` / `q` | 关闭 | 大纲窗口内 |
+| `<Cr>` | 跳转到位置 | 大纲窗口内 |
+| `o` | 聚焦位置 | 大纲窗口内 |
+| `<C-space>` | 悬停符号 | 大纲窗口内 |
+| `K` | 切换预览 | 大纲窗口内 |
+| `r` | 重命名符号 | 大纲窗口内 |
+| `a` | 代码操作 | 大纲窗口内 |
+| `h` | 折叠 | 大纲窗口内 |
+| `l` | 展开 | 大纲窗口内 |
+| `W` | 折叠所有 | 大纲窗口内 |
+| `E` | 展开所有 | 大纲窗口内 |
+| `R` | 重置折叠 | 大纲窗口内 |
 
-### 🪟 窗口管理
+> 📍 配置：`lua/dengbo/plugins/symbols-outline.lua`
 
-| 快捷键 | 模式 | 功能 |
+### 其他功能
+
+| 快捷键 | 功能 | 模式/说明 |
+|--------|------|-----------|
+| `]t` | 跳转到下一个 TODO 注释 | Normal |
+| `[t` | 跳转到上一个 TODO 注释 | Normal |
+| `<leader>s` | 替换（配合 motion） | Normal |
+| `<leader>ss` | 替换整行 | Normal |
+| `<leader>S` | 替换到行尾 | Normal |
+| `<leader>s` | 替换选中内容 | Visual |
+| `<leader>j` | Flash 跳转（全窗口，无需输入字符） | Normal/Visual/Operator |
+| `<leader>J` | Flash 跳转（向后，全窗口） | Normal/Visual/Operator |
+| `<leader>jr` | Flash 远程操作 | Operator |
+| `<leader>jR` | Flash Treesitter 搜索 | Operator/Visual |
+| `<C-s>` | 切换 Flash 搜索 | Command |
+| `f` | 向前搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
+| `F` | 向后搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
+| `<C-space>` | 初始化选择/增量选择节点 | Tree-sitter |
+| `<BS>` | 递减选择节点 | Tree-sitter |
+| `<C-k>` | 上一个补全项 | Insert（nvim-cmp） |
+| `<C-j>` | 下一个补全项 | Insert（nvim-cmp） |
+| `<C-b>` | 向上滚动文档 | Insert（nvim-cmp） |
+| `<C-f>` | 向下滚动文档 | Insert（nvim-cmp） |
+| `<C-Space>` | 显示补全建议 | Insert（nvim-cmp） |
+| `<C-e>` | 关闭补全窗口 | Insert（nvim-cmp） |
+| `<CR>` | 确认选择（不自动选择） | Insert（nvim-cmp） |
+
+> 📍 TODO 配置：`lua/dengbo/plugins/todo-comments.lua`  
+> 📍 替换配置：`lua/dengbo/plugins/substitute.lua`  
+> 📍 Flash 配置：`lua/dengbo/plugins/flash.lua` 💡 使用 `<leader>j` 一键全窗口跳转（推荐，不冲突）  
+> 📍 Lightspeed 配置：`lua/dengbo/plugins/lightspeed.lua` ⚠️ 覆盖原生 `f`/`F`，需要输入字符  
+> 📍 Tree-sitter 配置：`lua/dengbo/plugins/treesitter.lua`  
+> 📍 补全配置：`lua/dengbo/plugins/nvim-cmp.lua`
+
+### 文件类型特定操作
+
+| 快捷键 | 功能 | 文件类型 |
+|--------|------|----------|
+| `<leader>go` | 整理导入（Pyright） | Python |
+| `<leader>tc` | 测试当前类 | Python |
+| `<leader>tm` | 测试当前方法 | Python |
+| `<leader>ch` | 切换源文件/头文件 | C/C++ |
+
+### Neovide 特定快捷键
+
+| 快捷键 | 功能 | 模式 |
 |--------|------|------|
-| `<leader>sv` | n | 垂直分屏 |
-| `<leader>sh` | n | 水平分屏 |
-| `<leader>se` | n | 使分屏大小相等 |
-| `<leader>sx` | n | 关闭当前分屏 |
-| `<leader>sj` | n | 减小分屏高度 |
-| `<leader>sk` | n | 增加分屏高度 |
-| `<leader>sl` | n | 增加分屏宽度 |
-| `<leader>ss` | n | 减小分屏宽度 |
-| `<leader>sm` | n | 切换最大化窗口 |
-| `,w` | n | 选择窗口 |
-| `,W` | n | 交换窗口 |
+| `<D-s>` | 保存（Command+S） | Normal |
+| `<D-c>` | 复制（Command+C） | Visual |
+| `<D-v>` | 粘贴（Command+V） | Normal/Visual/Command/Insert/Terminal |
 
-### 📑 标签页和缓冲区
+> 📍 配置：`lua/dengbo/core/neovide.lua`
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>td` | n | 关闭当前缓冲区但保留标签页 |
-| `<leader>tl` | n | 列出所有缓冲区 |
-| `<leader>to` | n | 打开新标签页 |
-| `<leader>tx` | n | 关闭当前标签页 |
-| `<leader>tf` | n | 当前缓冲区新开标签页 |
-| `<leader>tp` | n | 切换到上一个标签页（BufferLine） |
-| `<leader>tn` | n | 切换到下一个标签页（BufferLine） |
-| `<leader>t]` | n | 切换到下一个标签页（原生） |
-| `<leader>t[` | n | 切换到上一个标签页（原生） |
-| `<leader>th` | n | 缓冲区向左移动 |
-| `<leader>tr` | n | 缓冲区向右移动 |
+### 输入法切换
 
-### 🔧 LSP (Language Server Protocol)
+| 命令/快捷键 | 功能 |
+|------------|------|
+| `:IMToggle` | 手动切换输入法 |
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `K` | n | 显示函数文档（悬停） |
-| `<leader>gg` | n | 悬停提示 |
-| `gd` | n | 跳转到定义 |
-| `gD` | n | 跳转到声明 |
-| `gi` | n | 跳转到实现 |
-| `gt` | n | 跳转到类型定义 |
-| `gr` | n | 查找引用（Telescope） |
-| `gs` | n | 函数签名提示 |
-| `rr` | n | 重命名 |
-| `ga` | n | 代码操作 |
-| `<leader>ca` | n | 代码操作 |
-| `gf` | n, v | 格式化（LSP） |
-| `<leader>cf` | n | 格式化代码 |
-| `gl` | n | 显示诊断信息 |
-| `gp` | n | 跳转到上一个诊断 |
-| `gn` | n | 跳转到下一个诊断 |
-| `tr` | n | 文档符号列表 |
-| `<leader>en` | n | 跳转到下一个 Error |
-| `<leader>ep` | n | 跳转到上一个 Error |
-| `<leader>ch` | n | 切换源文件/头文件（C/C++） |
-| `<leader>go` | n | 整理导入（Python） |
+> 📍 配置：`lua/dengbo/core/input_method.lua`  
+> 💡 输入法会在进入/退出插入模式时自动切换
 
-### 🐛 调试 (DAP)
+### Which-Key 提示
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>db` | n | 切换断点 |
-| `<leader>bc` | n | 设置条件断点 |
-| `<leader>bl` | n | 设置日志点 |
-| `<leader>br` | n | 清除所有断点 |
-| `<leader>ba` | n | 列出所有断点 |
-| `<leader>dc` | n | 继续运行 |
-| `<leader>dj` | n | 单步跳过 |
-| `<leader>dk` | n | 单步进入 |
-| `<leader>do` | n | 跳出函数 |
-| `<leader>dd` | n | 断开调试 |
-| `<leader>dt` | n | 结束调试 |
-| `<leader>dp` | n | 切换 REPL |
-| `<leader>dl` | n | 运行上一次调试 |
-| `<leader>di` | n | 调试悬停变量 |
-| `<leader>d?` | n | 浮动显示变量作用域 |
-| `<leader>df` | n | 查看调用栈 |
-| `<leader>dh` | n | 查看调试命令 |
-| `<leader>de` | n | 查找调试错误信息 |
-| `<leader>de` | v | 评估表达式 |
-| `<leader>tc` | n | 测试当前类（Python） |
-| `<leader>tm` | n | 测试当前方法（Python） |
+按 `<Space>` 后稍等片刻（默认 500ms），会显示所有可用的快捷键提示。
 
-### 🔀 Git 操作
+> 📍 配置：`lua/dengbo/plugins/which-key.lua`
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>gb` | n | 切换 Git 责任人显示 |
-| `<leader>lg` | n | 打开 LazyGit |
-| `]h` | n | 跳转到下一个 Git hunk |
-| `[h` | n | 跳转到上一个 Git hunk |
-| `<leader>hs` | n, v | Stage hunk |
-| `<leader>hr` | n, v | Reset hunk |
-| `<leader>hS` | n | Stage buffer |
-| `<leader>hR` | n | Reset buffer |
-| `<leader>hu` | n | Undo stage hunk |
-| `<leader>hp` | n | Preview hunk |
-| `<leader>hb` | n | Blame line |
-| `<leader>hB` | n | Toggle line blame |
-| `<leader>hd` | n | Diff this |
-| `<leader>hD` | n | Diff this ~ |
-| `ih` | o, x | 选择 Git hunk（文本对象） |
+### 查找所有快捷键
 
-### 📋 Diff 操作
+如果某个快捷键没有在这里列出，可以在以下文件中查找：
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>cc` | n | 把改动放到另一个缓冲区 |
-| `<leader>cj` | n | 从左边取改动 |
-| `<leader>ck` | n | 从右边取改动 |
-| `<leader>cn` | n | 跳转到下一个差异块 |
-| `<leader>cp` | n | 跳转到上一个差异块 |
+- **全局键位映射**：`lua/dengbo/core/keymaps.lua`
+- **LSP 键位映射**：`lua/dengbo/plugins/lsp/lspconfig.lua`
+- **插件特定键位映射**：`lua/dengbo/plugins/*.lua` 各插件配置文件
+- **Neovide 键位映射**：`lua/dengbo/core/neovide.lua`
 
-### 📝 Quickfix 和诊断
+或者使用 `:Telescope keymaps` 搜索所有已定义的快捷键。
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>qo` | n | 打开 quickfix 列表 |
-| `<leader>qf` | n | 跳转到第一个 quickfix 项 |
-| `<leader>qn` | n | 跳转到下一个 quickfix 项 |
-| `<leader>qp` | n | 跳转到上一个 quickfix 项 |
-| `<leader>ql` | n | 跳转到最后一个 quickfix 项 |
-| `<leader>qc` | n | 关闭 quickfix 列表 |
-| `<leader>xx` | n | 打开/关闭 Trouble 列表 |
-| `<leader>xw` | n | 打开 Trouble 工作区诊断 |
-| `<leader>xd` | n | 打开 Trouble 文档诊断 |
-| `<leader>xq` | n | 打开 Trouble quickfix 列表 |
-| `<leader>xl` | n | 打开 Trouble location 列表 |
-| `<leader>xt` | n | 在 Trouble 中打开 TODOs |
+## 📖 使用说明
 
-### 🎨 其他工具
+### 首次使用
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<leader>es` | n | 打开符号大纲 |
-| `gx` | n | 打开光标下的链接（跨平台） |
+1. 启动 Neovim 后，插件会自动安装
+2. 等待 Mason 安装 LSP 服务器和工具（首次可能需要较长时间）
+3. 主题会随机加载，每次启动可能不同
 
-### 🍎 Neovide (macOS 专用)
+### 输入法自动切换
 
-| 快捷键 | 模式 | 功能 |
-|--------|------|------|
-| `<D-s>` | n | 保存（Command+S） |
-| `<D-c>` | v | 复制（Command+C） |
-| `<D-v>` | n, v, c, i | 粘贴（Command+V） |
+配置已包含输入法自动切换功能：
+- 进入插入模式时，自动恢复上次使用的输入法
+- 退出插入模式时，自动切换到英文输入法
+- 使用 `:IMToggle` 命令手动切换输入法
 
-## 🎨 主题
+### 代码格式化
 
-配置支持多种主题，每次启动会随机选择一个主题：
+代码会在保存时自动格式化，支持的格式器：
+- Python: isort + black
+- JavaScript/TypeScript: prettier
+- Lua: stylua
+- Go: gofmt
+- 其他语言请查看 `plugins/formatting.lua`
 
-- **tokyonight** (night 风格)
-- **kanagawa** (wave 背景)
-- **catppuccin** (mocha 风格)
-- **rose-pine** (main 变体)
-- **sonokai** (default 风格)
-- **onenord**
+### 调试配置
 
-## 🔧 配置自定义
+#### Python 调试
 
-### 修改主题
+1. 确保已安装 `debugpy`（Mason 会自动安装）
+2. 在代码中设置断点：`<leader>db`
+3. 开始调试：`<leader>dc`
 
-编辑 `lua/dengbo/ui/theme.lua` 来修改主题列表或设置固定主题。
+#### C/C++ 调试
 
-### 添加新插件
+1. 确保已安装 `codelldb` 或 `cpptools`（Mason 会自动安装）
+2. 需要配置 `launch.json` 或使用适配器配置
+3. 查看 `plugins/nvim-dap-cpp.lua` 了解详细配置
 
-1. 在 `lua/dengbo/plugins/` 目录下创建新的 `.lua` 文件
-2. 返回插件配置表
-3. 重启 Neovim，lazy.nvim 会自动安装
+### 自定义配置
 
-### 修改键位映射
+所有配置都在 `lua/dengbo/` 目录下，可以根据需要修改：
 
-编辑 `lua/dengbo/core/keymaps.lua` 来添加或修改快捷键。
+- **选项配置**：`core/options.lua`
+- **键位映射**：`core/keymaps.lua`
+- **插件配置**：`plugins/` 目录下对应文件
+- **LSP 配置**：`plugins/lsp/lspconfig.lua`
 
-## 🌍 平台支持
-
-### Linux
-- ✅ 完全支持
-- ✅ 自动检测并使用 `xdg-open` 打开链接
-- ✅ 输入法切换功能自动禁用
-
-### macOS
-- ✅ 完全支持
-- ✅ 支持 `im-select` 输入法自动切换
-- ✅ 支持 Neovide GUI 配置
-- ✅ 使用 `open` 命令打开链接
-
-### Windows
-- ✅ 基本支持
-- ✅ 使用 `start` 命令打开链接
-
-## 🐛 故障排除
+## 🔧 故障排除
 
 ### 插件安装失败
 
 ```bash
-# 清理并重新安装
+# 清理插件缓存
 rm -rf ~/.local/share/nvim
 rm -rf ~/.local/state/nvim
-nvim
+nvim  # 重新启动，插件会重新安装
 ```
 
 ### LSP 服务器未启动
 
-1. 运行 `:Mason` 检查服务器是否已安装
-2. 运行 `:LspInfo` 查看 LSP 状态
-3. 检查 `lua/dengbo/plugins/lsp/lspconfig.lua` 中的服务器配置
+1. 检查 Mason 是否已安装服务器：`:Mason`
+2. 查看 LSP 日志：`:LspLog`
+3. 确保项目中有相应的配置文件（如 `pyproject.toml`、`tsconfig.json` 等）
+
+### 输入法切换不工作
+
+1. 确保 `im-select` 已安装并在 PATH 中
+2. 测试命令：`im-select`（应该输出当前输入法）
+3. 检查 macOS 权限设置
+
+### 主题未加载
+
+1. 确保主题插件已安装：`:Lazy`
+2. 手动加载主题：`:colorscheme tokyonight`
 
 ### 性能问题
 
-1. 检查大文件插件是否正常工作：`:checkhealth bigfile`
-2. 使用 `:Lazy profile` 查看插件加载时间
+1. 检查大文件处理：已配置 `bigfile-nvim` 插件
+2. 查看启动时间：`:Lazy profile`
 3. 禁用不需要的插件
-
-## 📚 相关资源
-
-- [Neovim 官方文档](https://neovim.io/doc/)
-- [Lazy.nvim 文档](https://github.com/folke/lazy.nvim)
-- [nvim-lspconfig 文档](https://github.com/neovim/nvim-lspconfig)
 
 ## 📝 更新日志
 
-### 最新优化
-- ✅ 按 SOLID 原则重构代码结构
-- ✅ 修复跨平台兼容性问题
-- ✅ 添加弃用 API 兼容性补丁
-- ✅ 优化 LSP 服务器配置
-- ✅ 改进错误处理和平台检测
-- ✅ 优化 lazy-lock.json 排序
+### 最新优化（2024）
 
-## 📄 许可证
-
-MIT License
+- ✅ 修复重复加载配置问题
+- ✅ 修复 LSP 服务器配置未启用问题
+- ✅ 优化键位映射，避免冲突
+- ✅ 重构配置结构，提高可维护性
+- ✅ 分离 Neovide 和输入法配置到独立模块
+- ✅ 修复 symbols-outline 键位映射位置错误
 
 ## 🤝 贡献
 
 欢迎提交 Issue 和 Pull Request！
 
+## 📄 许可证
+
+MIT License
+
+## 🔗 相关链接
+
+- [Neovim 官方文档](https://neovim.io/doc/)
+- [Lazy.nvim 文档](https://github.com/folke/lazy.nvim)
+- [Mason.nvim 文档](https://github.com/williamboman/mason.nvim)
+
 ---
 
-**注意**: 这是一个个人配置文件，根据您的需求进行调整。某些插件可能需要额外的系统依赖，请参考各插件的文档。
+**注意**：本配置主要针对 macOS 系统。如需在 Ubuntu/Linux 上使用，可能需要调整部分配置（如输入法切换工具）。

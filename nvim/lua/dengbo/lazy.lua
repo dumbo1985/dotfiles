@@ -1,20 +1,71 @@
---- Lazy.nvim 主入口文件
---- 负责协调各个模块的初始化
---- @module dengbo.lazy
+-- ========================================
+-- lazy.nvim bootstrap
+-- ========================================
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		"--branch=stable", -- latest stable release
+		lazypath,
+	})
+end
+vim.opt.rtp:prepend(lazypath)
 
--- 首先修复弃用 API 的兼容性问题（必须在插件加载前）
-require("dengbo.core.deprecated_fix").setup()
+-- ========================================
+-- lazy.nvim 插件管理
+-- ========================================
+require("lazy").setup({
+	{ import = "dengbo.plugins" },
+	{ import = "dengbo.plugins.lsp" },
+}, {
+	checker = { enabled = true, notify = false },
+	change_detection = { notify = false },
+})
 
--- 初始化 Lazy.nvim
-require("dengbo.core.lazy_init").setup()
+-- ========================================
+-- 随机主题加载
+-- ========================================
+vim.schedule(function()
+	local themes = {
+		{
+			name = "tokyonight",
+			setup = function()
+				require("tokyonight").setup({ style = "night" })
+			end,
+		},
+		{
+			name = "kanagawa",
+			setup = function()
+				require("kanagawa").setup({ background = { dark = "wave" } })
+			end,
+		},
+		{
+			name = "catppuccin",
+			setup = function()
+				require("catppuccin").setup({ flavour = "mocha" })
+			end,
+		},
+		{
+			name = "rose-pine",
+			setup = function()
+				require("rose-pine").setup({ variant = "main" })
+			end,
+		},
+		{
+			name = "sonokai",
+			setup = function()
+				vim.g.sonokai_style = "default"
+			end,
+		},
+		{ name = "onenord", setup = function() end },
+	}
 
--- 平台特定功能
-require("dengbo.platform.input_method").setup()
-
--- 核心功能
-require("dengbo.core.folding").setup()
-
--- UI 配置
-require("dengbo.ui.neovide").setup()
-require("dengbo.ui.transparent").setup()
-require("dengbo.ui.theme").setup()
+	math.randomseed(os.time())
+	local theme = themes[math.random(#themes)]
+	theme.setup()
+	vim.cmd("colorscheme " .. theme.name)
+	vim.notify("🎨 Loaded random theme: " .. theme.name)
+end)

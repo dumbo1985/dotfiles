@@ -34,18 +34,7 @@ keymap.set("i", "ii", "<ESC>") -- 通过 ii 退出插入模式
 keymap.set("n", "<leader>wq", ":wq<CR>", { desc = "保存并退出" })
 keymap.set("n", "<leader>qq", ":q!<CR>", { desc = "强制退出不保存" })
 keymap.set("n", "<leader>ww", ":w<CR>", { desc = "保存" })
--- 打开光标下的链接（跨平台）
-keymap.set("n", "gx", function()
-	local url = vim.fn.expand("<cfile>")
-	local is_macos = vim.fn.has("mac") == 1
-	local is_linux = vim.fn.has("unix") == 1 and not is_macos
-	local cmd = is_macos and "open" or (is_linux and "xdg-open" or "start")
-	if vim.fn.executable(cmd) == 1 then
-		vim.fn.jobstart({ cmd, url }, { detach = true })
-	else
-		vim.notify("无法打开链接: " .. url, vim.log.levels.WARN)
-	end
-end, { desc = "打开光标下的链接" })
+keymap.set("n", "gx", ":!open <c-r><c-a><CR>") -- 打开光标下的链接
 
 -- 清除搜索高亮
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "清除搜索高亮" })
@@ -112,67 +101,30 @@ keymap.set("n", "<leader>qc", ":cclose<CR>", { desc = "关闭 quickfix 列表" }
 -- Git blame
 keymap.set("n", "<leader>gb", ":GitBlameToggle<CR>", { desc = "切换 Git 责任人显示" })
 
--- LSP 键位映射（部分在 lspconfig.lua 中按 buffer 设置，这里保留全局映射）
--- 注意：K, gd, gr, <leader>ca 在 lspconfig.lua 中已设置，这里保留作为备用
-keymap.set("n", "<leader>gg", function()
-	vim.lsp.buf.hover()
-end, { desc = "悬停提示" })
-keymap.set("n", "gD", function()
-	vim.lsp.buf.declaration()
-end, { desc = "跳转到声明" })
-keymap.set("n", "gi", function()
-	vim.lsp.buf.implementation()
-end, { desc = "跳转到实现" })
-keymap.set("n", "gt", function()
-	vim.lsp.buf.type_definition()
-end, { desc = "跳转到类型定义" })
-keymap.set("n", "gs", function()
-	vim.lsp.buf.signature_help()
-end, { desc = "函数签名提示" })
-keymap.set("n", "rr", function()
-	vim.lsp.buf.rename()
-end, { desc = "重命名" })
-keymap.set({ "n", "v" }, "gf", function()
-	vim.lsp.buf.format({ async = true })
-end, { desc = "格式化" })
-keymap.set("n", "ga", function()
-	vim.lsp.buf.code_action()
-end, { desc = "代码操作" })
-keymap.set("n", "gl", function()
-	vim.diagnostic.open_float()
-end, { desc = "显示诊断信息" })
-keymap.set("n", "gp", function()
-	vim.diagnostic.goto_prev()
-end, { desc = "跳转到上一个诊断" })
-keymap.set("n", "gn", function()
-	vim.diagnostic.goto_next()
-end, { desc = "跳转到下一个诊断" })
-keymap.set("n", "tr", function()
-	vim.lsp.buf.document_symbol()
-end, { desc = "文档符号列表" })
+-- LSP (这些键位映射在 lspconfig.lua 的 on_attach 中设置，这里只保留全局诊断相关的)
+-- 注意：LSP 相关的键位映射（如 gd, gr, K 等）应该在 lspconfig.lua 的 on_attach 中设置为 buffer-local
+-- 不设置全局 gd，让原生的 gd（跳转到局部定义）在没有 LSP 时工作，LSP 附加时会设置 buffer-local 的 gd
+
+keymap.set("n", "gl", "<cmd>lua vim.diagnostic.open_float()<CR>", { desc = "显示诊断信息" })
+keymap.set("n", "gp", "<cmd>lua vim.diagnostic.goto_prev()<CR>", { desc = "跳转到上一个诊断" })
+keymap.set("n", "gn", "<cmd>lua vim.diagnostic.goto_next()<CR>", { desc = "跳转到下一个诊断" })
 
 -- 文件类型特定操作
 keymap.set("n", "<leader>go", function()
 	if vim.bo.filetype == "python" then
-		pcall(function()
-			vim.api.nvim_command("PyrightOrganizeImports")
-		end)
+		vim.api.nvim_command("PyrightOrganizeImports")
 	end
 end, { desc = "整理导入 (Python)" })
 
 keymap.set("n", "<leader>tc", function()
 	if vim.bo.filetype == "python" then
-		pcall(function()
-			require("dap-python").test_class()
-		end)
+		require("dap-python").test_class()
 	end
 end, { desc = "测试当前类 (Python)" })
 
 keymap.set("n", "<leader>tm", function()
 	if vim.bo.filetype == "python" then
-		pcall(function()
-			require("dap-python").test_method()
-		end)
+		require("dap-python").test_method()
 	end
 end, { desc = "测试当前方法 (Python)" })
 
@@ -197,43 +149,31 @@ keymap.set("n", "<leader>dj", "<cmd>lua require'dap'.step_over()<cr>", { desc = 
 keymap.set("n", "<leader>dk", "<cmd>lua require'dap'.step_into()<cr>", { desc = "单步进入" })
 keymap.set("n", "<leader>do", "<cmd>lua require'dap'.step_out()<cr>", { desc = "跳出函数" })
 keymap.set("n", "<leader>dd", function()
-	pcall(function()
-		require("dap").disconnect()
-		require("dapui").close()
-	end)
+	require("dap").disconnect()
+	require("dapui").close()
 end, { desc = "断开调试" })
 keymap.set("n", "<leader>dt", function()
-	pcall(function()
-		require("dap").terminate()
-		require("dapui").close()
-	end)
+	require("dap").terminate()
+	require("dapui").close()
 end, { desc = "结束调试" })
 keymap.set("n", "<leader>dp", "<cmd>lua require'dap'.repl.toggle()<cr>", { desc = "切换 REPL" })
 keymap.set("n", "<leader>dl", "<cmd>lua require'dap'.run_last()<cr>", { desc = "运行上一次调试" })
 keymap.set("n", "<leader>di", function()
-	pcall(function()
-		require("dap.ui.widgets").hover()
-	end)
+	require("dap.ui.widgets").hover()
 end, { desc = "调试悬停变量" })
 keymap.set("n", "<leader>d?", function()
-	pcall(function()
-		local widgets = require("dap.ui.widgets")
-		widgets.centered_float(widgets.scopes)
-	end)
+	local widgets = require("dap.ui.widgets")
+	widgets.centered_float(widgets.scopes)
 end, { desc = "浮动显示变量作用域" })
 keymap.set("n", "<leader>df", "<cmd>Telescope dap frames<cr>", { desc = "查看调用栈" })
 keymap.set("n", "<leader>dh", "<cmd>Telescope dap commands<cr>", { desc = "查看调试命令" })
 keymap.set("n", "<leader>de", function()
-	pcall(function()
-		require("telescope.builtin").diagnostics({ default_text = ":E:" })
-	end)
+	require("telescope.builtin").diagnostics({ default_text = ":E:" })
 end, { desc = "查找调试错误信息" })
 
 ---------------------
 -- ✨ 头文件和 CPP 文件跳转 ✨
 ---------------------
 keymap.set("n", "<leader>ch", function()
-	pcall(function()
-		vim.cmd("ClangdSwitchSourceHeader")
-	end)
+	vim.cmd("ClangdSwitchSourceHeader")
 end, { desc = "切换源文件/头文件" })

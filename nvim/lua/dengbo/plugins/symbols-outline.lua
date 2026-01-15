@@ -70,6 +70,7 @@ return {
 			},
 		})
 
+		-- 设置键位映射（应该在 setup() 调用之后）
 		vim.keymap.set("n", "<leader>es", "<cmd>SymbolsOutlineOpen<CR>", { desc = "Toggle symbol outline" })
 	end,
 }

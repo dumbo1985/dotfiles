@@ -4,23 +4,16 @@ return {
 	dependencies = {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
-		{ "folke/neodev.nvim", opts = {} }, -- ✅ 提供 Neovim API 类型支持
+		{ "folke/neodev.nvim", ft = "lua", opts = {} }, -- 仅 Lua 开发时启用
 		{ "b0o/schemastore.nvim" }, -- JSON schema 支持
 		"williamboman/mason.nvim",
 		"williamboman/mason-lspconfig.nvim",
 	},
 	config = function()
-		-- 初始化 Mason
-		require("mason").setup()
-		require("mason-lspconfig").setup()
-
 		local lspconfig = require("lspconfig")
 		local mason_lspconfig = require("mason-lspconfig")
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
 		local schemastore = require("schemastore")
-
-		-- 初始化 Neodev（必须在 lua_ls.setup 之前）
-		require("neodev").setup({})
 
 		-- 诊断图标配置
 		local severity_icons = {
@@ -181,9 +174,25 @@ return {
 			},
 		}
 
-		-- 自动安装配置的 LSP 服务器
+		-- 与 mason.lua 原列表对齐：含自定义 server_configs 以外的默认 LSP
+		local ensure_installed = {
+			"clangd",
+			"cssls",
+			"emmet_ls",
+			"gopls",
+			"graphql",
+			"html",
+			"jsonls",
+			"lua_ls",
+			"prismals",
+			"pyright",
+			"svelte",
+			"tailwindcss",
+			"ts_ls",
+		}
+
 		mason_lspconfig.setup({
-			ensure_installed = vim.tbl_keys(server_configs),
+			ensure_installed = ensure_installed,
 			automatic_installation = true,
 			-- 设置处理器：为所有服务器配置
 			handlers = {

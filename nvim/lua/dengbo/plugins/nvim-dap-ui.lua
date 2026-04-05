@@ -9,10 +9,6 @@ return {
 	},
 
 	config = function()
-		require("nvim-dap-virtual-text").setup({
-			commented = true,
-		})
-
 		local dap, dapui = require("dap"), require("dapui")
 		dapui.setup({
 			expand_lines = true,

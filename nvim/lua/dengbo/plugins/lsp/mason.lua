@@ -1,16 +1,10 @@
 return {
 	"williamboman/mason.nvim",
 	dependencies = {
-		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
 	},
 	config = function()
-		-- import mason
 		local mason = require("mason")
-
-		-- import mason-lspconfig
-		local mason_lspconfig = require("mason-lspconfig")
-
 		local mason_tool_installer = require("mason-tool-installer")
 
 		-- enable mason and configure icons
@@ -32,47 +26,20 @@ return {
 			},
 		})
 
-		mason_lspconfig.setup({
-			-- list of servers for mason to install
-			-- 注意：使用正确的 lspconfig 服务器名称
-			ensure_installed = {
-				"html",
-				"cssls",
-				"tailwindcss",
-				"svelte",
-				"lua_ls",
-				"graphql",
-				"emmet_ls",
-				"prismals",
-				"pyright",
-				"clangd",
-				"gopls",
-				"ts_ls", -- TypeScript/JavaScript (tsserver 已弃用)
-				"jsonls", -- JSON
-			},
-		})
+		-- mason-lspconfig 的 ensure_installed / handlers 统一在 lspconfig.lua 配置，避免重复 setup
 
 		mason_tool_installer.setup({
 			ensure_installed = {
-				"codelldb", -- LLDB 调试器适配器
-				"clangd", -- C/C++ LSP 服务器
-				"clang-format", -- 代码格式化
-				"cpptools", -- 备用调试适配器
-				"cpplint", -- 代码风格检查
-				"beautysh",
-				"buf",
-				"rustfmt",
-				"htmlbeautifier",
-				"prettier", -- prettier formatter
-				"stylua", -- lua formatter
-				"isort", -- python formatter
-				"black", -- python formatter
-				"pylint", -- python linter
-				"eslint_d", -- js linter
-				"python-lsp-server",
+				"codelldb",
+				"clangd",
+				"clang-format",
+				"prettier",
+				"stylua",
+				"isort",
+				"black",
+				"eslint_d",
 				"debugpy",
 				"flake8",
-				"mypy",
 				"yamlfix",
 				"taplo",
 				"shellcheck",

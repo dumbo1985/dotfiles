@@ -21,51 +21,24 @@ require("lazy").setup({
 	{ import = "dengbo.plugins" },
 	{ import = "dengbo.plugins.lsp" },
 }, {
-	checker = { enabled = true, notify = false },
+	defaults = {
+		-- 未显式指定 lazy 的插件默认延迟加载；需立即加载的插件在各自 spec 里写 lazy = false
+		lazy = true,
+	},
+	checker = { enabled = false, notify = false },
 	change_detection = { notify = false },
+	-- 安装/更新插件时若缺少 colorscheme，优先保证默认主题可用
+	install = { colorscheme = { "tokyonight" } },
 })
 
 -- ========================================
 -- 随机主题加载
 -- ========================================
 vim.schedule(function()
-	local themes = {
-		{
-			name = "tokyonight",
-			setup = function()
-				require("tokyonight").setup({ style = "night" })
-			end,
-		},
-		{
-			name = "kanagawa",
-			setup = function()
-				require("kanagawa").setup({ background = { dark = "wave" } })
-			end,
-		},
-		{
-			name = "catppuccin",
-			setup = function()
-				require("catppuccin").setup({ flavour = "mocha" })
-			end,
-		},
-		{
-			name = "rose-pine",
-			setup = function()
-				require("rose-pine").setup({ variant = "main" })
-			end,
-		},
-		{
-			name = "sonokai",
-			setup = function()
-				vim.g.sonokai_style = "default"
-			end,
-		},
-		{ name = "onenord", setup = function() end },
-	}
-
-	math.randomseed(os.time())
-	local theme = themes[math.random(#themes)]
-	theme.setup()
-	vim.cmd("colorscheme " .. theme.name)
-	vim.notify("🎨 Loaded random theme: " .. theme.name)
+	local themes = { "tokyonight", "kanagawa", "catppuccin", "rose-pine", "sonokai", "onenord" }
+	math.randomseed(vim.loop.hrtime())
+	local chosen = themes[math.random(#themes)]
+	if not pcall(vim.cmd.colorscheme, chosen) then
+		vim.cmd.colorscheme("tokyonight")
+	end
 end)

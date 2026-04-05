@@ -5,12 +5,9 @@ return {
 		vim.o.timeout = true
 		vim.o.timeoutlen = 500
 	end,
-	config = function()
-		local whichkey = require("which-key")
-
-		whichkey.setup({
-			-- 其他配置选项
-		})
+	opts = {},
+	config = function(_, opts)
+		require("which-key").setup(opts)
 
 		-- Normal mode keymaps
 		vim.keymap.set("n", "<leader>b", function() end, { desc = "Breakpoint" })

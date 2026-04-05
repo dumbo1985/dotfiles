@@ -7,7 +7,10 @@ return {
 		"mfussenegger/nvim-dap",
 	},
 	config = function()
-		-- Update the path passed to setup to point to your system or virtual env python binary
-		require("dap-python").setup("/opt/homebrew/bin/python3")
+		local py = vim.fn.exepath("python3")
+		if py == "" then
+			py = "/usr/bin/python3"
+		end
+		require("dap-python").setup(py)
 	end,
 }

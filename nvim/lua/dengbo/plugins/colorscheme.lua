@@ -1,36 +1,32 @@
 -- plugins/theme-randomizer.lua
 return {
-	-- 所有 colorscheme 插件
+	-- 默认主题：启动时加载，保证首屏稳定
 	{
 		"folke/tokyonight.nvim",
 		lazy = false,
 		priority = 1000,
 	},
+	-- 其它主题按需加载（:colorscheme xxx 时再加载）
 	{
 		"rebelot/kanagawa.nvim",
-		lazy = false,
-		priority = 1000,
+		lazy = true,
 	},
 	{
 		"catppuccin/nvim",
 		name = "catppuccin",
-		lazy = false,
-		priority = 1000,
+		lazy = true,
 	},
 	{
 		"rose-pine/neovim",
 		name = "rose-pine",
-		lazy = false,
-		priority = 1000,
+		lazy = true,
 	},
 	{
 		"sainnhe/sonokai",
-		lazy = false,
-		priority = 1000,
+		lazy = true,
 	},
 	{
 		"rmehri01/onenord.nvim",
-		lazy = false,
-		priority = 1000,
+		lazy = true,
 	},
 }

@@ -1,5 +1,27 @@
 return {
 	"nvim-tree/nvim-tree.lua",
+	cmd = {
+		"NvimTreeToggle",
+		"NvimTreeOpen",
+		"NvimTreeClose",
+		"NvimTreeFocus",
+		"NvimTreeFindFile",
+		"NvimTreeRefresh",
+		"NvimTreeCollapse",
+	},
+	init = function()
+		vim.api.nvim_create_autocmd("VimEnter", {
+			once = true,
+			callback = function()
+				if #vim.api.nvim_list_uis() == 0 then
+					return
+				end
+				vim.defer_fn(function()
+					vim.cmd("silent! NvimTreeOpen")
+				end, 20)
+			end,
+		})
+	end,
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
 		-- 推荐先禁用 netrw，不然偶尔打开会有冲突
@@ -70,7 +92,7 @@ return {
 			},
 
 			system_open = {
-				cmd = "open", -- MacOS 打开文件用 open
+				cmd = vim.fn.has("mac") == 1 and "open" or "xdg-open",
 			},
 
 			diagnostics = {

@@ -5,6 +5,11 @@ return {
 	-- "enddeadroyal/symbols-outline.nvim",
 	-- branch = "bugfix/symbol-hover-misplacement",
 
+	cmd = { "SymbolsOutline", "SymbolsOutlineOpen", "SymbolsOutlineClose" },
+	keys = {
+		{ "<leader>es", "<cmd>SymbolsOutlineOpen<CR>", desc = "Open symbol outline" },
+	},
+
 	config = function()
 		require("symbols-outline").setup({
 			highlight_hovered_item = true,
@@ -70,7 +75,5 @@ return {
 			},
 		})
 
-		-- 设置键位映射（应该在 setup() 调用之后）
-		vim.keymap.set("n", "<leader>es", "<cmd>SymbolsOutlineOpen<CR>", { desc = "Toggle symbol outline" })
 	end,
 }

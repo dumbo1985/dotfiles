@@ -2,10 +2,6 @@ return {
 	"folke/noice.nvim",
 	event = "VeryLazy",
 
-	opts = {
-		-- add any options here
-	},
-
 	dependencies = {
 		-- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
 		"MunifTanjim/nui.nvim",
@@ -15,8 +11,7 @@ return {
 		"rcarriga/nvim-notify",
 	},
 
-	config = function()
-		require("noice").setup({
+	opts = {
 			cmdline = {
 				enabled = true, -- enables the Noice cmdline UI
 				view = "cmdline_popup", -- view for rendering the cmdline. Change to `cmdline` to get a classic cmdline at the bottom
@@ -213,6 +208,5 @@ return {
 			status = {}, --- @see section on statusline components
 			---@type NoiceFormatOptions
 			format = {}, --- @see section on formatting
-		})
-	end,
+	},
 }

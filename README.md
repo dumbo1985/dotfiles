@@ -1,8 +1,6 @@
 # dotfiles
 
-个人 Neovim 配置文件集合，适用于 macOS 系统。包含完整的 LSP、调试、格式化、代码补全等功能配置。
-
-> 💡 注意：本项目主要针对 macOS 系统配置，Ubuntu 分支请查看相应分支。
+个人 Neovim 配置文件集合。当前 `forUbuntu` 分支面向 Ubuntu 24.04，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置。
 
 ## 📋 目录
 
@@ -23,98 +21,111 @@
 - 🔍 **模糊搜索**：Telescope 强大的文件搜索和内容搜索
 - 🌳 **语法高亮**：Tree-sitter 提供更好的语法高亮
 - 📋 **自动补全**：nvim-cmp 提供智能代码补全
-- 🎯 **输入法切换**：自动在插入模式和普通模式间切换输入法
+- 🎯 **输入法切换**：macOS 上支持自动切换；Ubuntu 使用桌面输入法，见下方说明
 - 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
 
 ## 🚀 安装步骤
 
 ### 前置要求
 
-1. **macOS 系统**（推荐 macOS 12+）
-2. **Homebrew** 包管理器
-3. **支持真彩色的终端**（如 iTerm2）
+- Ubuntu 24.04 LTS（以下命令以 x86-64 为例）
+- 可访问 GitHub 的网络
+- 建议使用 Neovim 0.10 或更新版本；Ubuntu 仓库中的版本可能落后于本配置使用的插件
+- 支持真彩色的终端（如 GNOME Terminal、WezTerm）
 
-### 1. 安装 Homebrew
-
-如果还没有安装 Homebrew：
+### 1. 安装系统依赖
 
 ```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+sudo apt update
+sudo apt install -y git curl unzip build-essential ripgrep fd-find \
+  python3 python3-venv python3-pip nodejs npm golang-go \
+  g++ gdb cmake shellcheck wl-clipboard xclip
 ```
 
-### 2. 安装 iTerm2
+`nodejs`/`npm` 和 `golang-go` 用于配置中启用的 JavaScript/TypeScript 与 Go 工具。若只使用 C/C++ 和 Lua，可以不安装它们，但 Mason 会对相应语言服务器显示安装失败。`wl-clipboard` 和 `xclip` 为 Wayland/X11 剪贴板提供支持。
 
-推荐使用 iTerm2 以获得更好的颜色支持：
+### 2. 安装 Neovim
 
-```bash
-   brew install --cask iterm2
-   ```
-
-### 3. 安装 Nerd Font
-
-安装一个 Nerd Font 以支持图标显示：
+推荐使用 Neovim 官方 Linux 发布包，而不是 Ubuntu 24.04 仓库中可能较旧的版本。先在 Neovim 官方 [Linux 安装说明](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux)中确认当前发布包名称。以下以 x86-64 tar 包为例：
 
 ```bash
-# 使用 Homebrew 安装 MesloLGS Nerd Font
-brew install --cask font-meslo-lg-nerd-font
-
-# 或者手动下载安装其他 Nerd Font
-# https://www.nerdfonts.com/font-downloads
+mkdir -p ~/.local/opt ~/.local/bin
+curl -fLo /tmp/nvim-linux-x86_64.tar.gz \
+  https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+tar -xzf /tmp/nvim-linux-x86_64.tar.gz -C ~/.local/opt
+ln -sfn ~/.local/opt/nvim-linux-x86_64/bin/nvim ~/.local/bin/nvim
 ```
 
-在 iTerm2 中设置字体：`Preferences > Profiles > Text > Font` 选择安装的 Nerd Font。
-
-### 4. 安装 Neovim
+确保 `~/.local/bin` 在 `PATH` 中；Ubuntu 默认 Bash 可将下面一行加入 `~/.bashrc`，然后重新打开终端：
 
 ```bash
-brew install neovim
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-### 5. 安装 Neovide（可选，GUI 编辑器）
+确认实际运行的是新版本：
 
 ```bash
-brew install --cask neovide
+command -v nvim
+nvim --version | head -n 2
 ```
 
-### 6. 安装其他依赖工具
+如果电脑是 ARM64，请从官方安装说明选择对应的 `arm64` 包。
+
+### 3. 安装 Nerd Font（推荐）
+
+Nerd Font 用于显示状态栏、文件树和启动页图标。下载 Meslo Nerd Font 压缩包并安装到当前用户：
 
 ```bash
-# Ripgrep（用于文件搜索）
-brew install ripgrep
-
-# Node.js（用于某些 LSP 服务器）
-brew install node
-
-# LazyGit（Git 工具）
-brew install lazygit
-
-# Ruby（用于某些格式化工具）
-brew install ruby
-
-# im-select（输入法切换工具，macOS）
-# 访问 https://github.com/daipeihust/im-select
-# 下载 macOS 版本并放入 PATH（如 /usr/local/bin）
+mkdir -p ~/.local/share/fonts/Meslo
+curl -fLo /tmp/Meslo.zip \
+  https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip
+unzip -o /tmp/Meslo.zip -d ~/.local/share/fonts/Meslo
+fc-cache -f
 ```
 
-### 7. 配置 Neovim
+在终端设置中选择 **MesloLGS Nerd Font Mono**。如果终端图标缺失，先检查所选字体和 `fc-cache`，再重启终端。
+
+### 4.（可选）安装 Neovide
+
+Neovide 是独立的图形界面，不是使用本配置的必需项。Ubuntu/Linux 预编译包和安装方式请参阅 [Neovide Releases](https://github.com/neovide/neovide/releases)；安装后可在终端运行 `neovide`。Neovide 专用快捷键目前使用 macOS 的 Command 键映射，Ubuntu 下不保证可用。
+
+### 5. 获取 Ubuntu 配置并建立链接
 
 ```bash
-# 克隆或下载此仓库
-cd ~/dotfiles
-
-# 创建符号链接
-ln -s ~/dotfiles/nvim ~/.config/nvim
+git clone --branch forUbuntu https://github.com/dumbo1985/dotfiles.git ~/dotfiles
+mkdir -p ~/.config
+if [ -e ~/.config/nvim ] && [ ! -L ~/.config/nvim ]; then
+  mv ~/.config/nvim ~/.config/nvim.backup
+fi
+ln -sfn ~/dotfiles/nvim ~/.config/nvim
 ```
 
-### 8. 启动 Neovim
+如果已经克隆过仓库，进入 `~/dotfiles` 后运行 `git switch forUbuntu`，再执行链接命令即可。已有的真实配置目录会先备份为 `~/.config/nvim.backup`。
 
-首次启动 Neovim 时，插件会自动安装：
+### 6. 首次启动
 
 ```bash
 nvim
 ```
 
-等待插件安装完成（可能需要几分钟）。
+首次启动会通过 `lazy.nvim` 下载插件；Mason 随后会安装配置列表中的 LSP 和开发工具。安装完成后重启 Neovim。可在 Neovim 中运行 `:Lazy` 查看插件状态、`:Mason` 查看工具状态、`:LspInfo` 查看当前文件的 LSP 状态。
+
+C/C++ 项目建议生成 `compile_commands.json`，因为 clangd 配置会查找项目 `build/` 目录：
+
+```bash
+cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+```
+
+### 7.（可选）启用中文输入法
+
+本配置的 `im-select` 自动切换只在 macOS 上启用。Ubuntu 使用桌面输入法，不需要 Neovim 插件切换。若使用 Fcitx5/Rime，可安装：
+
+```bash
+sudo apt install fcitx5 fcitx5-rime fcitx5-config-qt im-config
+im-config -n fcitx5
+```
+
+注销并重新登录后，打开 Fcitx 5 配置工具并添加 Rime。系统输入法可在 Neovim 插入模式中正常使用，但 `<Esc>` 后自动切换英文的功能当前没有为 Ubuntu 配置。
 
 ## 📁 配置结构
 
@@ -463,7 +474,7 @@ Leader 键设置为 `<Space>`（空格键）
 | `<leader>tm` | 测试当前方法 | Python |
 | `<leader>ch` | 切换源文件/头文件 | C/C++ |
 
-### Neovide 特定快捷键
+### Neovide 特定快捷键（当前映射面向 macOS）
 
 | 快捷键 | 功能 | 模式 |
 |--------|------|------|
@@ -480,7 +491,7 @@ Leader 键设置为 `<Space>`（空格键）
 | `:IMToggle` | 手动切换输入法 |
 
 > 📍 配置：`lua/dengbo/core/input_method.lua`  
-> 💡 输入法会在进入/退出插入模式时自动切换
+> 💡 仅在 macOS 且 `im-select` 可用时自动切换。Ubuntu 使用桌面输入法；`:IMToggle` 不适用于当前 Ubuntu 配置。
 
 ### Which-Key 提示
 
@@ -507,12 +518,9 @@ Leader 键设置为 `<Space>`（空格键）
 2. 等待 Mason 安装 LSP 服务器和工具（首次可能需要较长时间）
 3. 主题会随机加载，每次启动可能不同
 
-### 输入法自动切换
+### 输入法
 
-配置已包含输入法自动切换功能：
-- 进入插入模式时，自动恢复上次使用的输入法
-- 退出插入模式时，自动切换到英文输入法
-- 使用 `:IMToggle` 命令手动切换输入法
+Ubuntu 使用 Fcitx5、IBus 等桌面输入法。当前 Neovim 配置没有启用 Linux 输入法自动切换；macOS 上才会在进入/退出插入模式时切换，并提供 `:IMToggle` 命令。
 
 ### 代码格式化
 
@@ -533,9 +541,9 @@ Leader 键设置为 `<Space>`（空格键）
 
 #### C/C++ 调试
 
-1. 确保已安装 `codelldb` 或 `cpptools`（Mason 会自动安装）
-2. 需要配置 `launch.json` 或使用适配器配置
-3. 查看 `plugins/nvim-dap-cpp.lua` 了解详细配置
+1. 安装系统 GDB：`sudo apt install gdb`。Mason 会安装 `cpptools` 调试适配器。
+2. 在 Neovim 中启动调试并选择 `Launch file with gdb` 配置。
+3. 查看 `plugins/nvim-dap-cpp.lua` 了解详细配置。当前其中的 LLDB 路径是 macOS 路径，Ubuntu 下不要选择 LLDB 配置。
 
 ### 自定义配置
 
@@ -550,12 +558,7 @@ Leader 键设置为 `<Space>`（空格键）
 
 ### 插件安装失败
 
-```bash
-# 清理插件缓存
-rm -rf ~/.local/share/nvim
-rm -rf ~/.local/state/nvim
-nvim  # 重新启动，插件会重新安装
-```
+先检查网络和外部依赖，再在 Neovim 中运行 `:Lazy sync` 重试插件安装；Mason 工具的错误日志可用 `:MasonLog` 查看。不要直接删除 `~/.local/share/nvim`，其中还包含已安装的插件和工具。若仅需重装某个 Mason 包，可在 `:Mason` 中选择该包，或运行 `:MasonUninstall <包名>` 后再运行 `:MasonInstall <包名>`。
 
 ### LSP 服务器未启动
 
@@ -563,11 +566,9 @@ nvim  # 重新启动，插件会重新安装
 2. 查看 LSP 日志：`:LspLog`
 3. 确保项目中有相应的配置文件（如 `pyproject.toml`、`tsconfig.json` 等）
 
-### 输入法切换不工作
+### Ubuntu 输入法无法在 Neovim 中切换
 
-1. 确保 `im-select` 已安装并在 PATH 中
-2. 测试命令：`im-select`（应该输出当前输入法）
-3. 检查 macOS 权限设置
+当前配置没有启用 Linux 的输入法自动切换。请确认 Fcitx5/IBus 已在 Ubuntu 桌面正常工作；Neovim 会使用系统当前输入法。
 
 ### 主题未加载
 
@@ -607,4 +608,4 @@ MIT License
 
 ---
 
-**注意**：本配置主要针对 macOS 系统。如需在 Ubuntu/Linux 上使用，可能需要调整部分配置（如输入法切换工具）。
+`forUbuntu` 分支的教程以 Ubuntu 24.04 为目标；`main` 分支中的安装说明和部分 Neovide/调试设置面向 macOS。

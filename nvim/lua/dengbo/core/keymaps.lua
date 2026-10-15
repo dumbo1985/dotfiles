@@ -177,3 +177,42 @@ end, { desc = "查找调试错误信息" })
 keymap.set("n", "<leader>ch", function()
 	vim.cmd("ClangdSwitchSourceHeader")
 end, { desc = "切换源文件/头文件" })
+
+---------------------
+-- ✨ 终端模式剪贴板 ✨
+---------------------
+-- 终端模式（toggleterm 浮窗内）粘贴：Ctrl+Shift+V
+-- 终端模式不能直接执行 "+p，必须先 <C-\><C-n> 退出终端输入模式，
+-- 用 gP（保持光标位置）插入系统剪贴板内容，再 i 回到输入模式。
+local function term_paste()
+	-- 若剪贴板为空则不做任何事，避免误插入
+	local clip = vim.fn.getreg("+")
+	if clip == nil or clip == "" then
+		return
+	end
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('gP', true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("i", true, false, true), "n", false)
+end
+
+-- 注意：Neovide 对 <C-S-字母> 的上报在部分系统/输入法下不可靠，
+-- 因此除 Ctrl+Shift+V 外，额外提供 Ctrl+V 入口。
+-- 备用键用 <leader>p 系列（终端模式下不存在同名映射，避免与
+-- normal 模式的 <leader>tp/<leader>tc 产生「同键不同模式」的困惑）。
+keymap.set("t", "<C-S-v>", term_paste, { desc = "终端粘贴系统剪贴板" })
+keymap.set("t", "<C-v>", term_paste, { desc = "终端粘贴系统剪贴板" })
+keymap.set("t", "<leader>pp", term_paste, { desc = "终端粘贴系统剪贴板" })
+
+-- 终端模式下的复制
+local function term_copy()
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('"+y', true, false, true), "n", false)
+end
+keymap.set("t", "<C-S-c>", term_copy, { desc = "终端复制到系统剪贴板" })
+keymap.set("t", "<leader>yy", term_copy, { desc = "终端复制到系统剪贴板" })
+
+-- 普通/插入模式下也统一 Ctrl+V 为「从系统剪贴板粘贴」
+-- （与终端保持一致，避免在不同模式下来回切换习惯）
+keymap.set({ "n", "v" }, "<C-v>", '"+P', { desc = "从系统剪贴板粘贴" })
+keymap.set("i", "<C-v>", '<ESC>l"+Pli', { desc = "从系统剪贴板粘贴" })
+

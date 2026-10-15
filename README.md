@@ -165,6 +165,8 @@ nvim/
 - **nvim-cmp** - 代码补全引擎
 - **telescope.nvim** - 模糊搜索
 - **nvim-treesitter** - 语法高亮和代码解析
+- **render-markdown.nvim** - 在 Neovim 中渲染 Markdown 标题、列表、引用、代码块和任务清单
+- **markdown-preview.nvim** - 在浏览器中实时预览 Markdown 文档
 
 ### UI 增强
 
@@ -331,6 +333,19 @@ Leader 键设置为 `<Space>`（空格键）
 > 📍 格式化配置：`lua/dengbo/plugins/formatting.lua`  
 > 📍 检查配置：`lua/dengbo/plugins/linting.lua`  
 > 💡 代码会在保存时自动格式化，在进入缓冲区、写入后、离开插入模式时自动检查
+
+### Markdown 写作与预览
+
+打开 `.md` 文件后会自动启用 Markdown 渲染和浏览器预览。渲染会把标题、列表、引用、代码块及任务清单显示为更易读的样式；原始 Markdown 语法仍可正常编辑。按 `<Space>` 可查看对应快捷键提示。
+
+| 快捷键 | 功能 |
+|--------|------|
+| `<leader>mt` | 切换 Neovim 内 Markdown 渲染 |
+| `<leader>mp` | 在浏览器中打开/关闭实时预览 |
+
+浏览器预览会随文档编辑更新，并在关闭 Neovim 时保持浏览器页面不自动关闭。首次使用会安装预览所需组件；需要 Node.js/npm（安装步骤已包含）。
+
+> 📍 配置：`nvim/lua/dengbo/plugins/markdown.lua`
 
 ### 调试（DAP）
 

@@ -196,12 +196,12 @@ local function term_paste()
 end
 
 -- 注意：Neovide 对 <C-S-字母> 的上报在部分系统/输入法下不可靠，
--- 因此除 Ctrl+Shift+V 外，额外提供 Ctrl+V 入口。
--- 备用键用 <leader>p 系列（终端模式下不存在同名映射，避免与
--- normal 模式的 <leader>tp/<leader>tc 产生「同键不同模式」的困惑）。
+-- 因此除 Ctrl+Shift+V 外，额外提供 <leader>pp 入口。
+-- 特意**不**占用 <C-v>：它在 normal 模式是原生「可视块模式」，
+-- 覆盖会牺牲列选择这一高频功能，得不偿失。
 keymap.set("t", "<C-S-v>", term_paste, { desc = "终端粘贴系统剪贴板" })
-keymap.set("t", "<C-v>", term_paste, { desc = "终端粘贴系统剪贴板" })
 keymap.set("t", "<leader>pp", term_paste, { desc = "终端粘贴系统剪贴板" })
+keymap.set("t", "<M-v>", term_paste, { desc = "终端粘贴系统剪贴板（Alt+V 备用）" })
 
 -- 终端模式下的复制
 local function term_copy()
@@ -210,9 +210,8 @@ local function term_copy()
 end
 keymap.set("t", "<C-S-c>", term_copy, { desc = "终端复制到系统剪贴板" })
 keymap.set("t", "<leader>yy", term_copy, { desc = "终端复制到系统剪贴板" })
+keymap.set("t", "<M-c>", term_copy, { desc = "终端复制到系统剪贴板（Alt+C 备用）" })
 
--- 普通/插入模式下也统一 Ctrl+V 为「从系统剪贴板粘贴」
--- （与终端保持一致，避免在不同模式下来回切换习惯）
-keymap.set({ "n", "v" }, "<C-v>", '"+P', { desc = "从系统剪贴板粘贴" })
-keymap.set("i", "<C-v>", '<ESC>l"+Pli', { desc = "从系统剪贴板粘贴" })
+-- 说明：<C-v> 在 normal 模式保留为原生「可视块模式」，不做覆盖。
+-- 普通/可视模式下从系统剪贴板粘贴请用 "+p；或使用 Neovide 的 <D-v>（仅 macOS）。
 

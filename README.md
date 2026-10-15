@@ -4,6 +4,8 @@
 
 > 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `main` 分支。
 
+[English](README.en.md) | **中文**
+
 ## 📋 目录
 
 - [功能特性](#功能特性)
@@ -512,6 +514,26 @@ Leader 键设置为 `<Space>`（空格键）
 
 > 📍 配置：`lua/dengbo/plugins/symbols-outline.lua`
 
+### 终端
+
+用 `Ctrl+Y` 呼出浮动终端（toggleterm）。
+
+| 快捷键 | 功能 | 模式 |
+|--------|------|------|
+| `<C-y>` | 切换终端浮窗 | Normal |
+| `<C-S-v>` | 粘贴系统剪贴板 | Terminal |
+| `<leader>pp` | 粘贴（备用） | Terminal |
+| `<M-v>` | 粘贴（Alt+V 备用） | Terminal |
+| `<C-S-c>` | 复制到系统剪贴板 | Terminal |
+| `<leader>yy` | 复制（备用） | Terminal |
+| `<M-c>` | 复制（Alt+C 备用） | Terminal |
+
+> 📍 配置：`lua/dengbo/plugins/toggleterm.lua` 与 `lua/dengbo/core/keymaps.lua`
+
+> 💡 **为什么不用 `Ctrl+V`？** normal 模式下 `<C-v>` 是 Neovim 原生的**可视块模式**（列选择），覆盖它会静默废掉这个高频功能，因此保留原样。普通/可视模式下从系统剪贴板粘贴请用 `"+p`。
+
+> 💡 **若 `Ctrl+Shift+V` 无反应**，可能是 Neovide 在你的环境里无法上报 `<C-S-字母>` 组合键，改用 `<leader>pp` 或 `<M-v>` 即可，效果完全相同。
+
 ### 其他功能
 
 | 快捷键 | 功能 | 模式/说明 |
@@ -682,8 +704,11 @@ Ubuntu 使用 Fcitx5、IBus 等桌面输入法，Neovim 直接跟随系统输入
 - ✅ 安装说明全面改写为 Ubuntu 24.04 流程，移除 macOS 专属步骤
 - ✅ 新增 FUSE 缺失时用 `--appimage-extract` 运行 AppImage 的通用方案
 - ✅ 新增 Markdown 渲染与浏览器预览（`<leader>mt` / `<leader>mp`）
+- ✅ 新增 Linux 终端剪贴板快捷键（toggleterm 浮窗内）
+- ✅ 修复 `vim.lsp.buf_get_clients` 弃用警告
 - ✅ 修复 Neovide 废弃选项 `neovide_transparency` → `neovide_opacity`
 - ✅ 更新 symbols-outline 图标至 Nerd Font v3 码点
+- ✅ 新增英文版文档（`README.en.md`）
 - ⚠️ 已知遗留：Neovide 的 `<D-*>` 快捷键、lldb 适配器路径仍为 macOS 配置（见对应章节）
 
 ### 早期优化（2024）

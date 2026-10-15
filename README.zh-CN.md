@@ -34,7 +34,12 @@
 
 - Ubuntu 24.04 LTS（以下命令以 x86-64 为例）
 - 可访问 GitHub 的网络
-- 建议使用 Neovim 0.10 或更新版本；Ubuntu 仓库中的版本可能落后于本配置使用的插件
+- **必须使用 Neovim 0.12 或更新版本** —— nvim-treesitter 跟随其 `main` 分支，该分支只支持 0.12+；Ubuntu 仓库中的版本可能落后于本配置使用的插件
+- **tree-sitter CLI 0.26.1+** —— 用于编译没有预编译包的 parser（如 C/C++）。Ubuntu 仓库里的版本太旧，需从 [tree-sitter 发布页](https://github.com/tree-sitter/tree-sitter/releases)安装：
+  ```bash
+  curl -fL -o ~/tree-sitter.gz https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.1/tree-sitter-linux-x64.gz
+  gunzip -f ~/tree-sitter.gz && mv ~/tree-sitter ~/.local/bin/tree-sitter && chmod +x ~/.local/bin/tree-sitter
+  ```
 - 支持真彩色的终端（如 GNOME Terminal、WezTerm）
 
 ### 1. 安装系统依赖

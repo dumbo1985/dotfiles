@@ -34,7 +34,12 @@ A personal Neovim configuration. The `forUbuntu` branch targets **Ubuntu 24.04**
 
 - Ubuntu 24.04 LTS (commands below assume x86-64)
 - Network access to GitHub
-- Neovim 0.10 or newer recommended; the version in the Ubuntu repositories may lag behind the plugins used here
+- **Neovim 0.12 or newer is required** — nvim-treesitter follows its `main` branch, which only supports 0.12+; the version in the Ubuntu repositories may lag behind the plugins used here
+- **tree-sitter CLI 0.26.1+** — needed to compile parsers without a prebuilt binary (C/C++, for example). The Ubuntu package is too old, install it from the [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases):
+  ```bash
+  curl -fL -o ~/tree-sitter.gz https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.1/tree-sitter-linux-x64.gz
+  gunzip -f ~/tree-sitter.gz && mv ~/tree-sitter ~/.local/bin/tree-sitter && chmod +x ~/.local/bin/tree-sitter
+  ```
 - A true-color terminal (e.g. GNOME Terminal, WezTerm)
 
 ### 1. Install system dependencies

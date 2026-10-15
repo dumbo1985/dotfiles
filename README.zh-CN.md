@@ -43,8 +43,11 @@
 sudo apt update
 sudo apt install -y git curl unzip build-essential ripgrep fd-find \
   python3 python3-venv python3-pip nodejs npm golang-go \
-  g++ gdb cmake shellcheck wl-clipboard xclip
+  g++ gdb cmake shellcheck wl-clipboard xclip \
+  universal-ctags global
 ```
+
+`universal-ctags`（提供 `ctags` 命令）与 `global`（GNU GLOBAL，提供 `gtags`）用于 **vim-gutentags** 生成符号索引，是"没有 LSP、也没有 `compile_commands.json`"的项目里的跳转兜底方案；如果不会打开这类项目，可以不装。
 
 `nodejs`/`npm` 与 `golang-go` 用于 JavaScript/TypeScript、Go 的语言工具以及 Markdown 浏览器预览；若只使用 C/C++ 和 Lua，可以不装，但 Mason 会对相应工具显示安装失败。`wl-clipboard` 和 `xclip` 分别提供 Wayland/X11 剪贴板支持（Neovim 的 `"+y`/`"+p` 依赖它们）。
 
@@ -252,6 +255,7 @@ nvim/
 - **nvim-lint** - 代码检查
 - **gitsigns.nvim** - Git 集成
 - **todo-comments.nvim** - TODO 高亮
+- **vim-gutentags** - 自动维护 ctags/gtags 符号索引（无 LSP 时的跳转兜底）
 
 ### 编辑增强
 
@@ -513,6 +517,25 @@ Leader 键设置为 `<Space>`（空格键）
 | `R` | 重置折叠 | 大纲窗口内 |
 
 > 📍 配置：`lua/dengbo/plugins/symbols-outline.lua`
+
+### 标签跳转（ctags / gtags）
+
+由 **vim-gutentags** 自动生成的符号索引。有 LSP 附着时 Neovim 会优先使用 LSP 的 `tagfunc`，所以这一套主要用于没有语言服务器、也没有 `compile_commands.json` 的项目。
+
+| 快捷键 | 功能 | 模式/说明 |
+|--------|------|------|
+| `<C-]>` | 跳转到光标下符号的定义 | Normal |
+| `<C-t>` | 跳回上一个位置（弹出标签栈） | Normal |
+| `g]` | 列出所有匹配项并选择 | Normal |
+| `<C-W>]` | 横向分屏跳转到定义 | Normal |
+| `:tag <name>` | 按名称跳转到符号 | 命令 |
+| `:ts <name>` | 搜索标签列表 | 命令 |
+| `:Telescope tags` | 模糊搜索全项目符号 | 命令 |
+| `:Telescope current_buffer_tags` | 模糊搜索当前文件符号 | 命令 |
+
+> 📍 配置：`lua/dengbo/plugins/gutentags.lua`
+> 💡 索引文件统一放在 `~/.cache/nvim/tags/`，不会写入你的项目；首次进入项目时生成，之后保存文件时后台增量更新。
+> 💡 想改用 GNU GLOBAL：把该文件中的 `vim.g.gutentags_modules` 改成 `{ "ctags", "gtags_cscope" }`。命令行用法：`gtags` 生成索引，`global -x <符号>` 查定义，`global -rx <符号>` 查引用。
 
 ### 终端
 

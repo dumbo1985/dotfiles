@@ -1,43 +1,43 @@
 # dotfiles
 
-个人 Neovim 配置文件集合。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。
+A personal Neovim configuration. The `forUbuntu` branch targets **Ubuntu 24.04** and includes LSP, debugging, formatting and completion setup; the `main` branch keeps the macOS configuration (including `im-select` input-method switching and Command-key mappings).
 
-> 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `main` 分支。
+> 📌 **Everything below assumes Ubuntu 24.04.** No macOS/Homebrew instructions are included on this branch. If you are on macOS, switch to the `main` branch.
 
-[English](README.en.md) | **中文**
+**English** | [中文](README.zh-CN.md)
 
-## 📋 目录
+## 📋 Table of Contents
 
-- [功能特性](#功能特性)
-- [安装步骤](#安装步骤)
-- [配置结构](#配置结构)
-- [主要插件](#主要插件)
-- [键位映射](#键位映射)
-- [使用说明](#使用说明)
-- [故障排除](#故障排除)
+- [Features](#-features)
+- [Installation](#-installation)
+- [Layout](#-layout)
+- [Main Plugins](#-main-plugins)
+- [Keymaps](#-keymaps)
+- [Usage](#-usage)
+- [Troubleshooting](#-troubleshooting)
 
-## ✨ 功能特性
+## ✨ Features
 
-- 🎨 **多主题支持**：随机加载主题（tokyonight, kanagawa, catppuccin, rose-pine, sonokai, onenord）
-- 🔧 **LSP 支持**：完整的语言服务器协议支持，自动安装和配置
-- 🐛 **调试功能**：支持 Python、C/C++、Go 等语言的调试
-- 📝 **代码格式化**：自动格式化，支持多种语言
-- 🔍 **模糊搜索**：Telescope 强大的文件搜索和内容搜索
-- 🌳 **语法高亮**：Tree-sitter 提供更好的语法高亮
-- 📋 **自动补全**：nvim-cmp 提供智能代码补全
-- 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `main` 分支启用
-- 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
+- 🎨 **Multiple colorschemes**: randomly loaded (tokyonight, kanagawa, catppuccin, rose-pine, sonokai, onenord)
+- 🔧 **LSP support**: full language-server integration with automatic install and setup
+- 🐛 **Debugging**: for Python, C/C++, Go and more
+- 📝 **Formatting**: automatic formatting for many languages
+- 🔍 **Fuzzy finding**: Telescope for files and content
+- 🌳 **Syntax highlighting**: Tree-sitter
+- 📋 **Completion**: nvim-cmp
+- 🎯 **Input method**: Ubuntu uses the desktop IME (Fcitx5/Rime, etc.) with no plugin switching; `im-select` auto-switching is `main`-branch only
+- 🖥️ **Neovide support**: tuned for the Neovide GUI
 
-## 🚀 安装步骤
+## 🚀 Installation
 
-### 前置要求
+### Requirements
 
-- Ubuntu 24.04 LTS（以下命令以 x86-64 为例）
-- 可访问 GitHub 的网络
-- 建议使用 Neovim 0.10 或更新版本；Ubuntu 仓库中的版本可能落后于本配置使用的插件
-- 支持真彩色的终端（如 GNOME Terminal、WezTerm）
+- Ubuntu 24.04 LTS (commands below assume x86-64)
+- Network access to GitHub
+- Neovim 0.10 or newer recommended; the version in the Ubuntu repositories may lag behind the plugins used here
+- A true-color terminal (e.g. GNOME Terminal, WezTerm)
 
-### 1. 安装系统依赖
+### 1. Install system dependencies
 
 ```bash
 sudo apt update
@@ -46,13 +46,13 @@ sudo apt install -y git curl unzip build-essential ripgrep fd-find \
   g++ gdb cmake shellcheck wl-clipboard xclip
 ```
 
-`nodejs`/`npm` 与 `golang-go` 用于 JavaScript/TypeScript、Go 的语言工具以及 Markdown 浏览器预览；若只使用 C/C++ 和 Lua，可以不装，但 Mason 会对相应工具显示安装失败。`wl-clipboard` 和 `xclip` 分别提供 Wayland/X11 剪贴板支持（Neovim 的 `"+y`/`"+p` 依赖它们）。
+`nodejs`/`npm` and `golang-go` are needed for the JavaScript/TypeScript and Go tooling as well as the Markdown browser preview; you can skip them if you only use C/C++ and Lua, but Mason will report installation failures for the related tools. `wl-clipboard` and `xclip` provide Wayland/X11 clipboard support (Neovim's `"+y`/`"+p` depend on them).
 
-另外，本配置的格式化器包含 `beautysh`、`yamlfix`、`taplo`、`htmlbeautifier` 等工具，这些由 Mason 自动安装，无需 apt；但 `stylua` 格式化 Lua 需要系统中有对应可执行文件，Mason 会一并处理。
+Note that `beautysh`, `yamlfix`, `taplo`, `htmlbeautifier` and friends are installed by Mason and need no apt package; `stylua` for Lua is handled by Mason as well.
 
-### 2. 安装 Neovim
+### 2. Install Neovim
 
-推荐使用 Neovim 官方 Linux 发布包，而不是 Ubuntu 24.04 仓库中可能较旧的版本。先在 Neovim 官方 [Linux 安装说明](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux)中确认当前发布包名称。以下以 x86-64 tar 包为例：
+Use the official Linux release rather than the possibly outdated version in the Ubuntu 24.04 repositories. Check the current asset name in Neovim's [Linux install instructions](https://github.com/neovim/neovim/blob/master/INSTALL.md#linux) first. The example below uses the x86-64 tarball:
 
 ```bash
 mkdir -p ~/.local/opt ~/.local/bin
@@ -62,26 +62,26 @@ tar -xzf /tmp/nvim-linux-x86_64.tar.gz -C ~/.local/opt
 ln -sfn ~/.local/opt/nvim-linux-x86_64/bin/nvim ~/.local/bin/nvim
 ```
 
-确保 `~/.local/bin` 在 `PATH` 中；Ubuntu 默认 Bash 可将下面一行加入 `~/.bashrc`，然后重新打开终端：
+Make sure `~/.local/bin` is on your `PATH`. On Ubuntu's default Bash, add this line to `~/.bashrc` and reopen the terminal:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-确认实际运行的是新版本：
+Confirm the new version is actually the one running:
 
 ```bash
 command -v nvim
 nvim --version | head -n 2
 ```
 
-如果电脑是 ARM64，请从官方安装说明选择对应的 `arm64` 包。
+On ARM64, pick the corresponding `arm64` asset from the official instructions.
 
-> 💡 若下载到的是 **Neovim AppImage**，在 FUSE 不可用的机器上同样需要按上面第 4 步的 `--appimage-extract` 方式解压后运行，否则 `nvim` 命令会直接报 FUSE 挂载错误。
+> 💡 If you downloaded the **Neovim AppImage** instead, hosts without FUSE also need the `--appimage-extract` approach described in step 4 — otherwise the `nvim` command fails with a FUSE mount error.
 
-### 3. 安装 Nerd Font（推荐）
+### 3. Install a Nerd Font (recommended)
 
-Nerd Font 用于显示状态栏、文件树和启动页图标。下载 Meslo Nerd Font 压缩包并安装到当前用户：
+Nerd Fonts provide the icons used in the statusline, file tree and dashboard. Install Meslo Nerd Font for the current user:
 
 ```bash
 mkdir -p ~/.local/share/fonts/Meslo
@@ -91,37 +91,37 @@ unzip -o /tmp/Meslo.zip -d ~/.local/share/fonts/Meslo
 fc-cache -f
 ```
 
-在终端设置中选择 **MesloLGS Nerd Font Mono**。如果终端图标缺失，先检查所选字体和 `fc-cache`，再重启终端。
+Select **MesloLGS Nerd Font Mono** in your terminal settings. If icons are missing, check the selected font and `fc-cache`, then restart the terminal.
 
-### 4.（可选）安装 Neovide
+### 4. (Optional) Install Neovide
 
-Neovide 是独立的图形界面，不是使用本配置的必需项。Ubuntu/Linux 可在 [Neovide Releases](https://github.com/neovide/neovide/releases) 下载 AppImage 或压缩包，安装后运行 `neovide` 即可。
+Neovide is a separate GUI and is not required to use this configuration. On Ubuntu/Linux, grab the AppImage or archive from [Neovide Releases](https://github.com/neovide/neovide/releases), then run `neovide`.
 
-> ⚠️ **务必先确认 FUSE 可用**。AppImage 依赖 FUSE 挂载，若系统缺少 `/dev/fuse`（内核未加载 `fuse` 模块，或处于容器/受限环境中），直接执行 AppImage 会报 `Cannot mount AppImage, please check your FUSE setup`。检查与修复：
+> ⚠️ **Verify FUSE first.** AppImages are mounted through FUSE; on hosts without `/dev/fuse` (kernel module not loaded, or a container/restricted environment) running the AppImage directly fails with `Cannot mount AppImage, please check your FUSE setup`. To check and fix:
 >
 > ```bash
-> ls /dev/fuse                    # 无输出说明 FUSE 不可用
-> sudo modprobe fuse              # 尝试加载内核模块
-> sudo apt install -y libfuse2    # AppImage 需要 FUSE 2 兼容层
+> ls /dev/fuse                    # no output means FUSE is unavailable
+> sudo modprobe fuse              # try loading the kernel module
+> sudo apt install -y libfuse2    # AppImages need the FUSE 2 compatibility layer
 > ```
 >
-> 如果加载模块后仍无 `/dev/fuse`（常见于容器或精简内核），可以改用**免 FUSE 的解压方式**运行：
+> If `/dev/fuse` is still missing after loading the module (common in containers or trimmed kernels), fall back to **extracting the AppImage** instead of mounting it:
 >
 > ```bash
 > mkdir -p ~/Applications/neovide && cd ~/Applications/neovide
 > cp ~/Downloads/neovide.AppImage .
 > chmod +x neovide.AppImage
-> ./neovide.AppImage --appimage-extract     # 解压出 squashfs-root/
+> ./neovide.AppImage --appimage-extract     # unpacks squashfs-root/
 > ~/Applications/neovide/squashfs-root/usr/bin/neovide --version
 > ```
 >
-> 确认可用后软链到 `~/.local/bin`：
+> Once it works, symlink it into `~/.local/bin`:
 >
 > ```bash
 > ln -sf ~/Applications/neovide/squashfs-root/usr/bin/neovide ~/.local/bin/neovide
 > ```
 >
-> 如需在应用菜单里搜索启动，可再创建一个桌面入口：
+> To launch it from the application menu, also create a desktop entry:
 >
 > ```bash
 > mkdir -p ~/.local/share/applications ~/.local/share/icons/hicolor/scalable/apps
@@ -139,17 +139,17 @@ Neovide 是独立的图形界面，不是使用本配置的必需项。Ubuntu/Li
 > update-desktop-database ~/.local/share/applications
 > ```
 >
-> 这个 `--appimage-extract` 技巧对**任何** AppImage 都适用（例如 Neovim 官方 AppImage、其他 GUI 工具），是 FUSE 不可用时的通用兜底方案。
+> The `--appimage-extract` trick works for **any** AppImage (the official Neovim AppImage, other GUI tools) and is the general fallback when FUSE is unavailable.
 
-Neovide 专用快捷键使用 macOS 的 Command 键映射（`<D-s>` 等），在 Ubuntu 下这些映射不会生效，请改用下文的通用快捷键（如 `<leader>ww` 保存）。
+Neovide's dedicated shortcuts use the macOS Command modifier (`<D-s>` and friends). These do not fire on Ubuntu — use the general shortcuts below instead (e.g. `<leader>ww` to save).
 
-如果 Neovide 启动时报 `Failed to create OpenGL context`，说明显卡驱动或 GL 环境有问题，可先用软件渲染验证：
+If Neovide fails with `Failed to create OpenGL context`, your GPU driver or GL environment is at fault. Verify with software rendering first:
 
 ```bash
 LIBGL_ALWAYS_SOFTWARE=1 neovide
 ```
 
-### 5. 获取 Ubuntu 配置并建立链接
+### 5. Clone the Ubuntu config and link it
 
 ```bash
 git clone --branch forUbuntu https://github.com/dumbo1985/dotfiles.git ~/dotfiles
@@ -160,110 +160,110 @@ fi
 ln -sfn ~/dotfiles/nvim ~/.config/nvim
 ```
 
-如果已经克隆过仓库，进入 `~/dotfiles` 后运行 `git switch forUbuntu`，再执行链接命令即可。已有的真实配置目录会先备份为 `~/.config/nvim.backup`。
+If you already cloned the repo, `cd ~/dotfiles && git switch forUbuntu` and then run the linking commands. An existing real config directory is backed up to `~/.config/nvim.backup` first.
 
-### 6. 首次启动
+### 6. First launch
 
 ```bash
 nvim
 ```
 
-首次启动会通过 `lazy.nvim` 下载插件；Mason 随后会安装配置列表中的 LSP 和开发工具。安装完成后重启 Neovim。可在 Neovim 中运行 `:Lazy` 查看插件状态、`:Mason` 查看工具状态、`:LspInfo` 查看当前文件的 LSP 状态。
+On first launch `lazy.nvim` downloads the plugins, and Mason then installs the LSP servers and tools listed in the config. Restart Neovim when it finishes. Useful checks: `:Lazy` for plugin status, `:Mason` for tool status, `:LspInfo` for the LSP state of the current file.
 
-C/C++ 项目建议生成 `compile_commands.json`，因为 clangd 配置会查找项目 `build/` 目录：
+For C/C++ projects, generate `compile_commands.json` — the clangd setup looks for it in the project's `build/` directory:
 
 ```bash
 cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 ```
 
-### 7.（可选）启用中文输入法
+### 7. (Optional) Enable a Chinese input method
 
-Ubuntu 使用桌面输入法，Neovim 会自动跟随系统当前输入法，不需要额外插件。若使用 Fcitx5/Rime，可安装：
+Ubuntu uses the desktop IME; Neovim simply follows the system input method and needs no extra plugin. With Fcitx5/Rime:
 
 ```bash
 sudo apt install fcitx5 fcitx5-rime fcitx5-config-qt im-config
 im-config -n fcitx5
 ```
 
-注销并重新登录后，打开 Fcitx 5 配置工具并添加 Rime。另外建议安装剪贴板支持（若第 1 步未装）：
+Log out and back in, then open the Fcitx 5 config tool and add Rime. Also make sure the clipboard helpers are present (if you skipped step 1):
 
 ```bash
-sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
+sudo apt install -y wl-clipboard xclip    # Wayland / X11 clipboard
 ```
 
-> 💡 macOS 上依靠 `im-select` 在离开插入模式时自动切回英文的能力**未在 `forUbuntu` 分支启用**，如需该功能请使用 `main` 分支或自行移植。Ubuntu 下可在 Fcitx5 中设置「中英文切换」快捷键（如 `Ctrl+Space`）来手动切换。
+> 💡 The macOS-only ability to switch back to English on `InsertLeave` via `im-select` is **not enabled on the `forUbuntu` branch**. If you want it, use the `main` branch or port it yourself. On Ubuntu you can bind an Fcitx5 "toggle Chinese/English" key (e.g. `Ctrl+Space`) instead.
 
-## 📁 配置结构
+## 📁 Layout
 
 ```
 nvim/
-├── init.lua                    # 入口文件
-├── lazy-lock.json              # 插件版本锁定文件
+├── init.lua                    # entry point
+├── lazy-lock.json              # plugin version lockfile
 └── lua/dengbo/
-    ├── core/                   # 核心配置
-    │   ├── init.lua           # 核心配置入口
-    │   ├── options.lua        # Neovim 选项配置
-    │   ├── keymaps.lua         # 全局键位映射
-    │   ├── neovide.lua         # Neovide GUI 配置
-    │   └── input_method.lua    # 输入法自动切换（仅 macOS 生效，Ubuntu 下不会被加载）
-    ├── platform/               # 平台相关模块
-    │   └── input_method.lua    # 输入法切换的 macOS 实现（备用）
-    ├── lazy.lua                # 插件管理和主题加载
-    └── plugins/                # 插件配置
-        ├── init.lua           # 基础插件
-        ├── lsp/               # LSP 相关插件
-        │   ├── mason.lua      # Mason 包管理器
-        │   └── lspconfig.lua   # LSP 服务器配置
-        ├── nvim-cmp.lua       # 代码补全
-        ├── telescope.lua      # 模糊搜索
-        ├── treesitter.lua      # 语法高亮
-        ├── nvim-dap.lua       # 调试器
-        ├── formatting.lua     # 代码格式化
-        ├── linting.lua        # 代码检查
-        └── ...                # 其他插件配置
+    ├── core/                   # core config
+    │   ├── init.lua           # core entry
+    │   ├── options.lua        # Neovim options
+    │   ├── keymaps.lua        # global keymaps
+    │   ├── neovide.lua        # Neovide GUI config
+    │   └── input_method.lua   # IME auto-switching (macOS only; never loaded on Ubuntu)
+    ├── platform/               # platform-specific modules
+    │   └── input_method.lua    # macOS IME implementation (kept as a spare)
+    ├── lazy.lua                # plugin manager and colorscheme loading
+    └── plugins/                # plugin configs
+        ├── init.lua           # base plugins
+        ├── lsp/               # LSP plugins
+        │   ├── mason.lua      # Mason package manager
+        │   └── lspconfig.lua   # LSP server config
+        ├── nvim-cmp.lua       # completion
+        ├── telescope.lua      # fuzzy finder
+        ├── treesitter.lua      # syntax highlighting
+        ├── nvim-dap.lua       # debugger
+        ├── formatting.lua     # formatting
+        ├── linting.lua        # linting
+        └── ...                # other plugin configs
 ```
 
-## 🔌 主要插件
+## 🔌 Main Plugins
 
-### 核心功能
+### Core
 
-- **lazy.nvim** - 插件管理器
-- **nvim-lspconfig** - LSP 配置
-- **mason.nvim** - LSP/DAP/格式化工具管理器
-- **nvim-cmp** - 代码补全引擎
-- **telescope.nvim** - 模糊搜索
-- **nvim-treesitter** - 语法高亮和代码解析
-- **render-markdown.nvim** - 在 Neovim 中渲染 Markdown 标题、列表、引用、代码块和任务清单
-- **markdown-preview.nvim** - 在浏览器中实时预览 Markdown 文档
+- **lazy.nvim** - plugin manager
+- **nvim-lspconfig** - LSP configuration
+- **mason.nvim** - LSP/DAP/formatter installer
+- **nvim-cmp** - completion engine
+- **telescope.nvim** - fuzzy finder
+- **nvim-treesitter** - syntax highlighting and parsing
+- **render-markdown.nvim** - renders Markdown headings, lists, quotes, code blocks and checkboxes in Neovim
+- **markdown-preview.nvim** - live Markdown preview in the browser
 
-### UI 增强
+### UI
 
-- **alpha-nvim** - 启动界面
-- **bufferline.nvim** - 缓冲区标签栏
-- **lualine.nvim** - 状态栏
-- **nvim-tree** - 文件树
-- **which-key.nvim** - 键位提示
-- **noice.nvim** - 现代化 UI
+- **alpha-nvim** - dashboard
+- **bufferline.nvim** - buffer tabline
+- **lualine.nvim** - statusline
+- **nvim-tree** - file tree
+- **which-key.nvim** - keymap hints
+- **noice.nvim** - modern UI
 
-### 开发工具
+### Development
 
-- **nvim-dap** - 调试器
-- **conform.nvim** - 代码格式化
-- **nvim-lint** - 代码检查
-- **gitsigns.nvim** - Git 集成
-- **todo-comments.nvim** - TODO 高亮
+- **nvim-dap** - debugger
+- **conform.nvim** - formatting
+- **nvim-lint** - linting
+- **gitsigns.nvim** - Git integration
+- **todo-comments.nvim** - TODO highlighting
 
-### 编辑增强
+### Editing
 
-- **nvim-autopairs** - 自动配对括号
-- **nvim-surround** - 快速操作包围符号
-- **Comment.nvim** - 代码注释
-- **lightspeed.nvim** - 快速跳转（需要输入字符）
-- **flash.nvim** - 一键全窗口跳转（无需输入字符，使用 `<leader>j`）
+- **nvim-autopairs** - auto-close brackets
+- **nvim-surround** - surround manipulation
+- **Comment.nvim** - commenting
+- **lightspeed.nvim** - fast motion (requires typing characters)
+- **flash.nvim** - one-key window-wide jump (no typing; `<leader>j`)
 
-### 主题
+### Colorschemes
 
-支持的主题（随机加载）：
+Randomly loaded:
 - tokyonight
 - kanagawa
 - catppuccin
@@ -271,469 +271,469 @@ nvim/
 - sonokai
 - onenord
 
-## ⌨️ 键位映射
+## ⌨️ Keymaps
 
-### Leader 键
+### Leader key
 
-Leader 键设置为 `<Space>`（空格键）
+Leader is `<Space>`.
 
-> 💡 **提示**：在 Neovim 中按 `<Space>` 后稍等片刻，会显示所有可用的快捷键提示（需要 which-key 插件）
+> 💡 **Tip**: press `<Space>` and pause briefly to see every available shortcut (provided by which-key).
 
-### 基础操作
+### Basics
 
-| 快捷键 | 功能 | 模式 |
+| Key | Action | Mode |
 |--------|------|------|
-| `<leader>ww` | 保存文件 | Normal |
-| `<leader>wq` | 保存并退出 | Normal |
-| `<leader>qq` | 强制退出不保存 | Normal |
-| `jk` / `ii` | 退出插入模式 | Insert |
-| `n` | 跳转下一个搜索项并居中 | Normal |
-| `N` | 跳转上一个搜索项并居中 | Normal |
-| `G` | 跳转文件末尾并居中 | Normal |
-| `<C-d>` | 向下滚动并居中 | Normal |
-| `<C-u>` | 向上滚动并居中 | Normal |
-| `<leader>nh` | 清除搜索高亮 | Normal |
-| `gx` | 打开光标下的链接 | Normal |
-| `<leader>+` | 数字加一 | Normal |
-| `<leader>-` | 数字减一 | Normal |
+| `<leader>ww` | Save file | Normal |
+| `<leader>wq` | Save and quit | Normal |
+| `<leader>qq` | Force quit without saving | Normal |
+| `jk` / `ii` | Leave insert mode | Insert |
+| `n` | Next search hit, centered | Normal |
+| `N` | Previous search hit, centered | Normal |
+| `G` | Go to end of file, centered | Normal |
+| `<C-d>` | Scroll down, centered | Normal |
+| `<C-u>` | Scroll up, centered | Normal |
+| `<leader>nh` | Clear search highlight | Normal |
+| `gx` | Open the link under the cursor | Normal |
+| `<leader>+` | Increment number | Normal |
+| `<leader>-` | Decrement number | Normal |
 
-### 文件搜索（Telescope）
+### File search (Telescope)
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>ff` | 查找文件 |
-| `<leader>fr` | 最近打开的文件 |
-| `<leader>fs` | 全局搜索字符串 |
-| `<leader>fc` | 搜索光标下的字符串 |
-| `<leader>ft` | 查找 TODO |
+| `<leader>ff` | Find files |
+| `<leader>fr` | Recently opened files |
+| `<leader>fs` | Search string project-wide |
+| `<leader>fc` | Search the string under the cursor |
+| `<leader>ft` | Find TODOs |
 
-**Telescope 内部**（在 Telescope 窗口中）：
-| 快捷键 | 功能 |
+**Inside Telescope**:
+| Key | Action |
 |--------|------|
-| `<C-k>` | 上一个结果 |
-| `<C-j>` | 下一个结果 |
-| `<C-q>` | 发送选中项到 quickfix 列表并打开 |
+| `<C-k>` | Previous result |
+| `<C-j>` | Next result |
+| `<C-q>` | Send selection to quickfix and open it |
 
-> 📍 配置：`lua/dengbo/plugins/telescope.lua`
+> 📍 Config: `lua/dengbo/plugins/telescope.lua`
 
-### 文件树（NvimTree）
+### File tree (NvimTree)
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>ee` | 切换文件树 |
-| `<leader>ec` | 收起文件树 |
-| `<leader>er` | 刷新文件树 |
-| `<leader>eo` | 聚焦文件树 |
-| `<leader>ef` | 在文件树中定位当前文件 |
+| `<leader>ee` | Toggle file tree |
+| `<leader>ec` | Collapse file tree |
+| `<leader>er` | Refresh file tree |
+| `<leader>eo` | Focus file tree |
+| `<leader>ef` | Reveal current file in tree |
 
-### 缓冲区/标签页管理
+### Buffers and tabs
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>td` | 关闭当前缓冲区但保留标签页 |
-| `<leader>tl` | 列出所有缓冲区（Telescope） |
-| `<leader>to` | 打开新标签页 |
-| `<leader>tx` | 关闭当前标签页 |
-| `<leader>tf` | 当前缓冲区新开标签页 |
-| `<leader>tp` | 切换到上一个标签页（BufferLine） |
-| `<leader>tn` | 切换到下一个标签页（BufferLine） |
-| `<leader>t]` | 切换到下一个标签页（原生） |
-| `<leader>t[` | 切换到上一个标签页（原生） |
-| `<leader>th` | 缓冲区向左移动 |
-| `<leader>tr` | 缓冲区向右移动 |
+| `<leader>td` | Close buffer, keep the tab |
+| `<leader>tl` | List all buffers (Telescope) |
+| `<leader>to` | Open a new tab |
+| `<leader>tx` | Close current tab |
+| `<leader>tf` | Open current buffer in a new tab |
+| `<leader>tp` | Previous tab (BufferLine) |
+| `<leader>tn` | Next tab (BufferLine) |
+| `<leader>t]` | Next tab (native) |
+| `<leader>t[` | Previous tab (native) |
+| `<leader>th` | Move buffer left |
+| `<leader>tr` | Move buffer right |
 
-### 分屏管理
+### Splits
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>sv` | 垂直分屏 |
-| `<leader>sh` | 水平分屏 |
-| `<leader>se` | 使分屏大小相等 |
-| `<leader>sx` | 关闭当前分屏 |
-| `<leader>sj` | 减小分屏高度 |
-| `<leader>sk` | 增加分屏高度 |
-| `<leader>sl` | 增加分屏宽度 |
-| `<leader>ss` | 减小分屏宽度 |
-| `<leader>sm` | 切换最大化窗口 |
-| `,w` | 选择窗口（Window Picker） |
-| `,W` | 交换两个窗口（Window Picker） |
+| `<leader>sv` | Vertical split |
+| `<leader>sh` | Horizontal split |
+| `<leader>se` | Equalize split sizes |
+| `<leader>sx` | Close current split |
+| `<leader>sj` | Decrease split height |
+| `<leader>sk` | Increase split height |
+| `<leader>sl` | Increase split width |
+| `<leader>ss` | Decrease split width |
+| `<leader>sm` | Toggle maximize window |
+| `,w` | Pick a window (Window Picker) |
+| `,W` | Swap two windows (Window Picker) |
 
-> 📍 Window Picker 配置：`lua/dengbo/plugins/window-picker.lua`
+> 📍 Window Picker config: `lua/dengbo/plugins/window-picker.lua`
 
-### LSP（语言服务器协议）
+### LSP
 
-> ⚠️ **注意**：以下快捷键仅在 LSP 客户端激活时生效（buffer-local）
+> ⚠️ **Note**: these are buffer-local and only active while an LSP client is attached.
 
-| 快捷键 | 功能 | 模式 |
+| Key | Action | Mode |
 |--------|------|------|
-| `K` | 显示悬停信息 | Normal |
-| `gd` | 跳转到定义 | Normal |
-| `gD` | 跳转到声明 | Normal |
-| `gi` | 跳转到实现 | Normal |
-| `gt` | 跳转到类型定义 | Normal |
-| `gr` | 查找引用（Telescope） | Normal |
-| `gs` | 函数签名提示 | Normal |
-| `rr` | 重命名 | Normal |
-| `<leader>cf` | 格式化代码 | Normal |
-| `<leader>cf` | 格式化选中内容 | Visual |
-| `ga` | 代码操作 | Normal |
-| `tr` | 文档符号列表 | Normal |
+| `K` | Hover information | Normal |
+| `gd` | Go to definition | Normal |
+| `gD` | Go to declaration | Normal |
+| `gi` | Go to implementation | Normal |
+| `gt` | Go to type definition | Normal |
+| `gr` | Find references (Telescope) | Normal |
+| `gs` | Signature help | Normal |
+| `rr` | Rename | Normal |
+| `<leader>cf` | Format code | Normal |
+| `<leader>cf` | Format selection | Visual |
+| `ga` | Code action | Normal |
+| `tr` | Document symbols | Normal |
 
-> 📍 配置：`lua/dengbo/plugins/lsp/lspconfig.lua`
+> 📍 Config: `lua/dengbo/plugins/lsp/lspconfig.lua`
 
-### 诊断（Diagnostics）
+### Diagnostics
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `gl` | 显示诊断信息（浮动窗口） |
-| `gp` | 跳转到上一个诊断 |
-| `gn` | 跳转到下一个诊断 |
-| `<leader>en` | 跳转到下一个错误（仅错误） |
-| `<leader>ep` | 跳转到上一个错误（仅错误） |
+| `gl` | Show diagnostics (float) |
+| `gp` | Previous diagnostic |
+| `gn` | Next diagnostic |
+| `<leader>en` | Next error (errors only) |
+| `<leader>ep` | Previous error (errors only) |
 
-### 代码格式化与检查
+### Formatting and linting
 
-| 快捷键 | 功能 | 模式 |
+| Key | Action | Mode |
 |--------|------|------|
-| `<leader>mp` | 手动格式化文件或选中内容 | Normal/Visual |
-| `<leader>l` | 触发当前文件的代码检查 | Normal |
+| `<leader>mp` | Format file or selection | Normal/Visual |
+| `<leader>l` | Lint current file | Normal |
 
-> 📍 格式化配置：`lua/dengbo/plugins/formatting.lua`  
-> 📍 检查配置：`lua/dengbo/plugins/linting.lua`  
-> 💡 代码会在保存时自动格式化，在进入缓冲区、写入后、离开插入模式时自动检查
+> 📍 Formatting config: `lua/dengbo/plugins/formatting.lua`  
+> 📍 Linting config: `lua/dengbo/plugins/linting.lua`  
+> 💡 Code is formatted on save and linted on buffer enter, after write, and on leaving insert mode.
 
-### Markdown 写作与预览
+### Markdown writing and preview
 
-打开 `.md` 文件后会自动启用 Markdown 渲染和浏览器预览。渲染会把标题、列表、引用、代码块及任务清单显示为更易读的样式；原始 Markdown 语法仍可正常编辑。按 `<Space>` 可查看对应快捷键提示。
+Opening a `.md` file enables Markdown rendering and browser preview. Rendering styles headings, lists, quotes, code blocks and checkboxes for readability while the raw Markdown stays editable. Press `<Space>` to see the related shortcuts.
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>mt` | 切换 Neovim 内 Markdown 渲染 |
-| `<leader>mp` | 在浏览器中打开/关闭实时预览 |
+| `<leader>mt` | Toggle in-editor Markdown rendering |
+| `<leader>mp` | Toggle live browser preview |
 
-浏览器预览会随文档编辑更新，并在关闭 Neovim 时保持浏览器页面不自动关闭。首次使用会安装预览所需组件；需要 Node.js/npm（安装步骤已包含）。
+The browser preview updates as you edit and stays open when Neovim exits. First use installs the preview components; Node.js/npm is required (covered in the install steps).
 
-> 📍 配置：`nvim/lua/dengbo/plugins/markdown.lua`
+> 📍 Config: `nvim/lua/dengbo/plugins/markdown.lua`
 
-### 调试（DAP）
+### Debugging (DAP)
 
-| 快捷键 | 功能 | 分类 |
+| Key | Action | Category |
 |--------|------|------|
-| `<leader>db` | 切换断点 | 断点管理 |
-| `<leader>bc` | 设置条件断点 | 断点管理 |
-| `<leader>bl` | 设置日志点 | 断点管理 |
-| `<leader>br` | 清除所有断点 | 断点管理 |
-| `<leader>ba` | 列出所有断点（Telescope） | 断点管理 |
-| `<leader>dc` | 继续运行 | 调试控制 |
-| `<leader>dj` | 单步跳过（Step Over） | 调试控制 |
-| `<leader>dk` | 单步进入（Step Into） | 调试控制 |
-| `<leader>do` | 跳出函数（Step Out） | 调试控制 |
-| `<leader>dd` | 断开调试 | 调试控制 |
-| `<leader>dt` | 结束调试 | 调试控制 |
-| `<leader>dl` | 运行上一次调试 | 调试控制 |
-| `<leader>dp` | 切换 REPL | 调试控制 |
-| `<leader>di` | 调试悬停变量 | 调试信息 |
-| `<leader>d?` | 浮动显示变量作用域 | 调试信息 |
-| `<leader>df` | 查看调用栈（Telescope） | 调试信息 |
-| `<leader>dh` | 查看调试命令（Telescope） | 调试信息 |
-| `<leader>de` | 查找调试错误信息（Telescope） | 调试信息 |
-| `<leader>de` | 评估表达式（在 DAP UI 中） | Visual 模式 |
+| `<leader>db` | Toggle breakpoint | Breakpoints |
+| `<leader>bc` | Set conditional breakpoint | Breakpoints |
+| `<leader>bl` | Set log point | Breakpoints |
+| `<leader>br` | Clear all breakpoints | Breakpoints |
+| `<leader>ba` | List all breakpoints (Telescope) | Breakpoints |
+| `<leader>dc` | Continue | Control |
+| `<leader>dj` | Step over | Control |
+| `<leader>dk` | Step into | Control |
+| `<leader>do` | Step out | Control |
+| `<leader>dd` | Disconnect | Control |
+| `<leader>dt` | Terminate | Control |
+| `<leader>dl` | Run last debug session | Control |
+| `<leader>dp` | Toggle REPL | Control |
+| `<leader>di` | Hover a variable | Inspection |
+| `<leader>d?` | Float variable scopes | Inspection |
+| `<leader>df` | Call stack (Telescope) | Inspection |
+| `<leader>dh` | Debug commands (Telescope) | Inspection |
+| `<leader>de` | Find debug error messages (Telescope) | Inspection |
+| `<leader>de` | Evaluate expression (in DAP UI) | Visual mode |
 
-> 📍 配置：`lua/dengbo/plugins/nvim-dap*.lua`
+> 📍 Config: `lua/dengbo/plugins/nvim-dap*.lua`
 
-### 代码折叠
+### Folding
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>zc` | 折叠当前块 |
-| `<leader>zo` | 展开当前块 |
-| `<leader>za` | 切换折叠 |
-| `<leader>zR` | 展开所有 |
-| `<leader>zM` | 折叠所有 |
+| `<leader>zc` | Fold current block |
+| `<leader>zo` | Unfold current block |
+| `<leader>za` | Toggle fold |
+| `<leader>zR` | Unfold all |
+| `<leader>zM` | Fold all |
 
-### Diff 操作
+### Diff
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>cc` | 把改动放到另一个缓冲区 |
-| `<leader>cj` | 从左边取改动 |
-| `<leader>ck` | 从右边取改动 |
-| `<leader>cn` | 跳转到下一个差异块 |
-| `<leader>cp` | 跳转到上一个差异块 |
+| `<leader>cc` | Put the change into the other buffer |
+| `<leader>cj` | Take the change from the left |
+| `<leader>ck` | Take the change from the right |
+| `<leader>cn` | Next diff hunk |
+| `<leader>cp` | Previous diff hunk |
 
-### Quickfix 列表
+### Quickfix
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>qo` | 打开 quickfix 列表 |
-| `<leader>qf` | 跳转到第一个 quickfix 项 |
-| `<leader>qn` | 跳转到下一个 quickfix 项 |
-| `<leader>qp` | 跳转到上一个 quickfix 项 |
-| `<leader>ql` | 跳转到最后一个 quickfix 项 |
-| `<leader>qc` | 关闭 quickfix 列表 |
+| `<leader>qo` | Open quickfix list |
+| `<leader>qf` | Jump to first quickfix entry |
+| `<leader>qn` | Next quickfix entry |
+| `<leader>qp` | Previous quickfix entry |
+| `<leader>ql` | Jump to last quickfix entry |
+| `<leader>qc` | Close quickfix list |
 
-### Trouble（诊断列表）
+### Trouble
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>xx` | 打开/关闭 Trouble 列表 |
-| `<leader>xw` | 打开工作区诊断 |
-| `<leader>xd` | 打开文档诊断 |
-| `<leader>xq` | 打开 quickfix 列表 |
-| `<leader>xl` | 打开位置列表 |
-| `<leader>xt` | 在 Trouble 中打开 TODO |
+| `<leader>xx` | Toggle Trouble |
+| `<leader>xw` | Workspace diagnostics |
+| `<leader>xd` | Document diagnostics |
+| `<leader>xq` | Quickfix list |
+| `<leader>xl` | Location list |
+| `<leader>xt` | TODOs in Trouble |
 
-> 📍 配置：`lua/dengbo/plugins/trouble.lua`
+> 📍 Config: `lua/dengbo/plugins/trouble.lua`
 
-### Git 操作
+### Git
 
-| 快捷键 | 功能 |
+| Key | Action |
 |--------|------|
-| `<leader>gb` | 切换 Git Blame 显示 |
-| `<leader>lg` | 打开 LazyGit |
+| `<leader>gb` | Toggle Git blame |
+| `<leader>lg` | Open LazyGit |
 
-> 📍 LazyGit 配置：`lua/dengbo/plugins/lazygit.lua`
+> 📍 LazyGit config: `lua/dengbo/plugins/lazygit.lua`
 
-### 符号大纲（Symbols Outline）
+### Symbols outline
 
-| 快捷键 | 功能 | 位置 |
+| Key | Action | Scope |
 |--------|------|------|
-| `<leader>es` | 切换符号大纲 | 全局 |
-| `<Esc>` / `q` | 关闭 | 大纲窗口内 |
-| `<Cr>` | 跳转到位置 | 大纲窗口内 |
-| `o` | 聚焦位置 | 大纲窗口内 |
-| `<C-space>` | 悬停符号 | 大纲窗口内 |
-| `K` | 切换预览 | 大纲窗口内 |
-| `r` | 重命名符号 | 大纲窗口内 |
-| `a` | 代码操作 | 大纲窗口内 |
-| `h` | 折叠 | 大纲窗口内 |
-| `l` | 展开 | 大纲窗口内 |
-| `W` | 折叠所有 | 大纲窗口内 |
-| `E` | 展开所有 | 大纲窗口内 |
-| `R` | 重置折叠 | 大纲窗口内 |
+| `<leader>es` | Toggle symbols outline | Global |
+| `<Esc>` / `q` | Close | Outline window |
+| `<Cr>` | Jump to location | Outline window |
+| `o` | Focus location | Outline window |
+| `<C-space>` | Hover symbol | Outline window |
+| `K` | Toggle preview | Outline window |
+| `r` | Rename symbol | Outline window |
+| `a` | Code action | Outline window |
+| `h` | Collapse | Outline window |
+| `l` | Expand | Outline window |
+| `W` | Collapse all | Outline window |
+| `E` | Expand all | Outline window |
+| `R` | Reset folds | Outline window |
 
-> 📍 配置：`lua/dengbo/plugins/symbols-outline.lua`
+> 📍 Config: `lua/dengbo/plugins/symbols-outline.lua`
 
-### 终端
+### Terminal
 
-用 `Ctrl+Y` 呼出浮动终端（toggleterm）。
+Opened with `Ctrl+Y` as a floating window (toggleterm).
 
-| 快捷键 | 功能 | 模式 |
+| Key | Action | Mode |
 |--------|------|------|
-| `<C-y>` | 切换终端浮窗 | Normal |
-| `<C-S-v>` | 粘贴系统剪贴板 | Terminal |
-| `<leader>pp` | 粘贴（备用） | Terminal |
-| `<M-v>` | 粘贴（Alt+V 备用） | Terminal |
-| `<C-S-c>` | 复制到系统剪贴板 | Terminal |
-| `<leader>yy` | 复制（备用） | Terminal |
-| `<M-c>` | 复制（Alt+C 备用） | Terminal |
+| `<C-y>` | Toggle terminal float | Normal |
+| `<C-S-v>` | Paste from system clipboard | Terminal |
+| `<leader>pp` | Paste (backup) | Terminal |
+| `<M-v>` | Paste (Alt+V backup) | Terminal |
+| `<C-S-c>` | Copy to system clipboard | Terminal |
+| `<leader>yy` | Copy (backup) | Terminal |
+| `<M-c>` | Copy (Alt+C backup) | Terminal |
 
-> 📍 配置：`lua/dengbo/plugins/toggleterm.lua` 与 `lua/dengbo/core/keymaps.lua`
+> 📍 Config: `lua/dengbo/plugins/toggleterm.lua` and `lua/dengbo/core/keymaps.lua`
 
-> 💡 **为什么不用 `Ctrl+V`？** normal 模式下 `<C-v>` 是 Neovim 原生的**可视块模式**（列选择），覆盖它会静默废掉这个高频功能，因此保留原样。普通/可视模式下从系统剪贴板粘贴请用 `"+p`。
+> 💡 **Why not `Ctrl+V`?** In normal mode `<C-v>` is Neovim's native **visual block mode** (column selection). Overriding it to paste would silently remove a high-frequency editing feature, so it is left untouched. To paste from the system clipboard in normal/visual mode, use `"+p`.
 
-> 💡 **若 `Ctrl+Shift+V` 无反应**，可能是 Neovide 在你的环境里无法上报 `<C-S-字母>` 组合键，改用 `<leader>pp` 或 `<M-v>` 即可，效果完全相同。
+> 💡 **If `Ctrl+Shift+V` does nothing**, Neovide may be failing to report `<C-S-字母>` on your setup. Use `<leader>pp` or `<M-v>` instead — they are equivalent.
 
-### 其他功能
+### Other
 
-| 快捷键 | 功能 | 模式/说明 |
+| Key | Action | Mode/Notes |
 |--------|------|-----------|
-| `]t` | 跳转到下一个 TODO 注释 | Normal |
-| `[t` | 跳转到上一个 TODO 注释 | Normal |
-| `<leader>s` | 替换（配合 motion） | Normal |
-| `<leader>ss` | 替换整行 | Normal |
-| `<leader>S` | 替换到行尾 | Normal |
-| `<leader>s` | 替换选中内容 | Visual |
-| `<leader>j` | Flash 跳转（全窗口，无需输入字符） | Normal/Visual/Operator |
-| `<leader>J` | Flash 跳转（向后，全窗口） | Normal/Visual/Operator |
-| `<leader>jr` | Flash 远程操作 | Operator |
-| `<leader>jR` | Flash Treesitter 搜索 | Operator/Visual |
-| `<C-s>` | 切换 Flash 搜索 | Command |
-| `f` | 向前搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
-| `F` | 向后搜索并跳转（Lightspeed，需输入字符） | Normal/Visual/Operator |
-| `<C-space>` | 初始化选择/增量选择节点 | Tree-sitter |
-| `<BS>` | 递减选择节点 | Tree-sitter |
-| `<C-k>` | 上一个补全项 | Insert（nvim-cmp） |
-| `<C-j>` | 下一个补全项 | Insert（nvim-cmp） |
-| `<C-b>` | 向上滚动文档 | Insert（nvim-cmp） |
-| `<C-f>` | 向下滚动文档 | Insert（nvim-cmp） |
-| `<C-Space>` | 显示补全建议 | Insert（nvim-cmp） |
-| `<C-e>` | 关闭补全窗口 | Insert（nvim-cmp） |
-| `<CR>` | 确认选择（不自动选择） | Insert（nvim-cmp） |
+| `]t` | Next TODO comment | Normal |
+| `[t` | Previous TODO comment | Normal |
+| `<leader>s` | Substitute (with a motion) | Normal |
+| `<leader>ss` | Substitute the whole line | Normal |
+| `<leader>S` | Substitute to end of line | Normal |
+| `<leader>s` | Substitute selection | Visual |
+| `<leader>j` | Flash jump (window-wide, no typing) | Normal/Visual/Operator |
+| `<leader>J` | Flash jump (backwards, window-wide) | Normal/Visual/Operator |
+| `<leader>jr` | Flash remote | Operator |
+| `<leader>jR` | Flash Treesitter search | Operator/Visual |
+| `<C-s>` | Toggle Flash search | Command |
+| `f` | Search forward and jump (Lightspeed; requires typing) | Normal/Visual/Operator |
+| `F` | Search backward and jump (Lightspeed; requires typing) | Normal/Visual/Operator |
+| `<C-space>` | Init / grow selection node | Tree-sitter |
+| `<BS>` | Shrink selection node | Tree-sitter |
+| `<C-k>` | Previous completion item | Insert (nvim-cmp) |
+| `<C-j>` | Next completion item | Insert (nvim-cmp) |
+| `<C-b>` | Scroll docs up | Insert (nvim-cmp) |
+| `<C-f>` | Scroll docs down | Insert (nvim-cmp) |
+| `<C-Space>` | Trigger completion | Insert (nvim-cmp) |
+| `<C-e>` | Close completion window | Insert (nvim-cmp) |
+| `<CR>` | Confirm selection (no auto-select) | Insert (nvim-cmp) |
 
-> 📍 TODO 配置：`lua/dengbo/plugins/todo-comments.lua`  
-> 📍 替换配置：`lua/dengbo/plugins/substitute.lua`  
-> 📍 Flash 配置：`lua/dengbo/plugins/flash.lua` 💡 使用 `<leader>j` 一键全窗口跳转（推荐，不冲突）  
-> 📍 Lightspeed 配置：`lua/dengbo/plugins/lightspeed.lua` ⚠️ 覆盖原生 `f`/`F`，需要输入字符  
-> 📍 Tree-sitter 配置：`lua/dengbo/plugins/treesitter.lua`  
-> 📍 补全配置：`lua/dengbo/plugins/nvim-cmp.lua`
+> 📍 TODO config: `lua/dengbo/plugins/todo-comments.lua`  
+> 📍 Substitute config: `lua/dengbo/plugins/substitute.lua`  
+> 📍 Flash config: `lua/dengbo/plugins/flash.lua` 💡 `<leader>j` gives one-key window-wide jumps (recommended, no conflicts)  
+> 📍 Lightspeed config: `lua/dengbo/plugins/lightspeed.lua` ⚠️ overrides native `f`/`F` and requires typing  
+> 📍 Tree-sitter config: `lua/dengbo/plugins/treesitter.lua`  
+> 📍 Completion config: `lua/dengbo/plugins/nvim-cmp.lua`
 
-### 文件类型特定操作
+### Filetype-specific
 
-| 快捷键 | 功能 | 文件类型 |
+| Key | Action | Filetype |
 |--------|------|----------|
-| `<leader>go` | 整理导入（Pyright） | Python |
-| `<leader>tc` | 测试当前类 | Python |
-| `<leader>tm` | 测试当前方法 | Python |
-| `<leader>ch` | 切换源文件/头文件 | C/C++ |
+| `<leader>go` | Organize imports (Pyright) | Python |
+| `<leader>tc` | Test current class | Python |
+| `<leader>tm` | Test current method | Python |
+| `<leader>ch` | Switch source/header | C/C++ |
 
-### Neovide 特定快捷键（⚠️ 目前仅对 macOS 有效）
+### Neovide-specific shortcuts (⚠️ macOS only for now)
 
-下列映射使用 Command（`<D-*>`）修饰键，代码中写死了 `<D-*>` 且没有平台判断，因此**在 Ubuntu 上不会生效**。Ubuntu 请使用上文的通用快捷键（保存用 `<leader>ww`，复制粘贴用 `y`/`p` 或系统剪贴板 `"+y`/`"+p`）。
+These mappings use the Command modifier (`<D-*>`), which is hardcoded with no platform guard, so they **do not work on Ubuntu**. Use the general shortcuts above instead (save with `<leader>ww`; copy/paste with `y`/`p` or the system clipboard registers `"+y`/`"+p`).
 
-| 快捷键 | 功能 | 模式 |
+| Key | Action | Mode |
 |--------|------|------|
-| `<D-s>` | 保存（Command+S） | Normal |
-| `<D-c>` | 复制（Command+C） | Visual |
-| `<D-v>` | 粘贴（Command+V） | Normal/Visual/Command/Insert/Terminal |
+| `<D-s>` | Save (Command+S) | Normal |
+| `<D-c>` | Copy (Command+C) | Visual |
+| `<D-v>` | Paste (Command+V) | Normal/Visual/Command/Insert/Terminal |
 
-> 📍 配置：`lua/dengbo/core/neovide.lua`
+> 📍 Config: `lua/dengbo/core/neovide.lua`
 
-### 输入法
+### Input method
 
-Ubuntu 下不使用插件切换输入法，直接跟随桌面环境（Fcitx5/Rime 等）的当前输入法状态。离开插入模式自动切回英文的 `:IMToggle` 能力仅针对 macOS 实现，**本分支未启用**。
+On Ubuntu the IME is not switched by a plugin — Neovim follows the desktop environment (Fcitx5/Rime, etc.). The macOS-only ability to switch back to English on `InsertLeave` via `:IMToggle` is **not enabled on this branch**.
 
-> 📍 配置：`lua/dengbo/core/input_method.lua`（仅在 `has("mac")` 为真且 `im-select` 可执行时加载）  
-> 📍 备用实现：`lua/dengbo/platform/input_method.lua`
+> 📍 Config: `lua/dengbo/core/input_method.lua` (loaded only when `has("mac")` is true and `im-select` is executable)  
+> 📍 Spare implementation: `lua/dengbo/platform/input_method.lua`
 
-### Which-Key 提示
+### Which-Key hints
 
-按 `<Space>` 后稍等片刻（默认 500ms），会显示所有可用的快捷键提示。
+Press `<Space>` and pause briefly (500 ms by default) to see all available shortcuts.
 
-> 📍 配置：`lua/dengbo/plugins/which-key.lua`
+> 📍 Config: `lua/dengbo/plugins/which-key.lua`
 
-### 查找所有快捷键
+### Finding every shortcut
 
-如果某个快捷键没有在这里列出，可以在以下文件中查找：
+If a shortcut is missing here, look in:
 
-- **全局键位映射**：`lua/dengbo/core/keymaps.lua`
-- **LSP 键位映射**：`lua/dengbo/plugins/lsp/lspconfig.lua`
-- **插件特定键位映射**：`lua/dengbo/plugins/*.lua` 各插件配置文件
-- **Neovide 键位映射**：`lua/dengbo/core/neovide.lua`
+- **Global keymaps**: `lua/dengbo/core/keymaps.lua`
+- **LSP keymaps**: `lua/dengbo/plugins/lsp/lspconfig.lua`
+- **Plugin-specific keymaps**: the relevant file under `lua/dengbo/plugins/*.lua`
+- **Neovide keymaps**: `lua/dengbo/core/neovide.lua`
 
-或者使用 `:Telescope keymaps` 搜索所有已定义的快捷键。
+Or search them all with `:Telescope keymaps`.
 
-## 📖 使用说明
+## 📖 Usage
 
-### 首次使用
+### First run
 
-1. 启动 Neovim 后，插件会自动安装
-2. 等待 Mason 安装 LSP 服务器和工具（首次可能需要较长时间）
-3. 主题会随机加载，每次启动可能不同
+1. Plugins install automatically on launch
+2. Wait for Mason to install LSP servers and tools (the first run can take a while)
+3. A colorscheme is loaded at random, so it may differ on each start
 
-### 输入法
+### Input method
 
-Ubuntu 使用 Fcitx5、IBus 等桌面输入法，Neovim 直接跟随系统输入法状态，无需额外配置。
+Ubuntu uses a desktop IME such as Fcitx5 or IBus; Neovim follows the system input method and needs no extra configuration.
 
-本分支**没有启用** Linux 下的输入法自动切换：离开插入模式时自动切回英文、以及 `:IMToggle` 命令，都只在 macOS（配合 `im-select`）上实现。`core/init.lua` 已用 `has("mac")` 做了守卫，因此在 Ubuntu 上相关代码根本不会加载，也不会有副作用。如需在 Ubuntu 实现同样效果，可考虑 `fcitx5-remote` 自行编写 autocmd。
+This branch does **not** enable Linux IME auto-switching: both the "switch back to English on `InsertLeave`" behaviour and the `:IMToggle` command are macOS-only (via `im-select`). `core/init.lua` guards them with `has("mac")`, so the code is never even loaded on Ubuntu and has no side effects. If you want the same behaviour on Ubuntu, consider writing an autocmd around `fcitx5-remote`.
 
-### 代码格式化
+### Formatting
 
-代码会在保存时自动格式化（`format_on_save`，超时 1000ms）。配置的格式器（见 `plugins/formatting.lua`）包括：
+Code is formatted on save (`format_on_save`, 1000 ms timeout). The configured formatters (see `plugins/formatting.lua`) are:
 
 - Python: isort + black
-- JavaScript/TypeScript/Svelte/CSS/SCSS/JSON/Markdown/GraphQL: prettier（CSS/SCSS 优先 prettierd）
+- JavaScript/TypeScript/Svelte/CSS/SCSS/JSON/Markdown/GraphQL: prettier (prettierd preferred for CSS/SCSS)
 - Lua: stylua
 - Go: gofmt
 - Rust: rustfmt
-- Shell: shellcheck（`sh`）、beautysh（`bash`）
-- 其他: yamlfix（yaml）、taplo（toml）、htmlbeautifier（html）、buf（proto）
+- Shell: shellcheck (`sh`), beautysh (`bash`)
+- Others: yamlfix (yaml), taplo (toml), htmlbeautifier (html), buf (proto)
 
-### 调试配置
+### Debugging
 
-#### Python 调试
+#### Python
 
-1. 确保已安装 `debugpy`（Mason 会自动安装）
-2. 在代码中设置断点：`<leader>db`
-3. 开始调试：`<leader>dc`
+1. Make sure `debugpy` is installed (Mason does this automatically)
+2. Set a breakpoint: `<leader>db`
+3. Start debugging: `<leader>dc`
 
-#### C/C++ 调试
+#### C/C++
 
-1. 安装系统 GDB：`sudo apt install gdb`。Mason 会安装 `cpptools` 调试适配器。
-2. 在 Neovim 中启动调试并选择 **`Launch file with gdb`** 配置（这一项在 Ubuntu 上开箱可用）。
-3. ⚠️ **不要选择 `Launch with lldb`**。`plugins/nvim-dap-cpp.lua` 中的 lldb 适配器路径仍然写死为 macOS Homebrew 路径 `/opt/homebrew/opt/llvm/bin/lldb-vscode`，在 Ubuntu 上必然启动失败。若确实需要 lldb 调试，把该路径改为系统的 `lldb-vscode`（例如 `/usr/bin/lldb-vscode`，需 `sudo apt install lldb`）。
+1. Install system GDB: `sudo apt install gdb`. Mason installs the `cpptools` debug adapter.
+2. Start debugging in Neovim and pick the **`Launch file with gdb`** configuration — this one works out of the box on Ubuntu.
+3. ⚠️ **Do not pick `Launch with lldb`.** The lldb adapter path in `plugins/nvim-dap-cpp.lua` is still hardcoded to the macOS Homebrew location `/opt/homebrew/opt/llvm/bin/lldb-vscode` and will always fail on Ubuntu. If you genuinely need lldb, point it at the system `lldb-vscode` (e.g. `/usr/bin/lldb-vscode`, requires `sudo apt install lldb`).
 
-### 自定义配置
+### Customising
 
-所有配置都在 `lua/dengbo/` 目录下，可以根据需要修改：
+Everything lives under `lua/dengbo/`:
 
-- **选项配置**：`core/options.lua`
-- **键位映射**：`core/keymaps.lua`
-- **插件配置**：`plugins/` 目录下对应文件
-- **LSP 配置**：`plugins/lsp/lspconfig.lua`
+- **Options**: `core/options.lua`
+- **Keymaps**: `core/keymaps.lua`
+- **Plugin config**: the matching file under `plugins/`
+- **LSP config**: `plugins/lsp/lspconfig.lua`
 
-## 🔧 故障排除
+## 🔧 Troubleshooting
 
-### 插件安装失败
+### Plugin installation fails
 
-先检查网络和外部依赖，再在 Neovim 中运行 `:Lazy sync` 重试插件安装；Mason 工具的错误日志可用 `:MasonLog` 查看。不要直接删除 `~/.local/share/nvim`，其中还包含已安装的插件和工具。若仅需重装某个 Mason 包，可在 `:Mason` 中选择该包，或运行 `:MasonUninstall <包名>` 后再运行 `:MasonInstall <包名>`。
+Check your network and external dependencies first, then run `:Lazy sync` in Neovim to retry; Mason errors are visible with `:MasonLog`. Do not delete `~/.local/share/nvim` — it also holds the installed plugins and tools. To reinstall a single Mason package, select it in `:Mason`, or run `:MasonUninstall <package>` followed by `:MasonInstall <package>`.
 
-### LSP 服务器未启动
+### LSP server does not start
 
-1. 检查 Mason 是否已安装服务器：`:Mason`
-2. 查看 LSP 日志：`:LspLog`
-3. 确保项目中有相应的配置文件（如 `pyproject.toml`、`tsconfig.json` 等）
+1. Check whether Mason installed the server: `:Mason`
+2. Read the LSP log: `:LspLog`
+3. Make sure the project has the relevant config file (e.g. `pyproject.toml`, `tsconfig.json`)
 
-### Ubuntu 输入法无法在 Neovim 中切换
+### The input method will not switch inside Neovim
 
-本分支没有启用 Linux 的输入法自动切换（相关代码有 `has("mac")` 守卫，Ubuntu 下不会加载）。请确认 Fcitx5/IBus 已在 Ubuntu 桌面正常工作，Neovim 会使用系统当前输入法；通过桌面的中英文切换快捷键（如 `Ctrl+Space`）切换即可。
+This branch does not enable Linux IME auto-switching (the code is guarded by `has("mac")` and never loads on Ubuntu). Confirm Fcitx5/IBus works on the Ubuntu desktop — Neovim uses the current system input method. Switch with the desktop's toggle key (e.g. `Ctrl+Space`).
 
-### AppImage 无法运行（Neovide / Neovim）
+### AppImage will not run (Neovide / Neovim)
 
-报错 `Cannot mount AppImage, please check your FUSE setup` 或 `fuse: device not found`，说明系统缺少 FUSE 支持。先按第 4 步尝试 `sudo modprobe fuse` 和安装 `libfuse2`；若仍不可用，用 `--appimage-extract` 解压后直接运行内部的真实二进制（详见第 4 步）。这是环境级问题，与配置文件无关。
+`Cannot mount AppImage, please check your FUSE setup` or `fuse: device not found` means FUSE is missing. Try `sudo modprobe fuse` and installing `libfuse2` as described in step 4; if that still fails, use `--appimage-extract` to unpack and run the real binary inside (see step 4). This is an environment-level issue unrelated to the config.
 
-### Neovide 启动报 OpenGL 错误
+### Neovide fails with an OpenGL error
 
-`Failed to create OpenGL context` 通常是显卡驱动或 GL 环境问题。先用 `LIBGL_ALWAYS_SOFTWARE=1 neovide` 验证是否为驱动问题；若是，检查 `glxinfo -B` 输出的渲染器，并确认已正确安装对应显卡驱动。
+`Failed to create OpenGL context` usually points at the GPU driver or the GL environment. Verify with `LIBGL_ALWAYS_SOFTWARE=1 neovide`; if that works, inspect the renderer reported by `glxinfo -B` and make sure the correct GPU driver is installed.
 
-### 主题未加载
+### Colorscheme not loaded
 
-1. 确保主题插件已安装：`:Lazy`
-2. 手动加载主题：`:colorscheme tokyonight`
+1. Make sure the colorscheme plugin is installed: `:Lazy`
+2. Load one manually: `:colorscheme tokyonight`
 
-### 性能问题
+### Performance
 
-1. 检查大文件处理：已配置 `bigfile-nvim` 插件
-2. 查看启动时间：`:Lazy profile`
-3. 禁用不需要的插件
+1. Large-file handling is covered by `bigfile-nvim`
+2. Check startup time: `:Lazy profile`
+3. Disable plugins you do not need
 
-## 📝 更新日志
+## 📝 Changelog
 
-### forUbuntu 分支（2026）
+### forUbuntu branch (2026)
 
-- ✅ 安装说明全面改写为 Ubuntu 24.04 流程，移除 macOS 专属步骤
-- ✅ 新增 FUSE 缺失时用 `--appimage-extract` 运行 AppImage 的通用方案
-- ✅ 新增 Markdown 渲染与浏览器预览（`<leader>mt` / `<leader>mp`）
-- ✅ 新增 Linux 终端剪贴板快捷键（toggleterm 浮窗内）
-- ✅ 修复 `vim.lsp.buf_get_clients` 弃用警告
-- ✅ 修复 Neovide 废弃选项 `neovide_transparency` → `neovide_opacity`
-- ✅ 更新 symbols-outline 图标至 Nerd Font v3 码点
-- ✅ 新增英文版文档（`README.en.md`）
-- ⚠️ 已知遗留：Neovide 的 `<D-*>` 快捷键、lldb 适配器路径仍为 macOS 配置（见对应章节）
+- ✅ Rewrote the install guide for Ubuntu 24.04 and dropped macOS-only steps
+- ✅ Documented the general `--appimage-extract` workaround for hosts without FUSE
+- ✅ Added Markdown rendering and browser preview (`<leader>mt` / `<leader>mp`)
+- ✅ Added Linux terminal clipboard keymaps for the toggleterm float
+- ✅ Fixed the `vim.lsp.buf_get_clients` deprecation warning
+- ✅ Fixed the deprecated Neovide option `neovide_transparency` → `neovide_opacity`
+- ✅ Updated symbols-outline icons to Nerd Font v3 codepoints
+- ✅ Made English the default README (`README.zh-CN.md` keeps the Chinese version)
+- ⚠️ Known leftovers: Neovide's `<D-*>` keymaps and the lldb adapter path are still macOS-only (see the relevant sections)
 
-### 早期优化（2024）
+### Earlier work (2024)
 
-- ✅ 修复重复加载配置问题
-- ✅ 修复 LSP 服务器配置未启用问题
-- ✅ 优化键位映射，避免冲突
-- ✅ 重构配置结构，提高可维护性
-- ✅ 分离 Neovide 和输入法配置到独立模块
-- ✅ 修复 symbols-outline 键位映射位置错误
+- ✅ Fixed duplicated config loading
+- ✅ Fixed LSP servers not being enabled
+- ✅ Cleaned up keymaps to avoid conflicts
+- ✅ Refactored the config layout for maintainability
+- ✅ Split the Neovide and input-method config into their own modules
+- ✅ Fixed a misplaced symbols-outline keymap
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and pull requests are welcome.
 
-## 📄 许可证
+## 📄 License
 
 MIT License
 
-## 🔗 相关链接
+## 🔗 Links
 
-- [Neovim 官方文档](https://neovim.io/doc/)
-- [Lazy.nvim 文档](https://github.com/folke/lazy.nvim)
-- [Mason.nvim 文档](https://github.com/williamboman/mason.nvim)
+- [Neovim documentation](https://neovim.io/doc/)
+- [Lazy.nvim documentation](https://github.com/folke/lazy.nvim)
+- [Mason.nvim documentation](https://github.com/williamboman/mason.nvim)
 
 ---
 
-`forUbuntu` 分支的教程以 Ubuntu 24.04 为目标；`main` 分支中的安装说明和部分 Neovide/调试设置面向 macOS。
+The `forUbuntu` branch targets Ubuntu 24.04; the install guide and some Neovide/debug settings on `main` target macOS.

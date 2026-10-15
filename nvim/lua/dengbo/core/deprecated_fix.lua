@@ -1,35 +1,25 @@
 --- 弃用 API 兼容性补丁
---- 修复插件中使用的已弃用 API
+--- 屏蔽插件中调用的已弃用 API 产生的警告
 --- @module dengbo.core.deprecated_fix
 
 local M = {}
 
---- 修复 vim.lsp.buf_get_clients 的弃用警告
---- 为 symbols-outline.nvim 等插件提供兼容性
---- 注意：在 Neovim 0.12+ 中，buf_get_clients 已被移除
+--- 用新 API 覆盖 vim.lsp.buf_get_clients 的废弃桩函数
+--- symbols-outline.nvim、telescope 等插件仍在调用旧 API；
+--- Neovim 0.12 的废弃桩在被调用时会发 deprecation 警告，
+--- 因此必须**无条件覆盖**（不能用 if not ... 守卫——桩函数始终存在，守卫永远不生效）。
 function M.fix_lsp_buf_get_clients()
-	-- 在 Neovim 0.12+ 中，buf_get_clients 已被移除
-	-- 我们需要在插件加载前创建兼容层
-	if vim.lsp.get_clients then
-		-- 创建兼容函数，将 buf_get_clients 映射到 get_clients
-		if not vim.lsp.buf_get_clients then
-			vim.lsp.buf_get_clients = function(bufnr)
-				-- 使用新的 API：vim.lsp.get_clients({ bufnr = bufnr })
-				bufnr = bufnr or vim.api.nvim_get_current_buf()
-				local clients = vim.lsp.get_clients({ bufnr = bufnr })
-				-- 返回格式兼容旧 API
-				return clients
-			end
+	if vim.lsp.get_clients and vim.lsp.buf_get_clients then
+		vim.lsp.buf_get_clients = function(bufnr)
+			bufnr = (bufnr == nil or bufnr == 0) and vim.api.nvim_get_current_buf() or bufnr
+			return vim.lsp.get_clients({ bufnr = bufnr })
 		end
 	end
 end
 
---- 初始化兼容性补丁
---- 必须在插件加载前调用
+--- 初始化兼容性补丁（在 lazy.nvim 加载插件之前调用）
 function M.setup()
-	-- 在插件加载前修复弃用 API
 	M.fix_lsp_buf_get_clients()
 end
 
 return M
-

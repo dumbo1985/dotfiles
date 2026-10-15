@@ -1,6 +1,8 @@
 # dotfiles
 
-个人 Neovim 配置文件集合。当前 `forUbuntu` 分支面向 Ubuntu 24.04，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置。
+个人 Neovim 配置文件集合。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。
+
+> 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `main` 分支。
 
 ## 📋 目录
 
@@ -21,7 +23,7 @@
 - 🔍 **模糊搜索**：Telescope 强大的文件搜索和内容搜索
 - 🌳 **语法高亮**：Tree-sitter 提供更好的语法高亮
 - 📋 **自动补全**：nvim-cmp 提供智能代码补全
-- 🎯 **输入法切换**：macOS 上支持自动切换；Ubuntu 使用桌面输入法，见下方说明
+- 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `main` 分支启用
 - 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
 
 ## 🚀 安装步骤
@@ -42,7 +44,9 @@ sudo apt install -y git curl unzip build-essential ripgrep fd-find \
   g++ gdb cmake shellcheck wl-clipboard xclip
 ```
 
-`nodejs`/`npm` 和 `golang-go` 用于配置中启用的 JavaScript/TypeScript 与 Go 工具。若只使用 C/C++ 和 Lua，可以不安装它们，但 Mason 会对相应语言服务器显示安装失败。`wl-clipboard` 和 `xclip` 为 Wayland/X11 剪贴板提供支持。
+`nodejs`/`npm` 与 `golang-go` 用于 JavaScript/TypeScript、Go 的语言工具以及 Markdown 浏览器预览；若只使用 C/C++ 和 Lua，可以不装，但 Mason 会对相应工具显示安装失败。`wl-clipboard` 和 `xclip` 分别提供 Wayland/X11 剪贴板支持（Neovim 的 `"+y`/`"+p` 依赖它们）。
+
+另外，本配置的格式化器包含 `beautysh`、`yamlfix`、`taplo`、`htmlbeautifier` 等工具，这些由 Mason 自动安装，无需 apt；但 `stylua` 格式化 Lua 需要系统中有对应可执行文件，Mason 会一并处理。
 
 ### 2. 安装 Neovim
 
@@ -71,6 +75,8 @@ nvim --version | head -n 2
 
 如果电脑是 ARM64，请从官方安装说明选择对应的 `arm64` 包。
 
+> 💡 若下载到的是 **Neovim AppImage**，在 FUSE 不可用的机器上同样需要按上面第 4 步的 `--appimage-extract` 方式解压后运行，否则 `nvim` 命令会直接报 FUSE 挂载错误。
+
 ### 3. 安装 Nerd Font（推荐）
 
 Nerd Font 用于显示状态栏、文件树和启动页图标。下载 Meslo Nerd Font 压缩包并安装到当前用户：
@@ -87,7 +93,59 @@ fc-cache -f
 
 ### 4.（可选）安装 Neovide
 
-Neovide 是独立的图形界面，不是使用本配置的必需项。Ubuntu/Linux 预编译包和安装方式请参阅 [Neovide Releases](https://github.com/neovide/neovide/releases)；安装后可在终端运行 `neovide`。Neovide 专用快捷键目前使用 macOS 的 Command 键映射，Ubuntu 下不保证可用。
+Neovide 是独立的图形界面，不是使用本配置的必需项。Ubuntu/Linux 可在 [Neovide Releases](https://github.com/neovide/neovide/releases) 下载 AppImage 或压缩包，安装后运行 `neovide` 即可。
+
+> ⚠️ **务必先确认 FUSE 可用**。AppImage 依赖 FUSE 挂载，若系统缺少 `/dev/fuse`（内核未加载 `fuse` 模块，或处于容器/受限环境中），直接执行 AppImage 会报 `Cannot mount AppImage, please check your FUSE setup`。检查与修复：
+>
+> ```bash
+> ls /dev/fuse                    # 无输出说明 FUSE 不可用
+> sudo modprobe fuse              # 尝试加载内核模块
+> sudo apt install -y libfuse2    # AppImage 需要 FUSE 2 兼容层
+> ```
+>
+> 如果加载模块后仍无 `/dev/fuse`（常见于容器或精简内核），可以改用**免 FUSE 的解压方式**运行：
+>
+> ```bash
+> mkdir -p ~/Applications/neovide && cd ~/Applications/neovide
+> cp ~/Downloads/neovide.AppImage .
+> chmod +x neovide.AppImage
+> ./neovide.AppImage --appimage-extract     # 解压出 squashfs-root/
+> ~/Applications/neovide/squashfs-root/usr/bin/neovide --version
+> ```
+>
+> 确认可用后软链到 `~/.local/bin`：
+>
+> ```bash
+> ln -sf ~/Applications/neovide/squashfs-root/usr/bin/neovide ~/.local/bin/neovide
+> ```
+>
+> 如需在应用菜单里搜索启动，可再创建一个桌面入口：
+>
+> ```bash
+> mkdir -p ~/.local/share/applications ~/.local/share/icons/hicolor/scalable/apps
+> cp ~/Applications/neovide/squashfs-root/neovide.svg \
+>   ~/.local/share/icons/hicolor/scalable/apps/neovide.svg
+> cat > ~/.local/share/applications/neovide.desktop <<'EOF'
+> [Desktop Entry]
+> Type=Application
+> Name=Neovide
+> Exec=/home/$USER/.local/bin/neovide %F
+> Icon=neovide
+> Categories=Utility;TextEditor;
+> Terminal=false
+> EOF
+> update-desktop-database ~/.local/share/applications
+> ```
+>
+> 这个 `--appimage-extract` 技巧对**任何** AppImage 都适用（例如 Neovim 官方 AppImage、其他 GUI 工具），是 FUSE 不可用时的通用兜底方案。
+
+Neovide 专用快捷键使用 macOS 的 Command 键映射（`<D-s>` 等），在 Ubuntu 下这些映射不会生效，请改用下文的通用快捷键（如 `<leader>ww` 保存）。
+
+如果 Neovide 启动时报 `Failed to create OpenGL context`，说明显卡驱动或 GL 环境有问题，可先用软件渲染验证：
+
+```bash
+LIBGL_ALWAYS_SOFTWARE=1 neovide
+```
 
 ### 5. 获取 Ubuntu 配置并建立链接
 
@@ -118,14 +176,20 @@ cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
 ### 7.（可选）启用中文输入法
 
-本配置的 `im-select` 自动切换只在 macOS 上启用。Ubuntu 使用桌面输入法，不需要 Neovim 插件切换。若使用 Fcitx5/Rime，可安装：
+Ubuntu 使用桌面输入法，Neovim 会自动跟随系统当前输入法，不需要额外插件。若使用 Fcitx5/Rime，可安装：
 
 ```bash
 sudo apt install fcitx5 fcitx5-rime fcitx5-config-qt im-config
 im-config -n fcitx5
 ```
 
-注销并重新登录后，打开 Fcitx 5 配置工具并添加 Rime。系统输入法可在 Neovim 插入模式中正常使用，但 `<Esc>` 后自动切换英文的功能当前没有为 Ubuntu 配置。
+注销并重新登录后，打开 Fcitx 5 配置工具并添加 Rime。另外建议安装剪贴板支持（若第 1 步未装）：
+
+```bash
+sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
+```
+
+> 💡 macOS 上依靠 `im-select` 在离开插入模式时自动切回英文的能力**未在 `forUbuntu` 分支启用**，如需该功能请使用 `main` 分支或自行移植。Ubuntu 下可在 Fcitx5 中设置「中英文切换」快捷键（如 `Ctrl+Space`）来手动切换。
 
 ## 📁 配置结构
 
@@ -139,7 +203,9 @@ nvim/
     │   ├── options.lua        # Neovim 选项配置
     │   ├── keymaps.lua         # 全局键位映射
     │   ├── neovide.lua         # Neovide GUI 配置
-    │   └── input_method.lua    # 输入法自动切换
+    │   └── input_method.lua    # 输入法自动切换（仅 macOS 生效，Ubuntu 下不会被加载）
+    ├── platform/               # 平台相关模块
+    │   └── input_method.lua    # 输入法切换的 macOS 实现（备用）
     ├── lazy.lua                # 插件管理和主题加载
     └── plugins/                # 插件配置
         ├── init.lua           # 基础插件
@@ -489,7 +555,9 @@ Leader 键设置为 `<Space>`（空格键）
 | `<leader>tm` | 测试当前方法 | Python |
 | `<leader>ch` | 切换源文件/头文件 | C/C++ |
 
-### Neovide 特定快捷键（当前映射面向 macOS）
+### Neovide 特定快捷键（⚠️ 目前仅对 macOS 有效）
+
+下列映射使用 Command（`<D-*>`）修饰键，代码中写死了 `<D-*>` 且没有平台判断，因此**在 Ubuntu 上不会生效**。Ubuntu 请使用上文的通用快捷键（保存用 `<leader>ww`，复制粘贴用 `y`/`p` 或系统剪贴板 `"+y`/`"+p`）。
 
 | 快捷键 | 功能 | 模式 |
 |--------|------|------|
@@ -499,14 +567,12 @@ Leader 键设置为 `<Space>`（空格键）
 
 > 📍 配置：`lua/dengbo/core/neovide.lua`
 
-### 输入法切换
+### 输入法
 
-| 命令/快捷键 | 功能 |
-|------------|------|
-| `:IMToggle` | 手动切换输入法 |
+Ubuntu 下不使用插件切换输入法，直接跟随桌面环境（Fcitx5/Rime 等）的当前输入法状态。离开插入模式自动切回英文的 `:IMToggle` 能力仅针对 macOS 实现，**本分支未启用**。
 
-> 📍 配置：`lua/dengbo/core/input_method.lua`  
-> 💡 仅在 macOS 且 `im-select` 可用时自动切换。Ubuntu 使用桌面输入法；`:IMToggle` 不适用于当前 Ubuntu 配置。
+> 📍 配置：`lua/dengbo/core/input_method.lua`（仅在 `has("mac")` 为真且 `im-select` 可执行时加载）  
+> 📍 备用实现：`lua/dengbo/platform/input_method.lua`
 
 ### Which-Key 提示
 
@@ -535,16 +601,21 @@ Leader 键设置为 `<Space>`（空格键）
 
 ### 输入法
 
-Ubuntu 使用 Fcitx5、IBus 等桌面输入法。当前 Neovim 配置没有启用 Linux 输入法自动切换；macOS 上才会在进入/退出插入模式时切换，并提供 `:IMToggle` 命令。
+Ubuntu 使用 Fcitx5、IBus 等桌面输入法，Neovim 直接跟随系统输入法状态，无需额外配置。
+
+本分支**没有启用** Linux 下的输入法自动切换：离开插入模式时自动切回英文、以及 `:IMToggle` 命令，都只在 macOS（配合 `im-select`）上实现。`core/init.lua` 已用 `has("mac")` 做了守卫，因此在 Ubuntu 上相关代码根本不会加载，也不会有副作用。如需在 Ubuntu 实现同样效果，可考虑 `fcitx5-remote` 自行编写 autocmd。
 
 ### 代码格式化
 
-代码会在保存时自动格式化，支持的格式器：
+代码会在保存时自动格式化（`format_on_save`，超时 1000ms）。配置的格式器（见 `plugins/formatting.lua`）包括：
+
 - Python: isort + black
-- JavaScript/TypeScript: prettier
+- JavaScript/TypeScript/Svelte/CSS/SCSS/JSON/Markdown/GraphQL: prettier（CSS/SCSS 优先 prettierd）
 - Lua: stylua
 - Go: gofmt
-- 其他语言请查看 `plugins/formatting.lua`
+- Rust: rustfmt
+- Shell: shellcheck（`sh`）、beautysh（`bash`）
+- 其他: yamlfix（yaml）、taplo（toml）、htmlbeautifier（html）、buf（proto）
 
 ### 调试配置
 
@@ -557,8 +628,8 @@ Ubuntu 使用 Fcitx5、IBus 等桌面输入法。当前 Neovim 配置没有启�
 #### C/C++ 调试
 
 1. 安装系统 GDB：`sudo apt install gdb`。Mason 会安装 `cpptools` 调试适配器。
-2. 在 Neovim 中启动调试并选择 `Launch file with gdb` 配置。
-3. 查看 `plugins/nvim-dap-cpp.lua` 了解详细配置。当前其中的 LLDB 路径是 macOS 路径，Ubuntu 下不要选择 LLDB 配置。
+2. 在 Neovim 中启动调试并选择 **`Launch file with gdb`** 配置（这一项在 Ubuntu 上开箱可用）。
+3. ⚠️ **不要选择 `Launch with lldb`**。`plugins/nvim-dap-cpp.lua` 中的 lldb 适配器路径仍然写死为 macOS Homebrew 路径 `/opt/homebrew/opt/llvm/bin/lldb-vscode`，在 Ubuntu 上必然启动失败。若确实需要 lldb 调试，把该路径改为系统的 `lldb-vscode`（例如 `/usr/bin/lldb-vscode`，需 `sudo apt install lldb`）。
 
 ### 自定义配置
 
@@ -583,7 +654,15 @@ Ubuntu 使用 Fcitx5、IBus 等桌面输入法。当前 Neovim 配置没有启�
 
 ### Ubuntu 输入法无法在 Neovim 中切换
 
-当前配置没有启用 Linux 的输入法自动切换。请确认 Fcitx5/IBus 已在 Ubuntu 桌面正常工作；Neovim 会使用系统当前输入法。
+本分支没有启用 Linux 的输入法自动切换（相关代码有 `has("mac")` 守卫，Ubuntu 下不会加载）。请确认 Fcitx5/IBus 已在 Ubuntu 桌面正常工作，Neovim 会使用系统当前输入法；通过桌面的中英文切换快捷键（如 `Ctrl+Space`）切换即可。
+
+### AppImage 无法运行（Neovide / Neovim）
+
+报错 `Cannot mount AppImage, please check your FUSE setup` 或 `fuse: device not found`，说明系统缺少 FUSE 支持。先按第 4 步尝试 `sudo modprobe fuse` 和安装 `libfuse2`；若仍不可用，用 `--appimage-extract` 解压后直接运行内部的真实二进制（详见第 4 步）。这是环境级问题，与配置文件无关。
+
+### Neovide 启动报 OpenGL 错误
+
+`Failed to create OpenGL context` 通常是显卡驱动或 GL 环境问题。先用 `LIBGL_ALWAYS_SOFTWARE=1 neovide` 验证是否为驱动问题；若是，检查 `glxinfo -B` 输出的渲染器，并确认已正确安装对应显卡驱动。
 
 ### 主题未加载
 
@@ -598,7 +677,16 @@ Ubuntu 使用 Fcitx5、IBus 等桌面输入法。当前 Neovim 配置没有启�
 
 ## 📝 更新日志
 
-### 最新优化（2024）
+### forUbuntu 分支（2026）
+
+- ✅ 安装说明全面改写为 Ubuntu 24.04 流程，移除 macOS 专属步骤
+- ✅ 新增 FUSE 缺失时用 `--appimage-extract` 运行 AppImage 的通用方案
+- ✅ 新增 Markdown 渲染与浏览器预览（`<leader>mt` / `<leader>mp`）
+- ✅ 修复 Neovide 废弃选项 `neovide_transparency` → `neovide_opacity`
+- ✅ 更新 symbols-outline 图标至 Nerd Font v3 码点
+- ⚠️ 已知遗留：Neovide 的 `<D-*>` 快捷键、lldb 适配器路径仍为 macOS 配置（见对应章节）
+
+### 早期优化（2024）
 
 - ✅ 修复重复加载配置问题
 - ✅ 修复 LSP 服务器配置未启用问题

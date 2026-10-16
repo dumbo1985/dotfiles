@@ -1,8 +1,8 @@
 # dotfiles
 
-A personal development-environment dotfiles collection (Neovim + shell jump commands + clangd fallback + ble.sh integration + daily wallpaper). The `forUbuntu` branch targets **Ubuntu 24.04** and includes LSP, debugging, formatting and completion setup; the `main` branch keeps the macOS configuration (including `im-select` input-method switching and Command-key mappings). A fresh machine only needs this repo cloned and `install.sh` run.
+A personal development-environment dotfiles collection (Neovim + shell jump commands + clangd fallback + ble.sh integration + daily wallpaper). The `forUbuntu` branch targets **Ubuntu 24.04** and includes LSP, debugging, formatting and completion setup; the `forMac` branch keeps the macOS configuration (including `im-select` input-method switching and Command-key mappings). A fresh machine only needs this repo cloned and `install.sh` run.
 
-> 📌 **Everything below assumes Ubuntu 24.04.** No macOS/Homebrew instructions are included on this branch. If you are on macOS, switch to the `main` branch.
+> 📌 **Everything below assumes Ubuntu 24.04.** No macOS/Homebrew instructions are included on this branch. If you are on macOS, switch to the `forMac` branch.
 
 **English** | [中文](README.zh-CN.md)
 
@@ -43,7 +43,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # tools outside ap
 - 🔍 **Fuzzy finding**: Telescope for files and content
 - 🌳 **Syntax highlighting**: Tree-sitter
 - 📋 **Completion**: nvim-cmp
-- 🎯 **Input method**: Ubuntu uses the desktop IME (Fcitx5/Rime, etc.) with no plugin switching; `im-select` auto-switching is `main`-branch only
+- 🎯 **Input method**: Ubuntu uses the desktop IME (Fcitx5/Rime, etc.) with no plugin switching; `im-select` auto-switching is `forMac`-branch only
 - 🖥️ **Neovide support**: tuned for the Neovide GUI
 - 🧰 **Fast machine bootstrap**: `install.sh` deploys nvim / clangd / blerc / jump commands / daily wallpaper in one idempotent run
 
@@ -101,4 +101,4 @@ MIT License
 
 ---
 
-The `forUbuntu` branch targets Ubuntu 24.04; the install guide and some Neovide/debug settings on `main` target macOS.
+The `forUbuntu` branch targets Ubuntu 24.04; the install guide and some Neovide/debug settings on `forMac` target macOS.

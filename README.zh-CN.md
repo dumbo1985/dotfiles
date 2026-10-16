@@ -1,8 +1,8 @@
 # dotfiles
 
-个人开发环境配置集合（Neovim + shell 跳转命令 + clangd 兜底 + ble.sh 集成 + 每日壁纸）。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。新机器只需 clone 本仓库并运行 `install.sh` 即可完成部署。
+个人开发环境配置集合（Neovim + shell 跳转命令 + clangd 兜底 + ble.sh 集成 + 每日壁纸）。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`forMac` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。新机器只需 clone 本仓库并运行 `install.sh` 即可完成部署。
 
-> 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `main` 分支。
+> 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `forMac` 分支。
 
 [English](README.md) | **中文**
 
@@ -43,7 +43,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # lazygit/dust/fas
 - 🔍 **模糊搜索**：Telescope 强大的文件搜索和内容搜索
 - 🌳 **语法高亮**：Tree-sitter 提供更好的语法高亮
 - 📋 **自动补全**：nvim-cmp 提供智能代码补全
-- 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `main` 分支启用
+- 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `forMac` 分支启用
 - 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
 - 🧰 **整机快速迁移**：`install.sh` 一键把 nvim / clangd / blerc / 跳转命令 / 每日壁纸部署到新机器，幂等可重跑
 
@@ -101,4 +101,4 @@ MIT License
 
 ---
 
-`forUbuntu` 分支的教程以 Ubuntu 24.04 为目标；`main` 分支中的安装说明和部分 Neovide/调试设置面向 macOS。
+`forUbuntu` 分支的教程以 Ubuntu 24.04 为目标；`forMac` 分支中的安装说明和部分 Neovide/调试设置面向 macOS。

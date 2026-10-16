@@ -190,7 +190,7 @@ Log out and back in, then open the Fcitx 5 config tool and add Rime. Also make s
 sudo apt install -y wl-clipboard xclip    # Wayland / X11 clipboard
 ```
 
-> 💡 The macOS-only ability to switch back to English on `InsertLeave` via `im-select` is **not enabled on the `forUbuntu` branch**. If you want it, use the `main` branch or port it yourself. On Ubuntu you can bind an Fcitx5 "toggle Chinese/English" key (e.g. `Ctrl+Space`) instead.
+> 💡 The macOS-only ability to switch back to English on `InsertLeave` via `im-select` is **not enabled on the `forUbuntu` branch**. If you want it, use the `forMac` branch or port it yourself. On Ubuntu you can bind an Fcitx5 "toggle Chinese/English" key (e.g. `Ctrl+Space`) instead.
 
 ### 8. (Optional) One-command CLI toolbox
 

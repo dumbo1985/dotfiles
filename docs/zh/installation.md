@@ -6,7 +6,7 @@
 
 - Ubuntu 24.04 LTS（以下命令以 x86-64 为例）
 - 可访问 GitHub 的网络
-- **必须使用 Neovim 0.12 或更新版本** —— nvim-treesitter 跟随其 `main` 分支，该分支只支持 0.12+；Ubuntu 仓库中的版本可能落后于本配置使用的插件
+- **必须使用 Neovim 0.12 或更新版本** —— nvim-treesitter 跟随其 `forMac` 分支，该分支只支持 0.12+；Ubuntu 仓库中的版本可能落后于本配置使用的插件
 - **tree-sitter CLI 0.26.1+** —— 用于编译没有预编译包的 parser（如 C/C++）。Ubuntu 仓库里的版本太旧，需从 [tree-sitter 发布页](https://github.com/tree-sitter/tree-sitter/releases)安装：
   ```bash
   curl -fL -o ~/tree-sitter.gz https://github.com/tree-sitter/tree-sitter/releases/download/v0.27.1/tree-sitter-linux-x64.gz
@@ -190,7 +190,7 @@ im-config -n fcitx5
 sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
 ```
 
-> 💡 macOS 上依靠 `im-select` 在离开插入模式时自动切回英文的能力**未在 `forUbuntu` 分支启用**，如需该功能请使用 `main` 分支或自行移植。Ubuntu 下可在 Fcitx5 中设置「中英文切换」快捷键（如 `Ctrl+Space`）来手动切换。
+> 💡 macOS 上依靠 `im-select` 在离开插入模式时自动切回英文的能力**未在 `forUbuntu` 分支启用**，如需该功能请使用 `forMac` 分支或自行移植。Ubuntu 下可在 Fcitx5 中设置「中英文切换」快捷键（如 `Ctrl+Space`）来手动切换。
 
 ### 8.（可选）一键安装命令行工具箱
 

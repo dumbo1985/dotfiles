@@ -33,7 +33,8 @@ return {
 	},
 	config = function(_, opts)
 		require("conform").setup(opts)
-		vim.keymap.set({ "n", "v" }, "<leader>mp", function()
+		-- 注意：<leader>mp 已被 markdown.lua 的浏览器预览占用，这里改用 <leader>mf
+		vim.keymap.set({ "n", "v" }, "<leader>mf", function()
 			require("conform").format({
 				lsp_fallback = true,
 				async = false,

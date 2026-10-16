@@ -17,6 +17,11 @@ opt.autoindent = true -- copy indent from current line when starting new one
 -- line wrapping
 opt.wrap = false -- disable line wrapping
 
+-- 显示行尾空格等不可见字符（Markdown 硬换行靠行尾两个空格，看不见容易漏）
+-- 不需要时可用 :set nolist 关闭
+opt.list = true
+opt.listchars = { tab = "» ", trail = "·", nbsp = "␣", extends = "›", precedes = "‹" }
+
 -- search settings
 opt.ignorecase = true -- ignore case when searching
 opt.smartcase = true -- if you include mixed case in your search, assumes you want case-sensitive

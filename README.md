@@ -222,6 +222,15 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 clipboard
 
 > 💡 The macOS-only ability to switch back to English on `InsertLeave` via `im-select` is **not enabled on the `forUbuntu` branch**. If you want it, use the `main` branch or port it yourself. On Ubuntu you can bind an Fcitx5 "toggle Chinese/English" key (e.g. `Ctrl+Space`) instead.
 
+### 8. (Optional) One-command CLI toolbox
+
+```bash
+bash ~/dotfiles/toolbox/ubuntu24-cli-toolbox.sh             # from apt: eza/bat/fd/zoxide/tmux/tig/direnv/fzf, ...
+bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run # outside apt: lazygit/dust/procs/fastfetch/zellij, ... (preview)
+```
+
+The first script installs modern CLI tools grouped by purpose and appends a marked `>>> cli-toolbox >>>` block to `~/.bashrc` (ls/ll aliases, zoxide/direnv/thefuck integration, fzf key bindings, colored man pages); re-running does not duplicate the block. The second downloads prebuilt binaries from each project's GitHub Releases (versions resolved at runtime) and supports `--dry-run`, per-tool selection, and `--force`. Both need sudo/network and are therefore not run by `install.sh`.
+
 ## 📁 Layout
 
 ```
@@ -241,6 +250,9 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 clipboard
 │   └── blerc                   # ble.sh + fzf integration (symlinked to ~/.blerc)
 ├── clangd/
 │   └── config.yaml             # user-level clangd fallback (Qt6 system-lib paths)
+├── toolbox/                    # CLI toolbox (needs sudo, run manually; not run by install.sh)
+│   ├── ubuntu24-cli-toolbox.sh # modern CLI tools from apt + bashrc alias block
+│   └── install-extra-cli-tools.sh # tools outside apt (GitHub Releases binaries)
 └── wallpaper/                  # daily wallpaper (GNOME/gsettings; skippable, unrelated to nvim)
     ├── bin/                    # daily-wallpaper / install-daily-wallpaper / wallpaper-doctor
     └── systemd/                # daily-wallpaper.service / .timer
@@ -254,6 +266,7 @@ Besides Neovim, the repo manages three things that are easy to lose on a new mac
 - **ble.sh + fzf integration (`ble/blerc`)**: keeps ble.sh's default MULTILINE behavior (RET inserts a newline in multiline input; `C-j` executes). ble.sh itself must be installed separately (`git clone --recursive https://github.com/akinomyoga/ble.sh && make -C ble.sh install PREFIX=~/.local`, then source it from `~/.bashrc`); the file is inert without it.
 - **clangd system-lib fallback (`clangd/config.yaml`)**: without a compile database (project never configured via CMake), clangd falls back to bare clang and floods Qt headers with errors. This file adds the Qt6 header paths of the Ubuntu 24.04 apt packages via `-isystem`, so "clone and start reading" projects still jump correctly. Projects with their own `compile_commands.json` are unaffected (`Add` is appended; duplicate paths are harmless). To add other system libs (OpenCV/Eigen, ...), check with `pkg-config --cflags <name>` — see the comments inside the file.
 - **Daily wallpaper (`wallpaper/`)**: fetches a new picsum wallpaper on schedule and prunes old ones (keeps only the current one by default). Requires GNOME/gsettings; after deploy, `install-daily-wallpaper` picks the scheduler — systemd user timer when available, otherwise a login autostart plus printed cron instructions. Manage with `install-daily-wallpaper status / now / uninstall`.
+- **CLI toolbox (`toolbox/`)**: two standalone installer scripts, see installation step 8. The repo stores the scripts only; the `>>> cli-toolbox >>>` bashrc block they generate is owned by the scripts, not by dotfiles (it does not conflict with the `dotfiles:jump` block).
 
 ## 🔌 Main Plugins
 

@@ -85,5 +85,9 @@ cat <<'EOF'
 
 2) 重开终端（让 bashrc 的跳转命令与 blerc 生效），然后 nvim 首次启动会自动装插件。
 
+可选：一键安装现代命令行工具箱（eza/bat/fd/zoxide/tmux/lazygit 等，需 sudo）：
+   bash ~/dotfiles/toolbox/ubuntu24-cli-toolbox.sh        # apt 官方源内的（含 bashrc 别名/集成配置块）
+   bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run   # 官方源外的（GitHub Releases，先预览）
+
 重新部署/更新配置：进入 ~/dotfiles 执行 git pull && ./install.sh 即可，脚本幂等。
 EOF

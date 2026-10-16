@@ -222,6 +222,15 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
 
 > 💡 macOS 上依靠 `im-select` 在离开插入模式时自动切回英文的能力**未在 `forUbuntu` 分支启用**，如需该功能请使用 `main` 分支或自行移植。Ubuntu 下可在 Fcitx5 中设置「中英文切换」快捷键（如 `Ctrl+Space`）来手动切换。
 
+### 8.（可选）一键安装命令行工具箱
+
+```bash
+bash ~/dotfiles/toolbox/ubuntu24-cli-toolbox.sh       # apt 官方源内：eza/bat/fd/zoxide/tmux/tig/direnv/fzf 等
+bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # 官方源外：lazygit/dust/procs/fastfetch/zellij 等（先预览）
+```
+
+第一个脚本会按功能分组安装现代 CLI 工具，并往 `~/.bashrc` 追加带 `>>> cli-toolbox >>>` 标记的配置块（ls/ll 别名、zoxide/direnv/thefuck 集成、fzf 快捷键、彩色手册页），重复执行不会重复写入。第二个脚本从各项目 GitHub Releases 下载预编译二进制（版本号运行时动态获取），支持 `--dry-run` 预览、指定工具名安装、`--force` 重装。两者都需要 sudo / 网络，因此不由 `install.sh` 代跑。
+
 ## 📁 配置结构
 
 ```
@@ -241,6 +250,9 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
 │   └── blerc                   # ble.sh + fzf 集成（软链到 ~/.blerc）
 ├── clangd/
 │   └── config.yaml             # 用户级 clangd 兜底配置（Qt6 公共库路径）
+├── toolbox/                    # 命令行工具箱（需 sudo，手动运行，不由 install.sh 代跑）
+│   ├── ubuntu24-cli-toolbox.sh # apt 官方源内现代 CLI 一键安装 + bashrc 别名块
+│   └── install-extra-cli-tools.sh # 官方源外工具（GitHub Releases 预编译）
 └── wallpaper/                  # 每日壁纸（GNOME/gsettings，与 nvim 无关，可跳过）
     ├── bin/                    # daily-wallpaper / install-daily-wallpaper / wallpaper-doctor
     └── systemd/                # daily-wallpaper.service / .timer
@@ -254,6 +266,7 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
 - **ble.sh + fzf 集成（`ble/blerc`）**：保留 ble.sh 默认的 MULTILINE 行为（多行时 RET 插入换行、`C-j` 执行）。ble.sh 本体需另行安装（`git clone --recursive https://github.com/akinomyoga/ble.sh && make -C ble.sh install PREFIX=~/.local`，并在 `~/.bashrc` 里 source），没装它时此文件不生效。
 - **clangd 公共库兜底（`clangd/config.yaml`）**：项目没跑过 CMake configure、没有 `compile_commands.json` 时，clangd 退化成裸 clang 会满屏报 Qt 头文件错误。该文件把 Ubuntu 24.04 apt 安装的 Qt6 头文件路径补进 `-isystem`，让"clone 下来直接看代码"也能正常跳转、不报错。项目有编译数据库时不冲突（`Add` 是追加，重复路径无害）。装了其他公共库（OpenCV/Eigen 等）要加路径时，用 `pkg-config --cflags <库名>` 判断（输出 `-I` 且不在默认搜索路径就要加），见文件内注释。
 - **每日壁纸（`wallpaper/`）**：每天定时从 picsum 下载一张壁纸并自动清理旧图（默认只保留当前一张）。依赖 GNOME/gsettings；`install.sh` 部署脚本后由 `install-daily-wallpaper` 自动选路——systemd user timer 可用则用 timer，否则退到登录自启动并打印 cron 方案。管理命令：`install-daily-wallpaper status / now / uninstall`。
+- **命令行工具箱（`toolbox/`）**：两个独立的安装脚本，见安装步骤第 8 步。仓库只保存脚本本身；本机的 `>>> cli-toolbox >>>` bashrc 块由脚本生成，不归 dotfiles 管理（与 `dotfiles:jump` 块互不干扰）。
 
 ## 🔌 主要插件
 

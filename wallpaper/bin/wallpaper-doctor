@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+#
+# wallpaper-doctor —— 排查壁纸脚本为什么没生效
+#
+# 逐项检查：脚本、图源、D-Bus、dconf 后端、写入能力、调度器状态。
+# 在你的桌面终端里运行本脚本，能直接看出问题出在哪一环。
+
+set -uo pipefail
+
+WALLPAPER_DIR="${HOME}/.local/share/wallpapers"
+LOG_FILE="${HOME}/.local/state/daily-wallpaper.log"
+
+ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
+bad()  { printf '  \033[31m✗\033[0m %s\n' "$*"; }
+warn() { printf '  \033[33m!\033[0m %s\n' "$*"; }
+
+echo "═══ 每日壁纸自检 ═══"
+echo
+
+echo "── 1. 脚本 ──"
+if [[ -x "${HOME}/.local/bin/daily-wallpaper" ]]; then
+	ok "daily-wallpaper 可执行"
+else
+	bad "~/.local/bin/daily-wallpaper 缺失或不可执行"
+fi
+
+echo
+echo "── 2. 依赖 ──"
+for c in curl file gsettings; do
+	if command -v "$c" >/dev/null 2>&1; then ok "$c 已安装"; else bad "$c 缺失"; fi
+done
+
+echo
+echo "── 3. 会话环境（最关键）──"
+echo "  DISPLAY              = ${DISPLAY:-<未设置>}"
+echo "  DBUS_SESSION_BUS_ADDRESS = ${DBUS_SESSION_BUS_ADDRESS:-<未设置>}"
+echo "  XDG_CURRENT_DESKTOP  = ${XDG_CURRENT_DESKTOP:-<未设置>}"
+echo "  当前 UID             = $(id -u)  (应在桌面会话中为你的普通用户)"
+
+bus_path="/run/user/$(id -u)/bus"
+if [[ -S "$bus_path" ]]; then
+	ok "D-Bus socket 存在: $bus_path"
+else
+	bad "D-Bus socket 不存在: $bus_path —— gsettings 无法生效"
+	warn "请确认在图形会话的终端里运行（不是 ssh / 纯 tty / root shell）"
+fi
+
+echo
+echo "── 4. dconf 写入能力 ──"
+cur="$(gsettings get org.gnome.desktop.background picture-uri 2>/dev/null)"
+# 严格探测：向一个临时 key 写入再读回，能同时验证「可写」和「可读」。
+# 注意 dconf read 在连不上后端时可能返回空串，所以必须看退出码 + 实际值。
+probe_key="/org/gnome/desktop/background/picture-uri"
+probe_val="$(dconf read "$probe_key" 2>/dev/null)"
+probe_rc=$?
+if (( probe_rc != 0 )); then
+	bad "dconf 后端连不上（退出码 $probe_rc）—— gsettings 写入会静默失败"
+	warn "当前 shell 未接入图形会话的 D-Bus，请在桌面终端里运行"
+elif [[ -z "$probe_val" ]]; then
+	warn "dconf 可读但 picture-uri 为空 —— 桌面可能未初始化过壁纸设置"
+else
+	ok "dconf 后端可读写（picture-uri = $probe_val）"
+fi
+
+echo
+echo "── 5. 当前壁纸 ──"
+echo "  浅色: $cur"
+echo "  深色: $(gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null)"
+
+echo
+echo "── 6. 调度器 ──"
+if systemctl --user list-timers --all 2>/dev/null | grep -q daily-wallpaper; then
+	ok "systemd timer 已启用"
+	systemctl --user list-timers daily-wallpaper.timer --no-pager 2>/dev/null | head -3 | sed 's/^/    /'
+else
+	warn "systemd timer 未启用"
+fi
+if [[ -f "${HOME}/.config/autostart/daily-wallpaper.desktop" ]]; then
+	ok "GNOME 自启动已配置"
+else
+	warn "GNOME 自启动未配置"
+fi
+
+echo
+echo "── 7. 已保存壁纸（最近 5 张）──"
+ls -1t "$WALLPAPER_DIR" 2>/dev/null | head -5 | sed 's/^/    /' || warn "目录为空"
+
+echo
+echo "── 8. 最近日志 ──"
+tail -n 6 "$LOG_FILE" 2>/dev/null | sed 's/^/    /' || warn "暂无日志"
+
+echo
+echo "═══ 自检结束 ═══"
+echo "在桌面终端里执行： ~/.local/bin/daily-wallpaper   # 立即换一张试试"

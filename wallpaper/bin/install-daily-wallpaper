@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+#
+# install-daily-wallpaper.sh —— 一键启用/管理每日壁纸
+#
+# 提供两种调度方式：
+#   1. systemd user timer（推荐，支持开机补执行）
+#   2. GNOME 自启动 + 每日检查（systemd 不可用时的退路）
+#
+# 用法：
+#   install-daily-wallpaper.sh install [HH:MM]   安装并启用（默认 08:00）
+#   install-daily-wallpaper.sh uninstall         卸载
+#   install-daily-wallpaper.sh status            查看状态
+#   install-daily-wallpaper.sh now               立即换一张
+
+set -uo pipefail
+
+SCRIPT="${HOME}/.local/bin/daily-wallpaper"
+UNIT_DIR="${HOME}/.config/systemd/user"
+AUTOSTART_DIR="${HOME}/.config/autostart"
+TIME="${2:-08:00}"
+
+[[ -x "$SCRIPT" ]] || { echo "找不到 $SCRIPT，请先放置脚本并 chmod +x"; exit 1; }
+
+ensure_units() {
+	mkdir -p "$UNIT_DIR"
+	if [[ ! -f "$UNIT_DIR/daily-wallpaper.service" ]]; then
+		echo "缺少 $UNIT_DIR/daily-wallpaper.service"; exit 1
+	fi
+	if [[ -n "${2:-}" ]]; then
+		sed -i "s|^OnCalendar=.*|OnCalendar=*-*-* ${TIME}:00|" "$UNIT_DIR/daily-wallpaper.timer"
+	fi
+}
+
+cmd_install() {
+	ensure_units
+	if systemctl --user version >/dev/null 2>&1; then
+		# 确保定时器在未登录时也能运行（关键：否则关机时会错过）
+		loginctl enable-linger "$USER" 2>/dev/null || true
+		sed -i "s|^OnCalendar=.*|OnCalendar=*-*-* ${TIME}:00|" "$UNIT_DIR/daily-wallpaper.timer"
+		systemctl --user daemon-reload
+		systemctl --user enable --now daily-wallpaper.timer
+		echo "✓ 已启用 systemd 定时器，每天 ${TIME} 更换壁纸"
+		systemctl --user list-timers daily-wallpaper.timer --no-pager
+	else
+		echo "⚠ systemd user 不可用，改用 GNOME 自启动方案"
+		install_autostart
+	fi
+}
+
+install_autostart() {
+	mkdir -p "$AUTOSTART_DIR"
+	cat > "$AUTOSTART_DIR/daily-wallpaper.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Daily Wallpaper
+Comment=登录时检查并更换当日壁纸
+Exec=${SCRIPT}
+X-GNOME-Autostart-enabled=true
+NoDisplay=false
+Terminal=false
+EOF
+	echo "✓ 已写入 $AUTOSTART_DIR/daily-wallpaper.desktop"
+	echo "  每次登录会检查当天是否已换过壁纸（脚本按日期命名，同一天不会重复下载）"
+	echo "  如需严格定时（如每天 10:00），请改用系统 cron："
+	echo "    (crontab -l 2>/dev/null | grep -v daily-wallpaper;"
+	echo "     echo 'PATH=/usr/local/bin:/usr/bin:/bin';"
+	echo "     echo '0 10 * * * DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus XDG_RUNTIME_DIR=/run/user/1000 $SCRIPT >> $HOME/.local/state/daily-wallpaper-cron.log 2>&1') | crontab -"
+	echo "  说明：不要加 DISPLAY（gsettings 走 dconf，不需要 X11）；1000 换成你的实际 uid（id -u）。"
+}
+
+cmd_uninstall() {
+	systemctl --user disable --now daily-wallpaper.timer 2>/dev/null || true
+	rm -f "$UNIT_DIR/daily-wallpaper.timer" "$UNIT_DIR/daily-wallpaper.service"
+	rm -f "$AUTOSTART_DIR/daily-wallpaper.desktop"
+	systemctl --user daemon-reload 2>/dev/null || true
+	echo "✓ 已卸载定时任务（壁纸文件保留在 ~/.local/share/wallpapers）"
+}
+
+cmd_status() {
+	echo "── 脚本 ──"
+	[[ -x "$SCRIPT" ]] && echo "✓ $SCRIPT" || echo "✗ 脚本缺失"
+	echo "── systemd timer ──"
+	if systemctl --user list-timers --all 2>/dev/null | grep -q daily-wallpaper; then
+		systemctl --user list-timers daily-wallpaper.timer --no-pager
+	else
+		echo "(未启用)"
+	fi
+	echo "── GNOME 自启动 ──"
+	[[ -f "$AUTOSTART_DIR/daily-wallpaper.desktop" ]] && echo "✓ 已配置" || echo "(未配置)"
+	echo "── 最近日志 ──"
+	tail -n 8 "${HOME}/.local/state/daily-wallpaper.log" 2>/dev/null || echo "(暂无日志)"
+	echo "── 已保存壁纸 ──"
+	ls -1t "${HOME}/.local/share/wallpapers" 2>/dev/null | head -5 || echo "(无)"
+}
+
+case "${1:-}" in
+	install)   cmd_install ;;
+	uninstall) cmd_uninstall ;;
+	status)    cmd_status ;;
+	now)       "$SCRIPT" ;;
+	*)
+		sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'
+		exit 1 ;;
+esac

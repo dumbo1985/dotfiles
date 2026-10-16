@@ -1,0 +1,9 @@
+# Use fzf through ble.sh's supported integration so Ctrl+R/Ctrl+T remain available.
+ble-import -d integration/fzf-completion
+ble-import -d integration/fzf-key-bindings
+
+# 说明：ble.sh 默认在 MULTILINE 模式下 RET=插入换行、C-j=执行（防粘贴多段命令被回车误执行）。
+# 曾短暂把 RET/C-m rebind 为 accept-line，2026-10-16 按用户要求撤回，保留默认机制。
+# 若以后想改回来，在下面加：
+#   ble-bind -f 'RET' 'accept-line'
+#   ble-bind -f 'C-m' 'accept-line'

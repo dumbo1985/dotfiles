@@ -1,6 +1,6 @@
 # dotfiles
 
-个人 Neovim 配置文件集合。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。
+个人开发环境配置集合（Neovim + shell 跳转命令 + clangd 兜底 + ble.sh 集成 + 每日壁纸）。当前 `forUbuntu` 分支面向 **Ubuntu 24.04**，包含 LSP、调试、格式化和代码补全配置；`main` 分支保留 macOS 配置（含 `im-select` 输入法自动切换与 Command 键映射）。新机器只需 clone 本仓库并运行 `install.sh` 即可完成部署。
 
 > 📌 **本分支的安装与使用说明均以 Ubuntu 24.04 为准**，不会包含 macOS（Homebrew 等）的安装方式。若你在 macOS 上使用，请切换到 `main` 分支。
 
@@ -11,6 +11,7 @@
 - [功能特性](#功能特性)
 - [安装步骤](#安装步骤)
 - [配置结构](#配置结构)
+- [仓库内的其他配置](#-仓库内的其他配置)
 - [主要插件](#主要插件)
 - [键位映射](#键位映射)
 - [使用说明](#使用说明)
@@ -27,6 +28,7 @@
 - 📋 **自动补全**：nvim-cmp 提供智能代码补全
 - 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `main` 分支启用
 - 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
+- 🧰 **整机快速迁移**：`install.sh` 一键把 nvim / clangd / blerc / 跳转命令 / 每日壁纸部署到新机器，幂等可重跑
 
 ## 🚀 安装步骤
 
@@ -157,10 +159,27 @@ Neovide 专用快捷键使用 macOS 的 Command 键映射（`<D-s>` 等），在
 LIBGL_ALWAYS_SOFTWARE=1 neovide
 ```
 
-### 5. 获取 Ubuntu 配置并建立链接
+### 5. 获取 Ubuntu 配置并一键部署
 
 ```bash
 git clone --branch forUbuntu https://github.com/dumbo1985/dotfiles.git ~/dotfiles
+~/dotfiles/install.sh
+```
+
+`install.sh` 是幂等的，重复执行安全，它会把仓库里的所有配置接线到位：
+
+- 软链 `~/.config/nvim → ~/dotfiles/nvim`（已有真实目录会备份为 `*.pre-dotfiles.bak`）
+- 软链 `~/.config/clangd/config.yaml`（未编译项目也能跳转 Qt 等公共库，见[仓库内的其他配置](#-仓库内的其他配置)）
+- 软链 `~/.blerc`（ble.sh + fzf 集成；未装 ble.sh 时无影响）
+- 向 `~/.bashrc` 追加标记块，source `bash/jump.sh`（`workspace` / `dengprojects` 快速跳转命令）
+- 复制 `wallpaper/` 下的每日壁纸脚本到 `~/.local/bin` 并自动选择调度方式
+
+不想要壁纸功能的机器执行 `~/dotfiles/install.sh --skip-wallpaper`。
+
+<details>
+<summary>手动方式（与脚本等价，适合只想链接 nvim 的机器）</summary>
+
+```bash
 mkdir -p ~/.config
 if [ -e ~/.config/nvim ] && [ ! -L ~/.config/nvim ]; then
   mv ~/.config/nvim ~/.config/nvim.backup
@@ -169,6 +188,8 @@ ln -sfn ~/dotfiles/nvim ~/.config/nvim
 ```
 
 如果已经克隆过仓库，进入 `~/dotfiles` 后运行 `git switch forUbuntu`，再执行链接命令即可。已有的真实配置目录会先备份为 `~/.config/nvim.backup`。
+
+</details>
 
 ### 6. 首次启动
 
@@ -204,32 +225,35 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 剪贴板
 ## 📁 配置结构
 
 ```
-nvim/
-├── init.lua                    # 入口文件
-├── lazy-lock.json              # 插件版本锁定文件
-└── lua/dengbo/
-    ├── core/                   # 核心配置
-    │   ├── init.lua           # 核心配置入口
-    │   ├── options.lua        # Neovim 选项配置
-    │   ├── keymaps.lua         # 全局键位映射
-    │   ├── neovide.lua         # Neovide GUI 配置
-    │   └── input_method.lua    # 输入法自动切换（仅 macOS 生效，Ubuntu 下不会被加载）
-    ├── platform/               # 平台相关模块
-    │   └── input_method.lua    # 输入法切换的 macOS 实现（备用）
-    ├── lazy.lua                # 插件管理和主题加载
-    └── plugins/                # 插件配置
-        ├── init.lua           # 基础插件
-        ├── lsp/               # LSP 相关插件
-        │   ├── mason.lua      # Mason 包管理器
-        │   └── lspconfig.lua   # LSP 服务器配置
-        ├── nvim-cmp.lua       # 代码补全
-        ├── telescope.lua      # 模糊搜索
-        ├── treesitter.lua      # 语法高亮
-        ├── nvim-dap.lua       # 调试器
-        ├── formatting.lua     # 代码格式化
-        ├── linting.lua        # 代码检查
-        └── ...                # 其他插件配置
+.
+├── install.sh                  # 一键部署脚本（软链 nvim/clangd/blerc、追加 bashrc、部署壁纸）
+├── nvim/                       # Neovim 配置（软链到 ~/.config/nvim）
+│   ├── init.lua                # 入口文件
+│   ├── lazy-lock.json          # 插件版本锁定文件（回滚快照）
+│   └── lua/dengbo/
+│       ├── core/               # 核心配置（选项、键位、折叠、Neovide 等）
+│       ├── platform/           # 平台相关模块（macOS 输入法实现，备用）
+│       ├── lazy.lua            # 插件管理和主题加载
+│       └── plugins/            # 插件配置（lsp/、telescope、treesitter、dap、formatting …）
+├── bash/
+│   └── jump.sh                 # 终端快速跳转命令（workspace / dengprojects）
+├── ble/
+│   └── blerc                   # ble.sh + fzf 集成（软链到 ~/.blerc）
+├── clangd/
+│   └── config.yaml             # 用户级 clangd 兜底配置（Qt6 公共库路径）
+└── wallpaper/                  # 每日壁纸（GNOME/gsettings，与 nvim 无关，可跳过）
+    ├── bin/                    # daily-wallpaper / install-daily-wallpaper / wallpaper-doctor
+    └── systemd/                # daily-wallpaper.service / .timer
 ```
+
+## 🧩 仓库内的其他配置
+
+除 Neovim 外，仓库还管理三块"新机器上容易丢"的配置，均由 `install.sh` 自动接线：
+
+- **终端快速跳转（`bash/jump.sh`）**：`workspace`、`dengprojects` 两个命令，任意位置敲命令名即进入对应目录，可带子目录参数直达，Tab 补全实时扫描目录。想加新目录，在 `jump.sh` 里仿照添加一行 `_def_jump 名字 "$HOME/某路径"` 即可。
+- **ble.sh + fzf 集成（`ble/blerc`）**：保留 ble.sh 默认的 MULTILINE 行为（多行时 RET 插入换行、`C-j` 执行）。ble.sh 本体需另行安装（`git clone --recursive https://github.com/akinomyoga/ble.sh && make -C ble.sh install PREFIX=~/.local`，并在 `~/.bashrc` 里 source），没装它时此文件不生效。
+- **clangd 公共库兜底（`clangd/config.yaml`）**：项目没跑过 CMake configure、没有 `compile_commands.json` 时，clangd 退化成裸 clang 会满屏报 Qt 头文件错误。该文件把 Ubuntu 24.04 apt 安装的 Qt6 头文件路径补进 `-isystem`，让"clone 下来直接看代码"也能正常跳转、不报错。项目有编译数据库时不冲突（`Add` 是追加，重复路径无害）。装了其他公共库（OpenCV/Eigen 等）要加路径时，用 `pkg-config --cflags <库名>` 判断（输出 `-I` 且不在默认搜索路径就要加），见文件内注释。
+- **每日壁纸（`wallpaper/`）**：每天定时从 picsum 下载一张壁纸并自动清理旧图（默认只保留当前一张）。依赖 GNOME/gsettings；`install.sh` 部署脚本后由 `install-daily-wallpaper` 自动选路——systemd user timer 可用则用 timer，否则退到登录自启动并打印 cron 方案。管理命令：`install-daily-wallpaper status / now / uninstall`。
 
 ## 🔌 主要插件
 

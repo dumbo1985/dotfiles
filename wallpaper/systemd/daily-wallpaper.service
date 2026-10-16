@@ -1,0 +1,27 @@
+[Unit]
+Description=每日自动更换 GNOME 桌面壁纸
+Documentation=file://%h/.local/bin/daily-wallpaper
+# 只做排序，不阻塞：若 graphical-session.target 未激活，本服务仍应执行。
+# 之前用 PartOf=graphical-session.target，一旦该 target 不存在定时器就永远空转。
+After=dbus.service graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/daily-wallpaper
+
+# GNOME 的壁纸配置存在 dconf 中，通过会话 D-Bus 写入。
+# systemd user 服务默认不继承这些变量，必须显式注入，否则 gsettings 会静默失败。
+# %t 在 --user 模式下展开为 $XDG_RUNTIME_DIR（/run/user/<uid>）；
+# 不要写 %U 或硬编码 :0 —— 前者在 Environment= 中不保证展开，后者机器上是 :1。
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+Environment=XDG_RUNTIME_DIR=%t
+Environment=XDG_CURRENT_DESKTOP=ubuntu:GNOME
+
+# 网络未就绪时不要直接失败，给一次重试机会
+Restart=on-failure
+RestartSec=30s
+TimeoutStartSec=180
+
+# 日志走 journal，可用 journalctl --user -u daily-wallpaper 查看
+StandardOutput=journal
+StandardError=journal

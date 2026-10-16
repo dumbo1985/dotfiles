@@ -1,0 +1,18 @@
+[Unit]
+Description=每天定时触发壁纸更换
+Documentation=file://%h/.local/bin/daily-wallpaper
+
+[Timer]
+# 每天 10:00 触发；改成你想要的时间即可（只改这一行的 HH:MM:SS）
+OnCalendar=*-*-* 10:00:00
+
+# 关键：若到点时电脑关机/休眠，开机后补执行一次
+Persistent=true
+
+# 开机后延迟 2 分钟再执行，等桌面与网络就绪
+OnBootSec=2min
+AccuracySec=1min
+Unit=daily-wallpaper.service
+
+[Install]
+WantedBy=timers.target

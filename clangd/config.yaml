@@ -1,0 +1,45 @@
+# 用户级 clangd 配置：对所有项目生效，不需要在项目里放任何文件
+#
+# 作用：项目没有编译数据库（没 configure、没生成 compile_commands.json）时，
+# clangd 会退化成裸 clang，Qt 这类系统库的头文件路径一条都没有，于是满屏
+# "Unknown type name 'QString'"。这里把 Qt6 的头文件路径补上，
+# 未编译的项目也能正常跳转、不报错。
+#
+# 已有编译数据库的项目不受影响：CompileFlags.Add 是追加在原有编译命令之后的，
+# 重复路径无害。若某个项目用的是另一套 Qt（例如 /opt/Qt/6.x），
+# 在该项目里放一个 .clangd，用 CompileFlags.Remove 去掉这些路径即可。
+#
+# 这里不写 -std：clangd 默认已是 gnu++17。项目若要别的标准，
+# 在项目自己的 compile_flags.txt / .clangd 里指定，避免全局冲突。
+#
+# 以后装了别的公共库，要不要往下面加一行？判断方法：
+#   pkg-config --cflags <库名>
+# 输出为空 → 头文件在 clang 默认搜索路径（/usr/include、/usr/local/include），不用管；
+# 输出 -I/某路径 且该路径不是 /usr/include 本身 → 需要照下面格式加 -isystem 行。
+# 典型需要加的：OpenCV(/usr/include/opencv4)、Eigen(/usr/include/eigen3)、
+# 以及装到 /opt 或 ~/ 下的库。
+# 注意：项目只要跑过 cmake configure，CMake 会自己把正确的 -isystem 写进
+# compile_commands.json，那时不走这里——这个文件只用于"没 configure 直接看代码"的兜底。
+CompileFlags:
+  Add:
+    - -isystem/usr/include/x86_64-linux-gnu/qt6
+    - -isystem/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtConcurrent
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtCore
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtDBus
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtDeviceDiscoverySupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtEglFSDeviceIntegration
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtEglFsKmsGbmSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtEglFsKmsSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtFbSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtGui
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtInputSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtKmsSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtNetwork
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtOpenGL
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtOpenGLWidgets
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtPrintSupport
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtSql
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtTest
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtWidgets
+    - -isystem/usr/include/x86_64-linux-gnu/qt6/QtXml

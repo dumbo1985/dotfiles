@@ -1,6 +1,6 @@
 # dotfiles
 
-A personal Neovim configuration. The `forUbuntu` branch targets **Ubuntu 24.04** and includes LSP, debugging, formatting and completion setup; the `main` branch keeps the macOS configuration (including `im-select` input-method switching and Command-key mappings).
+A personal development-environment dotfiles collection (Neovim + shell jump commands + clangd fallback + ble.sh integration + daily wallpaper). The `forUbuntu` branch targets **Ubuntu 24.04** and includes LSP, debugging, formatting and completion setup; the `main` branch keeps the macOS configuration (including `im-select` input-method switching and Command-key mappings). A fresh machine only needs this repo cloned and `install.sh` run.
 
 > 📌 **Everything below assumes Ubuntu 24.04.** No macOS/Homebrew instructions are included on this branch. If you are on macOS, switch to the `main` branch.
 
@@ -11,6 +11,7 @@ A personal Neovim configuration. The `forUbuntu` branch targets **Ubuntu 24.04**
 - [Features](#-features)
 - [Installation](#-installation)
 - [Layout](#-layout)
+- [Other configs in this repo](#-other-configs-in-this-repo)
 - [Main Plugins](#-main-plugins)
 - [Keymaps](#-keymaps)
 - [Usage](#-usage)
@@ -27,6 +28,7 @@ A personal Neovim configuration. The `forUbuntu` branch targets **Ubuntu 24.04**
 - 📋 **Completion**: nvim-cmp
 - 🎯 **Input method**: Ubuntu uses the desktop IME (Fcitx5/Rime, etc.) with no plugin switching; `im-select` auto-switching is `main`-branch only
 - 🖥️ **Neovide support**: tuned for the Neovide GUI
+- 🧰 **Fast machine bootstrap**: `install.sh` deploys nvim / clangd / blerc / jump commands / daily wallpaper in one idempotent run
 
 ## 🚀 Installation
 
@@ -157,10 +159,27 @@ If Neovide fails with `Failed to create OpenGL context`, your GPU driver or GL e
 LIBGL_ALWAYS_SOFTWARE=1 neovide
 ```
 
-### 5. Clone the Ubuntu config and link it
+### 5. Clone the Ubuntu config and bootstrap in one step
 
 ```bash
 git clone --branch forUbuntu https://github.com/dumbo1985/dotfiles.git ~/dotfiles
+~/dotfiles/install.sh
+```
+
+`install.sh` is idempotent — safe to re-run — and wires everything up:
+
+- symlinks `~/.config/nvim → ~/dotfiles/nvim` (an existing real directory is backed up as `*.pre-dotfiles.bak`)
+- symlinks `~/.config/clangd/config.yaml` (unconfigured projects still resolve Qt and other system libs; see [Other configs in this repo](#-other-configs-in-this-repo))
+- symlinks `~/.blerc` (ble.sh + fzf integration; harmless if ble.sh is not installed)
+- appends a marked block to `~/.bashrc` sourcing `bash/jump.sh` (the `workspace` / `dengprojects` jump commands)
+- copies the daily-wallpaper scripts from `wallpaper/` to `~/.local/bin` and picks a scheduler automatically
+
+On machines where you don't want the wallpaper feature, run `~/dotfiles/install.sh --skip-wallpaper`.
+
+<details>
+<summary>Manual method (equivalent, for nvim-only machines)</summary>
+
+```bash
 mkdir -p ~/.config
 if [ -e ~/.config/nvim ] && [ ! -L ~/.config/nvim ]; then
   mv ~/.config/nvim ~/.config/nvim.backup
@@ -169,6 +188,8 @@ ln -sfn ~/dotfiles/nvim ~/.config/nvim
 ```
 
 If you already cloned the repo, `cd ~/dotfiles && git switch forUbuntu` and then run the linking commands. An existing real config directory is backed up to `~/.config/nvim.backup` first.
+
+</details>
 
 ### 6. First launch
 
@@ -204,32 +225,35 @@ sudo apt install -y wl-clipboard xclip    # Wayland / X11 clipboard
 ## 📁 Layout
 
 ```
-nvim/
-├── init.lua                    # entry point
-├── lazy-lock.json              # plugin version lockfile
-└── lua/dengbo/
-    ├── core/                   # core config
-    │   ├── init.lua           # core entry
-    │   ├── options.lua        # Neovim options
-    │   ├── keymaps.lua        # global keymaps
-    │   ├── neovide.lua        # Neovide GUI config
-    │   └── input_method.lua   # IME auto-switching (macOS only; never loaded on Ubuntu)
-    ├── platform/               # platform-specific modules
-    │   └── input_method.lua    # macOS IME implementation (kept as a spare)
-    ├── lazy.lua                # plugin manager and colorscheme loading
-    └── plugins/                # plugin configs
-        ├── init.lua           # base plugins
-        ├── lsp/               # LSP plugins
-        │   ├── mason.lua      # Mason package manager
-        │   └── lspconfig.lua   # LSP server config
-        ├── nvim-cmp.lua       # completion
-        ├── telescope.lua      # fuzzy finder
-        ├── treesitter.lua      # syntax highlighting
-        ├── nvim-dap.lua       # debugger
-        ├── formatting.lua     # formatting
-        ├── linting.lua        # linting
-        └── ...                # other plugin configs
+.
+├── install.sh                  # idempotent bootstrap (symlinks nvim/clangd/blerc, bashrc block, wallpaper deploy)
+├── nvim/                       # Neovim config (symlinked to ~/.config/nvim)
+│   ├── init.lua                # entry point
+│   ├── lazy-lock.json          # plugin version lockfile (rollback snapshot)
+│   └── lua/dengbo/
+│       ├── core/               # core config (options, keymaps, folding, Neovide, ...)
+│       ├── platform/           # platform modules (macOS IME implementation, spare)
+│       ├── lazy.lua            # plugin manager and colorscheme loading
+│       └── plugins/            # plugin configs (lsp/, telescope, treesitter, dap, formatting, ...)
+├── bash/
+│   └── jump.sh                 # terminal jump commands (workspace / dengprojects)
+├── ble/
+│   └── blerc                   # ble.sh + fzf integration (symlinked to ~/.blerc)
+├── clangd/
+│   └── config.yaml             # user-level clangd fallback (Qt6 system-lib paths)
+└── wallpaper/                  # daily wallpaper (GNOME/gsettings; skippable, unrelated to nvim)
+    ├── bin/                    # daily-wallpaper / install-daily-wallpaper / wallpaper-doctor
+    └── systemd/                # daily-wallpaper.service / .timer
 ```
+
+## 🧩 Other configs in this repo
+
+Besides Neovim, the repo manages three things that are easy to lose on a new machine, all wired up by `install.sh`:
+
+- **Shell jump commands (`bash/jump.sh`)**: `workspace` and `dengprojects` cd into their directories from anywhere, accept a subdirectory argument, and complete subdirectories live via Tab. To add a new one, append a line like `_def_jump name "$HOME/some/path"` in `jump.sh`.
+- **ble.sh + fzf integration (`ble/blerc`)**: keeps ble.sh's default MULTILINE behavior (RET inserts a newline in multiline input; `C-j` executes). ble.sh itself must be installed separately (`git clone --recursive https://github.com/akinomyoga/ble.sh && make -C ble.sh install PREFIX=~/.local`, then source it from `~/.bashrc`); the file is inert without it.
+- **clangd system-lib fallback (`clangd/config.yaml`)**: without a compile database (project never configured via CMake), clangd falls back to bare clang and floods Qt headers with errors. This file adds the Qt6 header paths of the Ubuntu 24.04 apt packages via `-isystem`, so "clone and start reading" projects still jump correctly. Projects with their own `compile_commands.json` are unaffected (`Add` is appended; duplicate paths are harmless). To add other system libs (OpenCV/Eigen, ...), check with `pkg-config --cflags <name>` — see the comments inside the file.
+- **Daily wallpaper (`wallpaper/`)**: fetches a new picsum wallpaper on schedule and prunes old ones (keeps only the current one by default). Requires GNOME/gsettings; after deploy, `install-daily-wallpaper` picks the scheduler — systemd user timer when available, otherwise a login autostart plus printed cron instructions. Manage with `install-daily-wallpaper status / now / uninstall`.
 
 ## 🔌 Main Plugins
 

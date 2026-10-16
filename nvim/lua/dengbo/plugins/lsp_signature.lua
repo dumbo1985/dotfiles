@@ -72,8 +72,7 @@ return {
 		-- recommended:
 		require("lsp_signature").setup(cfg) -- no need to specify bufnr if you don't use toggle_key
 
-		-- You can also do this inside lsp on_attach
-		-- note: on_attach deprecated
-		require("lsp_signature").on_attach(cfg, bufnr) -- no need to specify bufnr if you don't use toggle_key
+		-- 注意：on_attach 已弃用，现在通过 setup() 自动处理
+		-- 如果需要手动附加，可以在 lspconfig 的 on_attach 中调用
 	end,
 }

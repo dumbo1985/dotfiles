@@ -227,7 +227,7 @@ return {
 		-- 添加诊断命令
 		vim.api.nvim_create_user_command("LspDiagnostics", function()
 			local bufnr = vim.api.nvim_get_current_buf()
-			local clients = vim.lsp.get_active_clients({ bufnr = bufnr })
+			local clients = vim.lsp.get_clients({ bufnr = bufnr })
 			
 			if #clients == 0 then
 				vim.notify("当前缓冲区没有活动的 LSP 客户端", vim.log.levels.WARN)

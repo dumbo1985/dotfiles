@@ -177,3 +177,41 @@ end, { desc = "查找调试错误信息" })
 keymap.set("n", "<leader>ch", function()
 	vim.cmd("ClangdSwitchSourceHeader")
 end, { desc = "切换源文件/头文件" })
+
+---------------------
+-- ✨ 终端模式剪贴板 ✨
+---------------------
+-- 终端模式（toggleterm 浮窗内）粘贴：Ctrl+Shift+V
+-- 终端模式不能直接执行 "+p，必须先 <C-\><C-n> 退出终端输入模式，
+-- 用 gP（保持光标位置）插入系统剪贴板内容，再 i 回到输入模式。
+local function term_paste()
+	-- 若剪贴板为空则不做任何事，避免误插入
+	local clip = vim.fn.getreg("+")
+	if clip == nil or clip == "" then
+		return
+	end
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('gP', true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("i", true, false, true), "n", false)
+end
+
+-- 注意：Neovide 对 <C-S-字母> 的上报在部分系统/输入法下不可靠，
+-- 因此除 Ctrl+Shift+V 外，额外提供 <leader>pp 入口。
+-- 特意**不**占用 <C-v>：它在 normal 模式是原生「可视块模式」，
+-- 覆盖会牺牲列选择这一高频功能，得不偿失。
+keymap.set("t", "<C-S-v>", term_paste, { desc = "终端粘贴系统剪贴板" })
+keymap.set("t", "<leader>pp", term_paste, { desc = "终端粘贴系统剪贴板" })
+keymap.set("t", "<M-v>", term_paste, { desc = "终端粘贴系统剪贴板（Alt+V 备用）" })
+
+-- 终端模式下的复制
+local function term_copy()
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('"+y', true, false, true), "n", false)
+end
+keymap.set("t", "<C-S-c>", term_copy, { desc = "终端复制到系统剪贴板" })
+keymap.set("t", "<leader>yy", term_copy, { desc = "终端复制到系统剪贴板" })
+keymap.set("t", "<M-c>", term_copy, { desc = "终端复制到系统剪贴板（Alt+C 备用）" })
+
+-- 说明：<C-v> 在 normal 模式保留为原生「可视块模式」，不做覆盖。
+-- 普通/可视模式下从系统剪贴板粘贴请用 "+p；或使用 Neovide 的 <D-v>（仅 macOS）。
+

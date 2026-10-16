@@ -91,10 +91,6 @@ return {
 				timeout = 400, -- git 超时，防止卡住
 			},
 
-			system_open = {
-				cmd = vim.fn.has("mac") == 1 and "open" or "xdg-open",
-			},
-
 			diagnostics = {
 				enable = true, -- 推荐：显示 LSP 诊断信息
 				icons = {

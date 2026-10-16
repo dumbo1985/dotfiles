@@ -225,12 +225,14 @@ The browser preview updates as you edit and stays open when Neovim exits. First 
 
 ### Symbols outline
 
+Provided by **hedyhli/outline.nvim** (the original simrat39/symbols-outline.nvim is unmaintained and incompatible with the nvim-treesitter main branch).
+
 | Key | Action | Scope |
 |--------|------|------|
 | `<leader>es` | Toggle symbols outline | Global |
 | `<Esc>` / `q` | Close | Outline window |
 | `<Cr>` | Jump to location | Outline window |
-| `o` | Focus location | Outline window |
+| `o` | Go to symbol location | Outline window |
 | `<C-space>` | Hover symbol | Outline window |
 | `K` | Toggle preview | Outline window |
 | `r` | Rename symbol | Outline window |
@@ -241,7 +243,7 @@ The browser preview updates as you edit and stays open when Neovim exits. First 
 | `E` | Expand all | Outline window |
 | `R` | Reset folds | Outline window |
 
-> 📍 Config: `lua/dengbo/plugins/symbols-outline.lua`
+> 📍 Config: `lua/dengbo/plugins/outline.lua`
 
 ### Tags (ctags / gtags)
 

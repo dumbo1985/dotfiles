@@ -223,14 +223,16 @@ Leader 键设置为 `<Space>`（空格键）
 
 > 📍 LazyGit 配置：`lua/dengbo/plugins/lazygit.lua`
 
-### 符号大纲（Symbols Outline）
+### 符号大纲（Outline.nvim）
+
+由 **hedyhli/outline.nvim** 提供（原 simrat39/symbols-outline.nvim 已停止维护，与 nvim-treesitter main 分支不兼容）。
 
 | 快捷键 | 功能 | 位置 |
 |--------|------|------|
 | `<leader>es` | 切换符号大纲 | 全局 |
 | `<Esc>` / `q` | 关闭 | 大纲窗口内 |
 | `<Cr>` | 跳转到位置 | 大纲窗口内 |
-| `o` | 聚焦位置 | 大纲窗口内 |
+| `o` | 定位到符号位置 | 大纲窗口内 |
 | `<C-space>` | 悬停符号 | 大纲窗口内 |
 | `K` | 切换预览 | 大纲窗口内 |
 | `r` | 重命名符号 | 大纲窗口内 |
@@ -241,7 +243,7 @@ Leader 键设置为 `<Space>`（空格键）
 | `E` | 展开所有 | 大纲窗口内 |
 | `R` | 重置折叠 | 大纲窗口内 |
 
-> 📍 配置：`lua/dengbo/plugins/symbols-outline.lua`
+> 📍 配置：`lua/dengbo/plugins/outline.lua`
 
 ### 标签跳转（ctags / gtags）
 

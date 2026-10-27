@@ -10,7 +10,7 @@
 # 结束时会打印依赖安装命令，自行确认后执行。
 #
 # 用法：
-#   install.sh                  部署全部（nvim / clangd / blerc / 跳转命令 / 壁纸）
+#   install.sh                  部署全部（nvim / clangd / blerc / tmux / 跳转命令 / 壁纸）
 #   install.sh --skip-wallpaper 不部署壁纸脚本（只做开发环境）
 #
 set -uo pipefail
@@ -37,17 +37,20 @@ link() {
 	fi
 }
 
-say "1/5 nvim 配置（软链 ~/.config/nvim）"
+say "1/6 nvim 配置（软链 ~/.config/nvim）"
 link "$REPO/nvim" "$HOME/.config/nvim"
 
-say "2/5 clangd 公共库兜底配置（软链 ~/.config/clangd/config.yaml）"
+say "2/6 clangd 公共库兜底配置（软链 ~/.config/clangd/config.yaml）"
 link "$REPO/clangd/config.yaml" "$HOME/.config/clangd/config.yaml"
 
-say "3/5 blerc（ble.sh + fzf 集成，软链 ~/.blerc）"
+say "3/6 blerc（ble.sh + fzf 集成，软链 ~/.blerc）"
 # 注意：~/.blerc 只在装了 ble.sh 并在 bashrc 里加载它时才生效，没装也不影响
 link "$REPO/ble/blerc" "$HOME/.blerc"
 
-say "4/5 bashrc 跳转命令（workspace / dengprojects）"
+say "4/6 tmux 配置（软链 ~/.tmux.conf）"
+link "$REPO/tmux/tmux.conf" "$HOME/.tmux.conf"
+
+say "5/6 bashrc 跳转命令（workspace / dengprojects）"
 MB='# >>> dotfiles:jump >>>'
 ME='# <<< dotfiles:jump <<<'
 # 先删旧标记块（幂等），再追加指向本仓库 jump.sh 的 source 行
@@ -55,7 +58,7 @@ sed -i "/^${MB}\$/,/^${ME}\$/d" "$HOME/.bashrc"
 printf '\n%s\n[[ -f "%s/bash/jump.sh" ]] && source "%s/bash/jump.sh"\n%s\n' \
 	"$MB" "$REPO" "$REPO" "$ME" >> "$HOME/.bashrc"
 
-say "5/5 PATH 检查"
+say "6/6 PATH 检查"
 case ":${PATH}:" in
 	*":${HOME}/.local/bin:"*) ;;
 	*) warn "~/.local/bin 不在 PATH 中，请在 ~/.bashrc 加入：export PATH=\"\$HOME/.local/bin:\$PATH\" 并重开终端" ;;

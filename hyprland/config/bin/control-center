@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Launch real controls; buttons never pretend to reflect radio or scene state.
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+THEME_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme"
+export PATH="$THEME_ROOT/bin:$PATH"
+close_center() { swaync-client --close-panel >/dev/null 2>&1 || true; }
+case "${1:-toggle}" in
+    toggle|notifications) "$HYPR_CONFIG_DIR/bin/desktop-panel" --close; exec swaync-client --toggle-panel ;;
+    close) close_center ;;
+    dnd) exec swaync-client --toggle-dnd ;;
+    net|network|wifi) close_center; exec nm-connection-editor ;;
+    bt|bluetooth) close_center; exec blueman-manager ;;
+    calendar) close_center; exec "$HYPR_CONFIG_DIR/bin/desktop-panel" ;;
+    audio|volume) close_center; exec pavucontrol ;;
+    screenshot) close_center; sleep 0.22; exec "$HYPR_CONFIG_DIR/bin/screenshot" ;;
+    lock) close_center; exec loginctl lock-session ;;
+    power|logout) close_center; exec "$HYPR_CONFIG_DIR/bin/power-menu" ;;
+    day|night|focus) exec "$HYPR_CONFIG_DIR/bin/theme-mode" "$1" ;;
+    *) printf '用法：control-center [toggle|net|bt|calendar|audio|screenshot|lock|power|day|night|focus|dnd]\n' >&2; exit 2 ;;
+esac

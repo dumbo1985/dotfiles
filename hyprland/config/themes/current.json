@@ -1,0 +1,20 @@
+{
+  "name": "material-ocean",
+  "colors": {
+    "bg": "#0f111a",
+    "surface": "#1a1c25",
+    "overlay": "#232637",
+    "fg": "#a6accd",
+    "muted": "#929bc7",
+    "comment": "#464b5d",
+    "blue": "#82aaff",
+    "purple": "#c792ea",
+    "cyan": "#89ddff",
+    "green": "#c3e88d",
+    "red": "#f07178",
+    "yellow": "#ffcb6b",
+    "orange": "#f78c6c",
+    "black": "#090b10",
+    "white": "#eeffff"
+  }
+}

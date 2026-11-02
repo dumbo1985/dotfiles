@@ -36,7 +36,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # tools outside ap
 
 ## ✨ Features
 
-- 🎨 **Multiple colorschemes**: randomly loaded (tokyonight, kanagawa, catppuccin, rose-pine, sonokai, onenord)
+- 🎨 **50 dark colorschemes**: Neovim and Neovide share a random selection from 33 theme plugins, including distinct variants of Tokyo Night, Catppuccin, Nightfox and more
 - 🔧 **LSP support**: full language-server integration with automatic install and setup
 - 🐛 **Debugging**: for Python, C/C++, Go and more
 - 📝 **Formatting**: automatic formatting for many languages

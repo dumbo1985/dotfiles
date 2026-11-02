@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Desktop bar status; weather requests require an explicitly configured city."""
+
+import json
+import os
+from pathlib import Path
+import shlex
+import time
+import shutil
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+
+
+def read_memory():
+    values = {}
+    for line in Path("/proc/meminfo").read_text().splitlines():
+        key, value = line.split(":", 1)
+        values[key] = int(value.strip().split()[0])
+    total = values["MemTotal"] / 1048576
+    used = (values["MemTotal"] - values["MemAvailable"]) / 1048576
+    return used, total
+
+
+def cpu_temperature():
+    sensors = []
+    for device in Path("/sys/class/hwmon").glob("hwmon*"):
+        try:
+            name = (device / "name").read_text().strip()
+            if name not in {"k10temp", "coretemp", "zenpower"}:
+                continue
+            for sensor in device.glob("temp*_input"):
+                value = int(sensor.read_text()) / 1000
+                if 0 < value < 130:
+                    sensors.append(value)
+        except (OSError, ValueError):
+            continue
+    return max(sensors) if sensors else None
+
+
+def system_status():
+    fields = [int(value) for value in Path("/proc/stat").read_text().splitlines()[0].split()[1:9]]
+    total, idle = sum(fields), fields[3] + fields[4]
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", str(Path.home() / ".cache")))
+    cache = runtime / "hypr-bar-cpu.json"
+    usage = 0
+    try:
+        before = json.loads(cache.read_text())
+        delta = total - before["total"]
+        if delta >= 50:
+            usage = round(100 * (1 - (idle - before["idle"]) / delta))
+        elif 0 < time.monotonic() - before.get("timestamp", 0) < 10:
+            usage = before.get("usage", 0)
+    except (OSError, ValueError, KeyError):
+        pass
+    try:
+        cache.write_text(json.dumps({"total": total, "idle": idle, "usage": usage, "timestamp": time.monotonic()}))
+    except OSError:
+        pass
+    used, memory = read_memory()
+    temperature = cpu_temperature()
+    uptime = int(float(Path("/proc/uptime").read_text().split()[0]))
+    disk = shutil.disk_usage(Path.home())
+    details = ["系统状态", f"CPU 使用率  {max(0, min(100, usage))}%"]
+    if temperature is not None:
+        details.append(f"CPU 温度    {temperature:.0f}°C")
+    details.extend([
+        f"内存        {used:.1f} / {memory:.1f} GiB",
+        f"主目录可用  {disk.free / 1073741824:.0f} GiB",
+        f"运行时间    {uptime // 3600}小时 {(uptime % 3600) // 60}分",
+        "点击打开系统面板",
+    ])
+    return {"text": f"󰍛 {usage}%", "tooltip": "\n".join(details), "class": "hot" if temperature and temperature >= 85 else "normal"}
+
+
+def notification_status():
+    command = shutil.which("swaync-client")
+    if not command:
+        return {"text": "󰂚", "tooltip": "通知中心正在准备", "class": "unavailable"}
+    count = subprocess.run([command, "-c"], capture_output=True, text=True, timeout=1)
+    if count.returncode:
+        return {"text": "󰂚", "tooltip": "通知中心尚未启动", "class": "unavailable"}
+    number = int(count.stdout.strip() or 0)
+    dnd = subprocess.run([command, "-D"], capture_output=True, text=True, timeout=1).stdout.strip().lower() == "true"
+    icon = "󰂛" if dnd else ("󱅫" if number else "󰂚")
+    text = f"{icon} {number}" if number else icon
+    return {"text": text, "tooltip": f"通知中心 · {number} 条通知" + ("\n勿扰已开启" if dnd else "") + "\n点击展开 · 右键切换勿扰", "class": "dnd" if dnd else ("unread" if number else "empty")}
+
+
+def launch_pinned(name):
+    config = Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "hypr"
+    apps = {
+        "terminal": ({"org.wezfurlong.wezterm", "wezterm", "kitty", "foot", "alacritty"}, [str(config / "bin/terminal")]),
+        "code": ({"neovide"}, [str(Path.home() / ".local/bin/neovide")]),
+        "browser": ({"google-chrome", "chromium", "chromium-browser"}, ["google-chrome"]),
+        "files": ({"org.gnome.nautilus", "nautilus"}, ["nautilus", "--new-window"]),
+    }
+    classes, command = apps[name]
+    result = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2, check=True)
+    windows = [window for window in json.loads(result.stdout) if window.get("class", "").casefold() in classes and window.get("mapped", True)]
+    if windows:
+        window = min(windows, key=lambda item: item.get("focusHistoryID", 100000))
+        selector = json.dumps("address:" + window["address"])
+        subprocess.run(["hyprctl", "dispatch", f"hl.dsp.focus({{window={selector}}})"], check=True)
+    else:
+        command_text = json.dumps(shlex.join(command), ensure_ascii=False)
+        subprocess.run(["hyprctl", "eval", f"hl.exec_cmd({command_text})"], check=True)
+
+
+def main():
+    if len(sys.argv) == 3 and sys.argv[1] == "launch":
+        launch_pinned(sys.argv[2])
+        return
+    try:
+        mode = sys.argv[1] if len(sys.argv) > 1 else "system"
+        if mode == 'weather':
+            from weather_status import bar_status
+            result = bar_status()
+        else:
+            result = notification_status() if mode == "notifications" else system_status()
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+        result = {"text": "󰖐 天气不可用" if mode == 'weather' else "󰍛", "tooltip": "状态暂时不可用", "class": "unavailable"}
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""Apply the selected user-local GTK/Qt palette without changing display scale."""
+from __future__ import annotations
+
+import argparse
+import configparser
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+HYPR_CONFIG = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(HYPR_CONFIG / 'lib'))
+from theme_palette import palettes, settings, selection_text
+from cursor_config import cursor_environment
+
+
+HOME = Path.home()
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', HOME / '.config'))
+DATA = Path(os.environ.get('XDG_DATA_HOME', HOME / '.local/share'))
+
+
+def merge(path, sections):
+    config = configparser.ConfigParser(interpolation=None)
+    config.optionxform = str
+    config.read(path)
+    for section, options in sections.items():
+        if not config.has_section(section):
+            config.add_section(section)
+        for key, value in options.items():
+            config.set(section, key, str(value))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('w') as stream:
+        config.write(stream, space_around_delimiters=False)
+
+
+def main():
+    available = palettes()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--name', choices=list(available))
+    parser.add_argument('--print-gtk-theme', action='store_true',
+                        help='Print the selected GTK name without applying settings')
+    args = parser.parse_args()
+    name = args.name or settings().get('name', 'tokyo-night')
+    if not isinstance(name, str) or name not in available:
+        name = 'tokyo-night'
+    palette = available[name]
+    gtk_name = palette['gtk_theme']
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_. -]{0,79}', gtk_name):
+        raise SystemExit('Invalid GTK theme name in palettes.json')
+    if args.print_gtk_theme:
+        print(gtk_name)
+        return
+    theme = DATA / 'themes' / gtk_name
+    if not (theme / 'gtk-3.0/gtk.css').is_file():
+        raise SystemExit(f'GTK theme is missing: {theme}; run tools/build-gtk-themes.py')
+    colors = palette['colors']
+    cursor = cursor_environment()
+    if any(not re.fullmatch(r'#[0-9A-Fa-f]{6}', value) for value in colors.values()):
+        raise SystemExit('Invalid color in palettes.json')
+    gtk_settings = {
+        'gtk-theme-name': gtk_name,
+        'gtk-icon-theme-name': 'Papirus-Dark',
+        'gtk-font-name': 'Noto Sans CJK SC 11',
+        'gtk-cursor-theme-name': cursor['XCURSOR_THEME'],
+        'gtk-cursor-theme-size': cursor['XCURSOR_SIZE'],
+        'gtk-application-prefer-dark-theme': 'true',
+        'gtk-xft-antialias': '1',
+        'gtk-xft-hinting': '1',
+        'gtk-xft-hintstyle': 'hintslight',
+        # Grayscale works consistently on both landscape and rotated outputs.
+        'gtk-xft-rgba': 'none',
+    }
+    for version in ('3', '4'):
+        merge(CONFIG / f'gtk-{version}.0/settings.ini', {'Settings': gtk_settings})
+    gtk4 = CONFIG / 'gtk-4.0'
+    for name in ('assets', 'gtk.css', 'gtk-dark.css'):
+        destination = gtk4 / name
+        target = theme / 'gtk-4.0' / name
+        if destination.is_symlink():
+            destination.unlink()
+        elif destination.exists():
+            # Keep a user stylesheet if the helper is rerun after later edits.
+            previous = gtk4 / (name + '.before-hypr-theme')
+            if previous.exists() or previous.is_symlink():
+                raise SystemExit(f'Please preserve {destination} before replacing it')
+            destination.rename(previous)
+        destination.symlink_to(target, target_is_directory=target.is_dir())
+
+    # QPalette order, shared by Qt5ct and Qt6ct. Colors stay in the same family
+    # as the compositor, bar, launcher and terminal.
+    roles = ['fg', 'surface', 'overlay', 'overlay', 'black', 'overlay',
+             'fg', 'white', 'fg', 'bg', 'bg', 'black', 'blue', 'black',
+             'cyan', 'purple', 'surface', 'fg', 'surface', 'fg', 'comment']
+    active = [colors[role].lstrip('#') for role in roles]
+    active[13] = selection_text(palette).lstrip('#')
+    disabled = active.copy()
+    for role in (0, 6, 8, 13, 19, 20):
+        disabled[role] = colors['comment'].lstrip('#')
+    for version in ('5', '6'):
+        directory = CONFIG / f'qt{version}ct'
+        qt_palette = directory / 'colors/Hypr-Selected.conf'
+        merge(qt_palette, {'ColorScheme': {
+            'active_colors': ', '.join('#ff' + color for color in active),
+            'inactive_colors': ', '.join('#ff' + color for color in active),
+            'disabled_colors': ', '.join('#ff' + color for color in disabled),
+        }})
+        merge(directory / f'qt{version}ct.conf', {
+            'Appearance': {
+                'style': 'Fusion',
+                'custom_palette': 'true',
+                'color_scheme_path': str(qt_palette),
+                'icon_theme': 'Papirus-Dark',
+                'standard_dialogs': 'default',
+            },
+            'Fonts': {
+                'general': '"Noto Sans CJK SC,11,-1,5,50,0,0,0,0,0"',
+                'fixed': '"Noto Sans Mono CJK SC,11,-1,5,50,0,0,0,0,0"',
+            },
+            'Interface': {'menus_have_icons': 'true'},
+        })
+    desktop = {
+        'gtk-theme': gtk_name,
+        'icon-theme': 'Papirus-Dark',
+        'cursor-theme': cursor['XCURSOR_THEME'],
+        'cursor-size': cursor['XCURSOR_SIZE'],
+        'font-name': 'Noto Sans CJK SC 11',
+        'document-font-name': 'Noto Sans CJK SC 11',
+        'color-scheme': 'prefer-dark',
+    }
+    for key, value in desktop.items():
+        subprocess.run(['gsettings', 'set', 'org.gnome.desktop.interface', key, value],
+                       check=True)
+    print(f"{palette['name']} applied to GTK3, GTK4, Qt5 and Qt6.")
+
+
+if __name__ == '__main__':
+    main()

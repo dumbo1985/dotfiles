@@ -23,25 +23,39 @@ return {
 			[vim.diagnostic.severity.INFO] = { icon = " ", hl = "DiagnosticSignInfo" },
 		}
 
-		-- 使用新的 API 配置诊断符号（避免弃用警告）
-		vim.diagnostic.config({
-			virtual_text = {
+		-- 诊断符号（全局 4 级 / Python 只留 error）
+		local diag_signs = {
+			-- 使用新的 signs 配置方式
+			text = {
+				[vim.diagnostic.severity.ERROR] = severity_icons[vim.diagnostic.severity.ERROR].icon,
+				[vim.diagnostic.severity.WARN] = severity_icons[vim.diagnostic.severity.WARN].icon,
+				[vim.diagnostic.severity.HINT] = severity_icons[vim.diagnostic.severity.HINT].icon,
+				[vim.diagnostic.severity.INFO] = severity_icons[vim.diagnostic.severity.INFO].icon,
+			},
+		}
+		local error_only_signs = {
+			text = {
+				[vim.diagnostic.severity.ERROR] = severity_icons[vim.diagnostic.severity.ERROR].icon,
+			},
+		}
+
+		-- 虚拟文本配置：按最低级别生成，全局与 Python 缓冲复用
+		local function diag_virtual_text(min_severity)
+			return {
 				spacing = 2,
 				prefix = "▎",
+				severity = { min = min_severity },
 				format = function(diagnostic)
 					local config = severity_icons[diagnostic.severity] or { icon = "" }
 					return string.format("%s %s", config.icon, diagnostic.message)
 				end,
-			},
-			signs = {
-				-- 使用新的 signs 配置方式
-				text = {
-					[vim.diagnostic.severity.ERROR] = severity_icons[vim.diagnostic.severity.ERROR].icon,
-					[vim.diagnostic.severity.WARN] = severity_icons[vim.diagnostic.severity.WARN].icon,
-					[vim.diagnostic.severity.HINT] = severity_icons[vim.diagnostic.severity.HINT].icon,
-					[vim.diagnostic.severity.INFO] = severity_icons[vim.diagnostic.severity.INFO].icon,
-				},
-			},
+			}
+		end
+
+		-- 使用新的 API 配置诊断符号（避免弃用警告）
+		vim.diagnostic.config({
+			virtual_text = diag_virtual_text(vim.diagnostic.severity.HINT),
+			signs = diag_signs,
 			underline = { severity = { min = vim.diagnostic.severity.WARN } },
 			severity_sort = true,
 			float = {
@@ -83,6 +97,20 @@ return {
 			end, { buffer = bufnr, desc = "[C]ode [F]ormat selection", silent = true, noremap = true })
 			vim.keymap.set("n", "ga", vim.lsp.buf.code_action, vim.tbl_extend("force", opts, { desc = "代码操作" }))
 			vim.keymap.set("n", "tr", vim.lsp.buf.document_symbol, vim.tbl_extend("force", opts, { desc = "文档符号列表" }))
+
+			-- Python（pyright）只把 error 上屏：类型检查的 warning 量太大，
+			-- 例如未收窄的 Optional、dict 值类型推断，会糊满整个屏幕。
+			-- warning 并没有丢，随时可以用 <leader>xd（Trouble 当前缓冲区诊断）或
+			-- :lua vim.diagnostic.setloclist() 查看。
+			-- 注意 vim.diagnostic.config 的缓冲区覆盖是「浅替换」，
+			-- 所以要整份重写 virtual_text，否则全局的 prefix/format 会被清掉。
+			if client.name == "pyright" then
+				vim.diagnostic.config({
+					virtual_text = diag_virtual_text(vim.diagnostic.severity.ERROR),
+					signs = error_only_signs,
+					underline = { severity = { min = vim.diagnostic.severity.ERROR } },
+				}, nil, bufnr)
+			end
 		end
 
 		-- 使用 autocmd 确保在所有 LSP 客户端附加时设置映射
@@ -117,9 +145,9 @@ return {
 					"clangd",
 					"--background-index",
 					"--pch-storage=memory",
-					"--suggest-missing-includes",
 					"--clang-tidy",
-					"--compile-commands-dir=build",
+					-- 查询本机 DDES SDK 的标准头文件；编译数据库由 clangd 自动向上查找。
+					"--query-driver=" .. vim.fn.expand("~") .. "/.local/share/ddes-cross/ubuntu22.04/bin/aarch64-linux-gnu-*",
 					"--completion-style=detailed",
 					"--header-insertion=never",
 				},
@@ -190,6 +218,11 @@ return {
 			"tailwindcss",
 			"ts_ls",
 		}
+
+		-- Mason v2 不再调用 handlers，须在自动启用前注册 clangd 的配置。
+		vim.lsp.config("clangd", vim.tbl_deep_extend("force", server_configs.clangd, {
+			capabilities = capabilities,
+		}))
 
 		mason_lspconfig.setup({
 			ensure_installed = ensure_installed,

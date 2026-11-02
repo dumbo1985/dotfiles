@@ -1,0 +1,89 @@
+{
+  "name": "orbit-dock",
+  "layer": "top",
+  "position": "bottom",
+  "width": 720,
+  "height": 58,
+  "margin-top": 0,
+  "margin-bottom": 10,
+  "spacing": 4,
+  "exclusive": false,
+  "start_hidden": true,
+  "on-sigusr1": "show",
+  "on-sigusr2": "hide",
+  "modules-center": [
+    "custom/dock-terminal",
+    "custom/dock-code",
+    "custom/dock-browser",
+    "custom/dock-files",
+    "custom/dock-divider",
+    "wlr/taskbar",
+    "custom/dock-overview"
+  ],
+  "custom/dock-terminal": {
+    "format": "",
+    "tooltip-format": "终端 · 点击切换 · 右键新开",
+    "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" launch terminal",
+    "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/terminal\""
+  },
+  "custom/dock-code": {
+    "format": "",
+    "tooltip-format": "Neovide · 点击切换 · 右键新开",
+    "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" launch code",
+    "on-click-right": "\"$HOME/.local/bin/neovide\""
+  },
+  "custom/dock-browser": {
+    "format": "",
+    "tooltip-format": "浏览器 · 点击切换 · 右键打开",
+    "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" launch browser",
+    "on-click-right": "google-chrome"
+  },
+  "custom/dock-files": {
+    "format": "󰉋",
+    "tooltip-format": "文件管理器 · 点击切换 · 右键新开",
+    "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" launch files",
+    "on-click-right": "nautilus --new-window"
+  },
+  "custom/dock-divider": {
+    "format": "│",
+    "tooltip": false
+  },
+  "wlr/taskbar": {
+    "format": "{icon}",
+    "icon-size": 28,
+    "icon-theme": [
+      "Papirus-Dark",
+      "Yaru",
+      "hicolor"
+    ],
+    "all-outputs": false,
+    "sort-by-app-id": false,
+    "ignore-list": [
+      "org.wezfurlong.wezterm",
+      "wezterm",
+      "kitty",
+      "foot",
+      "alacritty",
+      "neovide",
+      "google-chrome",
+      "chromium",
+      "chromium-browser",
+      "org.gnome.Nautilus",
+      "org.gnome.nautilus",
+      "nautilus"
+    ],
+    "tooltip-format": "{name}\n{title}",
+    "on-click": "activate",
+    "app_ids-mapping": {
+      "Chatgpt": "chatgpt",
+      "Bytedance-feishu": "bytedance-feishu",
+      "org.wezfurlong.wezterm": "org.wezfurlong.wezterm",
+      "clash-verge": "clash-verge"
+    }
+  },
+  "custom/dock-overview": {
+    "format": "󰕰",
+    "tooltip-format": "窗口切换",
+    "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/window-switcher\""
+  }
+}

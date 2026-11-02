@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin:$PATH"
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+THEME_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hyprland"
+mkdir -p "$THEME_STATE_DIR"
+runtime_dir="${XDG_RUNTIME_DIR:-$HOME/.cache}/hypr-theme"
+mkdir -p "$runtime_dir"
+chmod 700 "$runtime_dir"
+exec 9>"$runtime_dir/theme-mode.lock"
+flock 9
+mode=${1:-night}
+if [[ $mode == restore ]]; then
+    mode=$(cat "$THEME_STATE_DIR/scene" 2>/dev/null || printf day)
+    case "$mode" in day|night|focus) ;; *) mode=day ;; esac
+fi
+stop_night_light() {
+    pkill -u "$(id -u)" -x hyprsunset || true
+    for _ in {1..30}; do
+        pgrep -u "$(id -u)" -x hyprsunset >/dev/null || return 0
+        sleep .05
+    done
+    printf '夜间色温服务尚未退出。\n' >&2
+    return 1
+}
+case "$mode" in
+    day)
+        hyprctl eval 'hl.config({decoration={dim_strength=0.04},animations={enabled=true}}); hl.animation({leaf="borderangle",enabled=true,speed=100,bezier="orbit",style="loop"})'
+        stop_night_light
+        swaync-client -sw -df >/dev/null 2>&1 || true
+        ;;
+    night)
+        hyprctl eval 'hl.config({decoration={dim_strength=0.08},animations={enabled=true}}); hl.animation({leaf="borderangle",enabled=true,speed=100,bezier="orbit",style="loop"})'
+        stop_night_light
+        printf -v sunset_command 'exec %q >%q 2>&1' "$HYPR_CONFIG_DIR/bin/night-light" "$THEME_STATE_DIR/night-light.log"
+        hyprctl eval "hl.exec_cmd([==[$sunset_command]==])"
+        swaync-client -sw -df >/dev/null 2>&1 || true
+        ;;
+    focus)
+        hyprctl eval 'hl.config({decoration={dim_strength=0.12},animations={enabled=true}}); hl.animation({leaf="borderangle",enabled=false,speed=100,bezier="orbit",style="loop"})'
+        stop_night_light
+        swaync-client -sw -dn >/dev/null 2>&1 || true
+        ;;
+    *) printf '用法：theme-mode day|night|focus\n' >&2; exit 2 ;;
+esac
+printf '%s\n' "$mode" > "$THEME_STATE_DIR/scene"

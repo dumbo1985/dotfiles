@@ -1,0 +1,49 @@
+* {
+    font-family: "MesloLGS Nerd Font Mono", "Noto Sans CJK SC", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    min-height: 0;
+    border: none;
+}
+window#waybar.orbit-dock { background: transparent; color: #a6accd; }
+.orbit-dock .modules-center {
+    background: rgba(9, 11, 16, 0.97);
+    border: 1px solid rgba(130, 170, 255, 0.38);
+    border-radius: 19px;
+    padding: 5px 10px;
+}
+#custom-dock-terminal, #custom-dock-code, #custom-dock-browser, #custom-dock-files, #custom-dock-overview {
+    font-size: 27px;
+    min-width: 39px;
+    padding: 0 5px;
+    margin: 0 1px;
+    border-radius: 12px;
+    transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+#custom-dock-terminal { color: #89ddff; }
+#custom-dock-code { color: #c3e88d; }
+#custom-dock-browser { color: #ffcb6b; }
+#custom-dock-files { color: #82aaff; }
+#custom-dock-overview { color: #c792ea; border-left: 1px solid #232637; margin-left: 5px; padding-left: 10px; }
+#custom-dock-divider { color: #232637; padding: 0 4px; }
+#custom-dock-terminal:hover, #custom-dock-code:hover, #custom-dock-browser:hover, #custom-dock-files:hover, #custom-dock-overview:hover {
+    background: #1a1c25;
+    box-shadow: inset 0 -2px #82aaff;
+}
+#taskbar button {
+    min-width: 34px;
+    padding: 3px 8px 5px;
+    margin: 0 1px;
+    border-radius: 11px;
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+#taskbar button.active {
+    background: rgba(130, 170, 255, 0.19);
+    border-bottom-color: #c792ea;
+}
+#taskbar button:hover { background: #1a1c25; }
+#taskbar button.minimized { opacity: 0.55; }
+tooltip { background: #090b10; color: #a6accd; border: 1px solid #232637; border-radius: 12px; }
+tooltip label { padding: 8px; }

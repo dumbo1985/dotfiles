@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Start both bars and companion services through the compositor's session scope.
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+THEME_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hyprland"
+export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin:$HOME/.local/bin:$PATH"
+mkdir -p "$THEME_STATE_DIR"
+runtime_dir="${XDG_RUNTIME_DIR:-$HOME/.cache}/hypr-theme"
+mkdir -p "$runtime_dir"
+chmod 700 "$runtime_dir"
+exec 9>"$runtime_dir/desktop-start.lock"
+flock 9
+launch() {
+    local name=$1 command
+    shift
+    printf -v command '%q ' "$@"
+    command="exec $command"
+    printf -v command '%s >%q 2>&1' "$command" "$THEME_STATE_DIR/$name.log"
+    hyprctl eval "hl.exec_cmd([==[$command]==])" >/dev/null
+}
+has_bar() {
+    local pid argument
+    while IFS= read -r pid; do
+        while IFS= read -r -d '' argument; do
+            [[ $argument != "$HYPR_CONFIG_DIR/$1" ]] || return 0
+        done 2>/dev/null <"/proc/$pid/cmdline" || true
+    done < <(pgrep -u "$(id -u)" -x waybar || true)
+    return 1
+}
+wait_stopped() {
+    local process=$1
+    for _ in {1..40}; do
+        pgrep -u "$(id -u)" -x "$process" >/dev/null || return 0
+        sleep .05
+    done
+    printf '%s 尚未退出，请查看用户会话日志。\n' "$process" >&2
+    return 1
+}
+ensure_bar() {
+    local name=$1 config=$2 style=$3
+    has_bar "$config" && return 0
+    launch "$name" waybar --config "$HYPR_CONFIG_DIR/$config" --style "$HYPR_CONFIG_DIR/$style" || return
+    for _ in {1..30}; do
+        has_bar "$config" && return 0
+        sleep .05
+    done
+    printf '%s 未启动，请查看 %s/%s.log。\n' "$name" "$THEME_STATE_DIR" "$name" >&2
+    return 1
+}
+pkill -u "$(id -u)" -x mako || true
+if [[ ${1:-} == --restart ]]; then
+    pkill -u "$(id -u)" -x waybar || true
+    pkill -u "$(id -u)" -x swaync || true
+    wait_stopped waybar || true
+    wait_stopped swaync || true
+    "$HYPR_CONFIG_DIR/bin/desktop-panel" --restart || printf '桌面面板重启失败。\n' >&2
+fi
+if ! pgrep -u "$(id -u)" -x swaync >/dev/null; then
+    launch swaync swaync -c "$HYPR_CONFIG_DIR/swaync.json" -s "$HYPR_CONFIG_DIR/swaync.css" || printf '通知服务启动失败。\n' >&2
+    for _ in {1..30}; do
+        pgrep -u "$(id -u)" -x swaync >/dev/null && break
+        sleep .05
+    done
+fi
+ensure_bar waybar waybar.json waybar.css || true
+ensure_bar dock dock.json dock.css || true
+"$HYPR_CONFIG_DIR/bin/dock-autohide" --start || printf 'Dock 自动隐藏未能启动。\n' >&2
+"$HYPR_CONFIG_DIR/bin/desktop-panel" --start || printf '桌面面板启动失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/clipboard" start || printf '剪贴板历史启动失败。\n' >&2

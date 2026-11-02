@@ -1,0 +1,177 @@
+#!/usr/bin/env bash
+# Capture at the compositor's native scale; keep originals before annotation.
+set -euo pipefail
+umask 077
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/dotfiles-hyprland"
+export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin:$HOME/.local/bin:$PATH"
+SELF="$(realpath -- "${BASH_SOURCE[0]}")"
+
+usage() {
+    cat <<'EOF'
+用法：screenshot [region|screen|full|window] [--edit]
+      screenshot edit [图片文件]   标注图片，省略文件时编辑最近一次截图
+      screenshot last              打开最近一次截图
+      screenshot folder            打开截图目录
+      screenshot menu              截图和标注菜单
+      screen-ocr                   框选中英文识字并复制（Super+Shift+O）
+
+默认框选区域；Esc 取消。截图自动保存并复制，通知中可点击“标注”。
+screen 只截当前屏幕，full 截全部屏幕，window 截当前窗口。
+标注窗口支持 a 箭头、r 矩形、t 文字、d 模糊、Ctrl+Z 撤销。
+退出标注窗口后另存并复制标注版，保留原图。
+EOF
+}
+
+fail() {
+    printf '%s\n' "$1" >&2
+    notify-send -a '桌面截图' -u normal '截图未完成' "$1" 2>/dev/null || true
+    exit 1
+}
+
+last_file() {
+    [[ -f "$STATE_DIR/screenshot-last" ]] || fail '还没有保存过截图。'
+    IFS= read -r IMAGE_FILE < "$STATE_DIR/screenshot-last" || true
+    [[ -n "$IMAGE_FILE" && -f "$IMAGE_FILE" ]] || fail '最近一次截图已被移动或删除。'
+}
+
+remember() {
+    mkdir -p -- "$STATE_DIR"
+    local state_tmp
+    state_tmp=$(mktemp "$STATE_DIR/screenshot-last.XXXXXX")
+    printf '%s\n' "$1" > "$state_tmp"
+    mv -f -- "$state_tmp" "$STATE_DIR/screenshot-last"
+}
+
+copy_image() {
+    wl-copy --type image/png < "$1"
+}
+
+notify_image() {
+    # Actions wait for a click in a separate, bounded process; Print stays ready.
+    local image="$1" copied="$2" edited="$3" title action
+    title='截图已保存并复制'
+    [[ "$copied" == yes ]] || title='截图已保存'
+    [[ "$edited" == no ]] || title='标注已保存并复制'
+    [[ "$edited" == no || "$copied" == yes ]] || title='标注已保存'
+    action=$(timeout 90s notify-send -a '桌面截图' -t 8000 \
+        -i "$image" -h "string:image-path:$image" \
+        -A 'edit=标注' -A 'open=打开图片' -A 'folder=打开目录' \
+        "$title" "$(basename -- "$image")" 2>/dev/null) || true
+    case "$action" in
+        edit) "$SELF" edit "$image" ;;
+        open) xdg-open "$image" >/dev/null 2>&1 ;;
+        folder) xdg-open "$(dirname -- "$image")" >/dev/null 2>&1 ;;
+    esac
+}
+
+announce() {
+    nohup "$SELF" --notify "$1" "$2" "$3" >/dev/null 2>&1 &
+}
+
+edit_image() {
+    local image="$1" output copied=no
+    [[ -f "$image" ]] || fail '找不到要标注的图片。'
+    command -v swappy >/dev/null || fail '尚未安装 Swappy 标注工具。'
+    image=$(realpath -- "$image")
+    # A single editor avoids Swappy's application-ID forwarding between files.
+    mkdir -p -- "$STATE_DIR"
+    exec 8> "$STATE_DIR/screenshot-editor.lock"
+    flock -n 8 || { notify-send -a '桌面截图' '标注窗口已经打开' '请先完成当前图片的标注。'; return 0; }
+    output=$(mktemp "$SCREENSHOT_DIR/$(basename -- "${image%.*}")-annotated-XXXXXX.png")
+    if ! swappy -f "$image" -o "$output"; then
+        [[ -s "$output" ]] || rm -f -- "$output"
+        fail '无法打开标注工具；原始截图已保留。'
+    fi
+    flock -u 8
+    exec 8>&-
+    if [[ ! -s "$output" ]]; then
+        rm -f -- "$output"
+        return 0
+    fi
+    if copy_image "$output"; then copied=yes; fi
+    remember "$output"
+    announce "$output" "$copied" yes
+}
+
+case "${1:-}" in
+    -h|--help|help) usage; exit 0 ;;
+    --notify)
+        [[ $# == 4 && -f "$2" ]] || exit 2
+        notify_image "$2" "$3" "$4"
+        exit 0 ;;
+esac
+
+PICTURES_DIR=$(xdg-user-dir PICTURES 2>/dev/null) || PICTURES_DIR="$HOME/Pictures"
+[[ -n "$PICTURES_DIR" ]] || PICTURES_DIR="$HOME/Pictures"
+export SCREENSHOT_DIR="${SCREENSHOT_DIR:-$PICTURES_DIR/Screenshots}"
+mkdir -p -- "$SCREENSHOT_DIR"
+MODE="${1:-region}"
+case "$MODE" in
+    menu)
+        choice=$(printf '%s\n' '󰹑  框选区域' '󰍹  当前屏幕' '󰍺  全部屏幕' '󰖯  当前窗口' '󰏫  框选并标注' '󰄀  标注最近截图' '󰊄  框选识字' '󰊄  代码识字' '󰉋  打开截图目录' \
+            | wofi --dmenu --prompt '截图与标注' --conf "$HYPR_CONFIG_DIR/wofi.conf" --style "$HYPR_CONFIG_DIR/wofi.css") || exit 0
+        sleep 0.22
+        case "$choice" in
+            *框选区域) exec "$SELF" region ;;
+            *当前屏幕) exec "$SELF" screen ;;
+            *全部屏幕) exec "$SELF" full ;;
+            *当前窗口) exec "$SELF" window ;;
+            *框选并标注) exec "$SELF" region --edit ;;
+            *标注最近截图) exec "$SELF" edit ;;
+            *框选识字) exec "$HYPR_CONFIG_DIR/bin/screen-ocr" ;;
+            *代码识字) exec "$HYPR_CONFIG_DIR/bin/screen-ocr" --code ;;
+            *打开截图目录) exec "$SELF" folder ;;
+        esac
+        exit 0 ;;
+    edit)
+        if [[ -n "${2:-}" ]]; then IMAGE_FILE="$2"; else last_file; fi
+        edit_image "$IMAGE_FILE"
+        exit 0 ;;
+    last) last_file; exec xdg-open "$IMAGE_FILE" ;;
+    folder) exec xdg-open "$SCREENSHOT_DIR" ;;
+    region|screen|full|window) ;;
+    *) usage >&2; exit 2 ;;
+esac
+[[ $# -le 2 && ( $# -lt 2 || "$2" == --edit ) ]] || { usage >&2; exit 2; }
+
+mkdir -p -- "$STATE_DIR"
+exec 9> "$STATE_DIR/screenshot-capture.lock"
+flock -n 9 || exit 0
+GRIM_ARGS=()
+case "$MODE" in
+    region)
+        geometry=$(slurp -d -b '#0d0f19aa' -c '#7aa2f7ff' -s '#7aa2f722' -B '#1a1b26ee' -w 2 -F 'Noto Sans CJK SC') || exit 0
+        [[ -n "$geometry" ]] || exit 0
+        GRIM_ARGS=(-g "$geometry")
+        sleep 0.12 ;;
+    screen)
+        output=$(hyprctl monitors -j | python3 -c 'import json,sys; print(next(m["name"] for m in json.load(sys.stdin) if m.get("focused")))') \
+            || fail '无法读取当前屏幕。'
+        GRIM_ARGS=(-o "$output") ;;
+    window)
+        geometry=$(hyprctl activewindow -j | python3 -c '
+import json,sys
+w=json.load(sys.stdin)
+if not w.get("mapped") or w.get("hidden"): sys.exit(1)
+x,y=w["at"]; width,height=w["size"]
+if width<=0 or height<=0: sys.exit(1)
+print(f"{int(x)},{int(y)} {int(width)}x{int(height)}")') || fail '当前没有可截图的窗口。'
+        GRIM_ARGS=(-g "$geometry") ;;
+esac
+
+image=$(mktemp "$SCREENSHOT_DIR/Screenshot-$(date +%Y-%m-%d_%H-%M-%S)-XXXXXX.png")
+if ! grim "${GRIM_ARGS[@]}" "$image" || [[ ! -s "$image" ]]; then
+    rm -f -- "$image"
+    fail '无法读取屏幕画面，请确认当前运行在 Hyprland Wayland 会话。'
+fi
+flock -u 9
+exec 9>&-
+copied=no
+if copy_image "$image"; then copied=yes; fi
+remember "$image"
+if [[ "${2:-}" == --edit ]]; then
+    edit_image "$image"
+else
+    announce "$image" "$copied" no
+fi

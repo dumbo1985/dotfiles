@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin:$PATH"
+umask 077
+case "${1:-pick}" in
+    watch)
+        # wl-clipboard 2.2 does not populate sensitive itself. Honor the common
+        # password-manager MIME hint as well; unmarked data cannot be detected.
+        [[ ${CLIPBOARD_STATE:-data} == data ]] || exit 0
+        if wl-paste --list-types 2>/dev/null | rg -Fx 'x-kde-passwordManagerHint' >/dev/null; then
+            exit 0
+        fi
+        cliphist store --max-items 100
+        ;;
+    start)
+        runtime_dir="${XDG_RUNTIME_DIR:-$HOME/.cache}/hypr-theme"
+        mkdir -p "$runtime_dir"
+        chmod 700 "$runtime_dir"
+        exec 9>"$runtime_dir/clipboard-start.lock"
+        flock 9
+        # Protect any existing history as well as new entries.
+        cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/cliphist"
+        [[ ! -d "$cache_dir" ]] || chmod 700 "$cache_dir"
+        [[ ! -f "$cache_dir/db" ]] || chmod 600 "$cache_dir/db"
+        if ! pgrep -u "$(id -u)" -f '^wl-paste --watch .*/hypr/bin/clipboard watch$' >/dev/null; then
+            printf -v command 'exec wl-paste --watch %q watch' "$HYPR_CONFIG_DIR/bin/clipboard"
+            hyprctl eval "hl.exec_cmd([==[$command]==])"
+            for _ in {1..30}; do
+                pgrep -u "$(id -u)" -f '^wl-paste --watch .*/hypr/bin/clipboard watch$' >/dev/null && exit 0
+                sleep .05
+            done
+            printf '剪贴板监听未能启动。\n' >&2
+            exit 1
+        fi
+        ;;
+    clear)
+        cliphist wipe
+        notify-send '剪贴板' '历史已清空'
+        ;;
+    pick)
+        selected=$(cliphist list | wofi --dmenu --prompt '剪贴板历史' --conf "$HYPR_CONFIG_DIR/wofi.conf" --style "$HYPR_CONFIG_DIR/wofi.css") || exit 0
+        [[ -n "$selected" ]] || exit 0
+        printf '%s\n' "$selected" | cliphist decode | wl-copy
+        ;;
+    *) exit 2 ;;
+esac

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+if command -v wezterm >/dev/null; then
+    exec wezterm start
+elif command -v flatpak >/dev/null && flatpak info org.wezfurlong.wezterm >/dev/null 2>&1; then
+    exec flatpak run org.wezfurlong.wezterm start
+else
+    exec kitty
+fi

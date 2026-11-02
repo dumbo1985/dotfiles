@@ -6,7 +6,9 @@
 
 1. 启动 Neovim 后，插件会自动安装
 2. 等待 Mason 安装 LSP 服务器和工具（首次可能需要较长时间）
-3. 主题会随机加载，每次启动可能不同
+3. Neovim 与 Neovide 共用 50 种深色配色，来自 33 个主题插件，包含不同配色变体；每次启动随机选择一种，连续启动可能重复
+
+用 `:echo g:colors_name` 查看当前主题；用 `:Telescope colorscheme` 手动选择主题，或用 `:Telescope colorscheme enable_preview=true` 在移动选择时即时预览。
 
 ### 输入法
 

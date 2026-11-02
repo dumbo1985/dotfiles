@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Explicitly opened terminal spectrum. Exiting its window stops Cava.
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+THEME_BIN="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin"
+export PATH="$THEME_BIN:$PATH"
+if [[ ! -x "$THEME_BIN/cava" ]] || ! command -v kitty >/dev/null; then
+    notify-send '音乐频谱暂不可用' '需要 Kitty 和桌面套件提供的 Cava。' 2>/dev/null || true
+    exit 1
+fi
+exec kitty --class hypr-music-visualizer --title '音乐频谱 · Q 退出' \
+    --config "$HYPR_CONFIG_DIR/themes/kitty.conf" \
+    --override background_opacity=0.94 \
+    --override window_padding_width=18 \
+    --override initial_window_width=900 \
+    --override initial_window_height=380 \
+    --override font_size=12 \
+    --override confirm_os_window_close=0 \
+    "$THEME_BIN/cava" -p "$HYPR_CONFIG_DIR/cava.conf"

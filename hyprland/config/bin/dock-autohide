@@ -1,0 +1,409 @@
+#!/usr/bin/env python3
+"""Reveal the Dock at a display's bottom edge without reserving window space."""
+from __future__ import annotations
+
+import argparse
+import fcntl
+import hashlib
+import json
+import logging
+import os
+from pathlib import Path
+import selectors
+import shlex
+import signal
+import socket
+import sys
+import time
+
+sys.dont_write_bytecode = True
+CONFIG = Path(__file__).resolve().parent.parent
+SIGNATURE = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', '')
+SESSION = hashlib.sha256(SIGNATURE.encode()).hexdigest()[:12]
+USER_RUNTIME = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}'))
+RUNTIME = USER_RUNTIME / f'hypr-dock-{SESSION}'
+CONTROL = RUNTIME / 'control.sock'
+HYPR_RUNTIME = USER_RUNTIME / 'hypr' / SIGNATURE
+INTERVAL = .16
+HIDE_DELAY = .35
+EDGE = 3
+
+
+def request(command):
+    """Use Hyprland IPC directly: polling never launches hyprctl processes."""
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(.7)
+        client.connect(str(HYPR_RUNTIME / '.socket.sock'))
+        client.sendall(command.encode())
+        data = bytearray()
+        while True:
+            part = client.recv(65536)
+            if not part:
+                break
+            data.extend(part)
+        return data.decode()
+
+
+def query(name):
+    return json.loads(request('j/' + name))
+
+
+def send(action):
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+        client.settimeout(.8)
+        client.connect(str(CONTROL))
+        client.sendall(action.encode() + b'\n')
+        data = bytearray()
+        while True:
+            part = client.recv(4096)
+            if not part:
+                break
+            data.extend(part)
+        return json.loads(data)
+
+
+def is_dock_process(pid):
+    """Match config and session before every signal, including after PID reuse."""
+    proc = Path('/proc') / str(pid)
+    try:
+        if proc.stat().st_uid != os.getuid() or (proc / 'comm').read_text().strip() != 'waybar':
+            return False
+        args = (proc / 'cmdline').read_bytes().split(b'\0')
+        args = [a.decode(errors='replace') for a in args if a]
+        config = None
+        for index, arg in enumerate(args):
+            if arg in ('-c', '--config') and index + 1 < len(args):
+                config = args[index + 1]
+            elif arg.startswith('--config='):
+                config = arg.split('=', 1)[1]
+        if not config:
+            return False
+        config = Path(config)
+        if not config.is_absolute():
+            config = (proc / 'cwd').resolve() / config
+        if config.resolve() != (CONFIG / 'dock.json').resolve():
+            return False
+        environment = (proc / 'environ').read_bytes().split(b'\0')
+        return ('HYPRLAND_INSTANCE_SIGNATURE=' + SIGNATURE).encode() in environment
+    except (OSError, ValueError):
+        return False
+
+
+def dock_processes():
+    """Discover only this session's separate Dock process, never the top bar."""
+    return {int(proc.name) for proc in Path('/proc').iterdir()
+            if proc.name.isdecimal() and is_dock_process(int(proc.name))}
+
+
+def monitor_rect(monitor):
+    width, height = monitor['width'], monitor['height']
+    if monitor.get('transform', 0) % 2:
+        width, height = height, width
+    scale = monitor.get('scale', 1)
+    x, y = monitor['x'], monitor['y']
+    return x, y, x + width / scale, y + height / scale
+
+
+def contains(rect, point):
+    x, y = point
+    return rect[0] <= x < rect[2] and rect[1] <= y < rect[3]
+
+
+class Service:
+    def __init__(self):
+        self.alive = True
+        self.selector = selectors.DefaultSelector()
+        self.monitors = []
+        self.fullscreen = set()
+        self.layers = {}
+        self.pids = set()
+        self.visible = False
+        self.reason = 'starting'
+        self.last_cursor = None
+        self.leave_at = None
+        self.scan_at = 0
+        self.refresh_at = 0
+        self.layers_at = 0
+        self.dirty = True
+        self.event = None
+        self.event_buffer = b''
+        self.event_retry = 0
+        self.query_count = 0
+        self.started = time.monotonic()
+
+    def set_visible(self, visible, reason, force=False):
+        if visible == self.visible and not force:
+            self.reason = reason
+            return
+        # SIGUSR1=show, SIGUSR2=hide are explicit and safe after restarts.
+        action = signal.SIGUSR1 if visible else signal.SIGUSR2
+        for pid in self.pids.copy():
+            if not is_dock_process(pid):
+                self.pids.discard(pid)
+                continue
+            try:
+                os.kill(pid, action)
+            except ProcessLookupError:
+                self.pids.discard(pid)
+        if visible != self.visible:
+            logging.info('Dock %s (%s)', 'shown' if visible else 'hidden', reason)
+        self.visible = visible
+        self.reason = reason
+        if visible:
+            self.layers_at = 0
+
+    def refresh(self):
+        monitors = query('monitors')
+        self.query_count += 1
+        self.monitors = [m for m in monitors if not m.get('disabled') and m.get('dpmsStatus', True) and m.get('mirrorOf', 'none') == 'none']
+        workspaces = query('workspaces')
+        self.query_count += 1
+        active = {m['activeWorkspace']['id'] for m in self.monitors}
+        active.update(m.get('specialWorkspace', {}).get('id') for m in self.monitors)
+        possible = {w['id'] for w in workspaces if w.get('hasfullscreen') and w['id'] in active}
+        # Hyprland distinguishes maximized=1 from true fullscreen=2.
+        self.fullscreen = set()
+        if possible:
+            clients = query('clients')
+            self.query_count += 1
+            full_workspaces = {w['workspace']['id'] for w in clients if int(w.get('fullscreen', 0)) & 2}
+            self.fullscreen = {m['name'] for m in self.monitors if m['activeWorkspace']['id'] in full_workspaces or m.get('specialWorkspace', {}).get('id') in full_workspaces}
+        self.refresh_at = time.monotonic()
+        self.dirty = False
+
+    def refresh_layers(self):
+        result = {}
+        layers = query('layers')
+        self.query_count += 1
+        for name, monitor in layers.items():
+            for level in monitor.get('levels', {}).values():
+                for layer in level:
+                    if layer.get('pid') in self.pids:
+                        x, y = layer['x'], layer['y']
+                        result[name] = (x, y, x + layer['w'], y + layer['h'])
+        self.layers = result
+        self.layers_at = time.monotonic()
+
+    def trigger(self, point):
+        """Return keep/show for the physical output containing the pointer."""
+        for monitor in self.monitors:
+            rect = monitor_rect(monitor)
+            if not contains(rect, point):
+                continue
+            if monitor['name'] in self.fullscreen:
+                return False, False, 'fullscreen'
+            left, top, right, bottom = rect
+            edge = point[1] >= bottom - EDGE
+            dock = self.layers.get(monitor['name'])
+            if dock is None:
+                width = min(720, right - left)
+                dock = ((left + right - width) / 2, bottom - 68, (left + right + width) / 2, bottom - 10)
+            # Include the ten-pixel gap below the floating Dock so it remains
+            # usable while moving from the activation edge onto its buttons.
+            keep = dock[0] - 12 <= point[0] < dock[2] + 12 and dock[1] - 8 <= point[1] < bottom
+            return edge, keep, 'bottom-edge' if edge else 'dock-area'
+        return False, False, 'outside-outputs'
+
+    def attach_events(self, now):
+        if self.event is not None or now < self.event_retry:
+            return
+        try:
+            self.event = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            self.event.settimeout(.5)
+            self.event.connect(str(HYPR_RUNTIME / '.socket2.sock'))
+            self.event.setblocking(False)
+            self.selector.register(self.event, selectors.EVENT_READ, 'event')
+        except OSError:
+            if self.event is not None:
+                self.event.close()
+            self.event = None
+            self.event_retry = now + 3
+
+    def receive_events(self):
+        try:
+            data = self.event.recv(65536)
+        except BlockingIOError:
+            return
+        if not data:
+            self.selector.unregister(self.event)
+            self.event.close()
+            self.event = None
+            return
+        self.event_buffer += data
+        lines = self.event_buffer.split(b'\n')
+        self.event_buffer = lines.pop()
+        relevant = (b'monitoradded', b'monitorremoved', b'workspace', b'focusedmon', b'moveworkspace', b'fullscreen', b'activespecial', b'configreloaded')
+        if any(line.startswith(relevant) for line in lines):
+            self.dirty = True
+        if any(line.startswith((b'openlayer', b'closelayer')) for line in lines):
+            self.layers_at = 0
+
+    def status(self):
+        return {'running': self.alive, 'pid': os.getpid(), 'dock_pids': sorted(self.pids),
+                'visible': self.visible, 'reason': self.reason, 'poll_ms': int(INTERVAL * 1000),
+                'hide_delay_ms': int(HIDE_DELAY * 1000), 'fullscreen_outputs': sorted(self.fullscreen),
+                'outputs': [m['name'] for m in self.monitors], 'ipc_queries': self.query_count,
+                'uptime_seconds': round(time.monotonic() - self.started, 1)}
+
+    def tick(self):
+        now = time.monotonic()
+        self.attach_events(now)
+        if now - self.scan_at >= 1:
+            current = dock_processes()
+            changed = current != self.pids
+            self.pids = current
+            self.scan_at = now
+            if changed:
+                self.set_visible(False, 'dock-restarted', force=True)
+                self.layers_at = 0
+                self.leave_at = None
+        point_data = query('cursorpos')
+        self.query_count += 1
+        point = (point_data['x'], point_data['y'])
+        moved = point != self.last_cursor
+        self.last_cursor = point
+        if self.dirty or (moved and now - self.refresh_at >= 5):
+            self.refresh()
+        if not self.pids:
+            self.reason = 'waiting-for-dock'
+            return
+        if (moved and now - self.layers_at >= 2) or (self.visible and self.layers_at == 0):
+            self.refresh_layers()
+        edge, keep, reason = self.trigger(point)
+        if edge:
+            self.leave_at = None
+            self.set_visible(True, reason)
+        elif self.visible and keep and reason != 'fullscreen':
+            self.leave_at = None
+            self.reason = 'dock-area'
+        elif self.visible:
+            if reason == 'fullscreen':
+                self.leave_at = None
+                self.set_visible(False, reason)
+            elif self.leave_at is None:
+                self.leave_at = now
+            elif now - self.leave_at >= HIDE_DELAY:
+                self.leave_at = None
+                self.set_visible(False, 'pointer-left')
+
+    def run(self):
+        CONTROL.unlink(missing_ok=True)
+        listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        listener.bind(str(CONTROL))
+        os.chmod(CONTROL, 0o600)
+        listener.listen(4)
+        listener.setblocking(False)
+        self.selector.register(listener, selectors.EVENT_READ, 'control')
+        next_tick = time.monotonic()
+        failures = 0
+        try:
+            while self.alive:
+                for key, _ in self.selector.select(max(0, next_tick - time.monotonic())):
+                    if key.data == 'event':
+                        self.receive_events()
+                    else:
+                        client, _ = listener.accept()
+                        with client:
+                            client.settimeout(.2)
+                            try:
+                                action = client.recv(64).decode().strip()
+                                if action == 'quit':
+                                    self.alive = False
+                                client.sendall(json.dumps(self.status()).encode())
+                            except (OSError, UnicodeError):
+                                pass
+                if time.monotonic() >= next_tick and self.alive:
+                    try:
+                        self.tick()
+                        failures = 0
+                    except (OSError, ValueError, KeyError, StopIteration) as error:
+                        failures += 1
+                        if failures == 1:
+                            logging.warning('Hyprland IPC unavailable: %s', error)
+                        self.set_visible(False, 'ipc-unavailable')
+                        if failures >= 15:
+                            break
+                    next_tick = time.monotonic() + INTERVAL
+                    if self.visible and self.leave_at is not None:
+                        next_tick = min(next_tick, self.leave_at + HIDE_DELAY)
+        finally:
+            self.set_visible(False, 'service-stopped', force=True)
+            self.selector.close()
+            if self.event is not None:
+                self.event.close()
+            listener.close()
+            CONTROL.unlink(missing_ok=True)
+
+
+def start_service():
+    if not SIGNATURE:
+        raise RuntimeError('dock-autohide requires a Hyprland session')
+    state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'dotfiles-hyprland'
+    state.mkdir(parents=True, exist_ok=True)
+    command = shlex.join(['/usr/bin/python3', '-u', str(Path(__file__).resolve()), '--daemon'])
+    command += ' >' + shlex.quote(str(state / 'dock-autohide.log')) + ' 2>&1'
+    result = request('eval hl.exec_cmd(' + json.dumps(command) + ')')
+    if 'error' in result.lower():
+        raise RuntimeError(result)
+    for _ in range(40):
+        time.sleep(.05)
+        try:
+            send('ping')
+            return
+        except (OSError, ValueError):
+            pass
+    raise RuntimeError('Dock auto-hide could not start; see dock-autohide.log')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--daemon', action='store_true')
+    mode.add_argument('--start', action='store_true')
+    mode.add_argument('--restart', action='store_true')
+    mode.add_argument('--stop', action='store_true')
+    mode.add_argument('--status', action='store_true')
+    args = parser.parse_args()
+    if args.daemon:
+        os.umask(0o077)
+        RUNTIME.mkdir(mode=0o700, parents=True, exist_ok=True)
+        with (RUNTIME / 'daemon.lock').open('w') as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return
+            logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+            service = Service()
+            signal.signal(signal.SIGTERM, lambda *_: setattr(service, 'alive', False))
+            signal.signal(signal.SIGINT, lambda *_: setattr(service, 'alive', False))
+            service.run()
+        return
+    if args.stop or args.restart:
+        try:
+            send('quit')
+            for _ in range(30):
+                if not CONTROL.exists():
+                    break
+                time.sleep(.05)
+        except (OSError, ValueError):
+            pass
+        if args.stop:
+            return
+    try:
+        status = send('ping')
+    except (OSError, ValueError):
+        if args.status:
+            print(json.dumps({'running': False}))
+            return
+        start_service()
+        status = send('ping')
+    if args.status:
+        print(json.dumps(status, ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, ValueError) as error:
+        print(str(error), file=sys.stderr)
+        raise SystemExit(1)

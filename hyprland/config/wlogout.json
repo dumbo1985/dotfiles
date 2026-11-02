@@ -1,0 +1,8 @@
+[
+  {"label": "lock", "action": "$HOME/.config/hypr/bin/power-menu --lock", "text": "󰌾  锁定", "keybind": "l"},
+  {"label": "logout", "action": "$HOME/.config/hypr/bin/power-menu --logout", "text": "󰍃  注销", "keybind": "e"},
+  {"label": "cancel", "action": "true", "text": "󰅖  返回", "keybind": "c"},
+  {"label": "suspend", "action": "$HOME/.config/hypr/bin/power-menu --suspend", "text": "󰒲  睡眠", "keybind": "u"},
+  {"label": "reboot", "action": "$HOME/.config/hypr/bin/power-menu --reboot", "text": "󰜉  重启", "keybind": "r"},
+  {"label": "shutdown", "action": "$HOME/.config/hypr/bin/power-menu --shutdown", "text": "󰐥  关机", "keybind": "s"}
+]

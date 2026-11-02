@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Load only the plugin built for this exact compositor and dependency ABI.
+set -euo pipefail
+motion_dir="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-motion"
+plugin="$motion_dir/dynamic-cursors-0.57.0.so"
+[[ -f "$plugin" && -f "$motion_dir/abi.txt" ]] || exit 0
+actual_abi=$(hyprctl version | sed -n 's/^Version ABI string: //p')
+expected_abi=$(cat "$motion_dir/abi.txt")
+if [[ "$actual_abi" != "$expected_abi" ]]; then
+    printf '鼠标动画插件与当前 Hyprland ABI 不匹配，已跳过加载。\n' >&2
+    exit 0
+fi
+if [[ $(hyprctl plugin list) != *"Plugin dynamic-cursors "* ]]; then
+    hyprctl plugin load "$plugin"
+fi

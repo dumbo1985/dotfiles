@@ -1,0 +1,98 @@
+{
+  "rose-pine": {
+    "name": "Rosé Pine · 玫瑰松",
+    "xcursor": "BreezeX-RosePine",
+    "hyprcursor": "rose-pine-hyprcursor",
+    "description": "当前柔和玫瑰配色，原生 Hyprcursor"
+  },
+  "bibata-classic": {
+    "name": "Bibata Modern Classic · 经典黑",
+    "xcursor": "Bibata-Modern-Classic",
+    "hyprcursor": "",
+    "description": "圆角黑色指针，明亮背景清晰"
+  },
+  "bibata-ice": {
+    "name": "Bibata Modern Ice · 冰白",
+    "xcursor": "Bibata-Modern-Ice",
+    "hyprcursor": "",
+    "description": "圆角白色指针，适合深色桌面"
+  },
+  "bibata-amber": {
+    "name": "Bibata Modern Amber · 琥珀",
+    "xcursor": "Bibata-Modern-Amber",
+    "hyprcursor": "",
+    "description": "醒目的暖黄琥珀色圆角指针"
+  },
+  "capitaine": {
+    "name": "Capitaine · 舰长深色",
+    "xcursor": "capitaine-cursors",
+    "hyprcursor": "",
+    "description": "受 macOS 启发，黑色主体与细白边"
+  },
+  "capitaine-light": {
+    "name": "Capitaine Light · 舰长浅色",
+    "xcursor": "capitaine-cursors-light",
+    "hyprcursor": "",
+    "description": "舰长的白色主体版本，彩色忙碌动画"
+  },
+  "catppuccin-mocha-mauve": {
+    "name": "Catppuccin Mocha Mauve · 奶咖紫",
+    "xcursor": "catppuccin-mocha-mauve-cursors",
+    "hyprcursor": "catppuccin-mocha-mauve-cursors",
+    "description": "柔和淡紫 Volantes 造型，原生 Hyprcursor"
+  },
+  "catppuccin-mocha-lavender": {
+    "name": "Catppuccin Mocha Lavender · 薰衣草",
+    "xcursor": "catppuccin-mocha-lavender-cursors",
+    "hyprcursor": "catppuccin-mocha-lavender-cursors",
+    "description": "偏蓝的薰衣草指针，原生 Hyprcursor"
+  },
+  "nordzy": {
+    "name": "Nordzy · 北欧深色",
+    "xcursor": "Nordzy-cursors",
+    "hyprcursor": "Nordzy-hyprcursors",
+    "description": "北欧灰蓝与圆润轮廓，原生 Hyprcursor"
+  },
+  "nordzy-white": {
+    "name": "Nordzy White · 北欧浅色",
+    "xcursor": "Nordzy-cursors-white",
+    "hyprcursor": "Nordzy-hyprcursors-white",
+    "description": "北欧浅白指针，原生 Hyprcursor"
+  },
+  "volantes": {
+    "name": "Volantes · 飞羽深色",
+    "xcursor": "volantes_cursors",
+    "hyprcursor": "",
+    "description": "简洁修长的深色轮廓与彩色忙碌动画"
+  },
+  "volantes-light": {
+    "name": "Volantes Light · 飞羽浅色",
+    "xcursor": "volantes_light_cursors",
+    "hyprcursor": "",
+    "description": "飞羽的浅色版本，细致简洁"
+  },
+  "adwaita": {
+    "name": "Adwaita · GNOME 经典",
+    "xcursor": "Adwaita",
+    "hyprcursor": "",
+    "description": "系统内置黑白指针，朴素稳定"
+  },
+  "yaru": {
+    "name": "Yaru · Ubuntu 默认",
+    "xcursor": "Yaru",
+    "hyprcursor": "",
+    "description": "系统内置 Ubuntu 指针"
+  },
+  "dmz-white": {
+    "name": "DMZ White · 经典白",
+    "xcursor": "DMZ-White",
+    "hyprcursor": "",
+    "description": "系统内置白色指针，传统轮廓"
+  },
+  "dmz-black": {
+    "name": "DMZ Black · 经典黑",
+    "xcursor": "DMZ-Black",
+    "hyprcursor": "",
+    "description": "系统内置黑色指针，传统轮廓"
+  }
+}

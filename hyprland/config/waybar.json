@@ -1,0 +1,527 @@
+[
+  {
+    "layer": "top",
+    "position": "top",
+    "height": 40,
+    "margin-top": 10,
+    "margin-bottom": 0,
+    "margin-left": 18,
+    "margin-right": 18,
+    "spacing": 3,
+    "modules-left": [
+      "custom/launcher",
+      "custom/workspace1",
+      "custom/workspace2",
+      "custom/workspace3",
+      "custom/workspace4",
+      "custom/workspace5",
+      "custom/workspace6",
+      "custom/workspace7",
+      "custom/workspace8",
+      "custom/workspace9",
+      "custom/workspace10"
+    ],
+    "modules-center": [
+      "mpris",
+      "clock"
+    ],
+    "modules-right": [
+      "custom/system",
+      "network#ethernet",
+      "network#wifi",
+      "bluetooth",
+      "pulseaudio",
+      "custom/weather",
+      "custom/notifications",
+      "tray",
+      "custom/control",
+      "custom/power"
+    ],
+    "custom/launcher": {
+      "format": "󰀻",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\"",
+      "tooltip-format": "桌面控制中心 · 右键剪贴板",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/clipboard\""
+    },
+    "clock": {
+      "locale": "zh_CN.UTF-8",
+      "format": "{:%H:%M  ·  %m月%d日}",
+      "tooltip-format": "<tt>{calendar}</tt>\n点击打开日历与系统面板",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/desktop-panel\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "pulseaudio": {
+      "format": "󰕾 {volume}%",
+      "format-muted": "󰖁 静音",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\"",
+      "on-click-middle": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+      "tooltip-format": "{desc}\n滚轮调音量 · 中键静音 · 右键声音面板",
+      "on-click-right": "pavucontrol",
+      "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+",
+      "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"
+    },
+    "tray": {
+      "spacing": 10,
+      "icon-size": 17
+    },
+    "custom/workspace1": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 1",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 1",
+      "exec-on-event": true
+    },
+    "custom/workspace2": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 2",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 2",
+      "exec-on-event": true
+    },
+    "custom/workspace3": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 3",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 3",
+      "exec-on-event": true
+    },
+    "custom/workspace4": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 4",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 4",
+      "exec-on-event": true
+    },
+    "custom/workspace5": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 5",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 5",
+      "exec-on-event": true
+    },
+    "custom/workspace6": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 6",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 6",
+      "exec-on-event": true
+    },
+    "custom/workspace7": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 7",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 7",
+      "exec-on-event": true
+    },
+    "custom/workspace8": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 8",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 8",
+      "exec-on-event": true
+    },
+    "custom/workspace9": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 9",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 9",
+      "exec-on-event": true
+    },
+    "custom/workspace10": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 10",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 10",
+      "exec-on-event": true
+    },
+    "network#ethernet": {
+      "interface": "enp6s0",
+      "format-ethernet": "󰈀 有线",
+      "format-disconnected": "󰈂 有线断开",
+      "format-disabled": "󰈂 有线关闭",
+      "tooltip-format": "有线 · {ifname}\n{ipaddr}",
+      "on-click": "nm-connection-editor",
+      "tooltip-format-ethernet": "有线 · {ifname}\n{ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+      "interval": 3
+    },
+    "network#wifi": {
+      "interface": "wlp7s0",
+      "format-wifi": "󰤨 {essid}",
+      "format-disconnected": "󰤭 无线未连接",
+      "format-disabled": "󰤭 无线已关闭",
+      "max-length": 15,
+      "tooltip-format-wifi": "Wi-Fi · {essid}\n信号 {signalStrength}% · {frequency} GHz\n{ifname} · {ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+      "tooltip-format-disconnected": "无线网卡未连接，点击管理连接",
+      "on-click": "nm-connection-editor",
+      "interval": 3
+    },
+    "name": "orbit-main",
+    "output": "DP-1",
+    "fixed-center": false,
+    "custom/system": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" system",
+      "interval": 3,
+      "return-type": "json",
+      "escape": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/desktop-panel\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/terminal\""
+    },
+    "mpris": {
+      "format": "{status_icon} {dynamic}",
+      "format-paused": "{status_icon} {dynamic}",
+      "status-icons": {
+        "playing": "󰎆",
+        "paused": "󰏤",
+        "stopped": "󰓛"
+      },
+      "dynamic-order": [
+        "title",
+        "artist"
+      ],
+      "dynamic-len": 19,
+      "title-len": 16,
+      "artist-len": 8,
+      "album-len": 0,
+      "max-length": 22,
+      "tooltip-format": "{player}\n{title}\n{artist}\n左键播放／暂停 · 右键下一首",
+      "on-click": "playerctl play-pause",
+      "on-click-right": "playerctl next",
+      "on-click-middle": "playerctl previous"
+    },
+    "bluetooth": {
+      "format": "󰂯",
+      "format-connected": "󰂱 {num_connections}",
+      "format-disabled": "󰂲",
+      "format-off": "󰂲",
+      "format-no-controller": "",
+      "tooltip-format": "蓝牙 · {status}\n点击打开设备设置",
+      "tooltip-format-connected": "蓝牙 · {num_connections} 台已连接\n{device_enumerate}\n点击打开设备设置",
+      "tooltip-format-enumerate-connected": "{device_alias}",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "custom/notifications": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" notifications",
+      "interval": 2,
+      "return-type": "json",
+      "escape": true,
+      "on-click": "swaync-client -t",
+      "on-click-right": "swaync-client -d",
+      "exec-on-event": true
+    },
+    "custom/control": {
+      "format": "󰒓",
+      "tooltip-format": "快捷设置 · 网络、声音、蓝牙、主题",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "custom/power": {
+      "format": "󰐥",
+      "tooltip-format": "锁屏、注销与电源菜单",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/power-menu\""
+    },
+    "custom/weather": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" weather",
+      "interval": 300,
+      "signal": 8,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/weather-settings\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/weather-settings\" --open"
+    }
+  },
+  {
+    "layer": "top",
+    "position": "top",
+    "height": 40,
+    "margin-top": 10,
+    "margin-bottom": 0,
+    "margin-left": 18,
+    "margin-right": 18,
+    "spacing": 3,
+    "modules-left": [
+      "custom/launcher",
+      "custom/workspace1",
+      "custom/workspace2",
+      "custom/workspace3",
+      "custom/workspace4",
+      "custom/workspace5",
+      "custom/workspace6",
+      "custom/workspace7",
+      "custom/workspace8",
+      "custom/workspace9",
+      "custom/workspace10"
+    ],
+    "modules-center": [
+      "clock"
+    ],
+    "modules-right": [
+      "network#ethernet",
+      "network#wifi",
+      "pulseaudio",
+      "custom/notifications",
+      "custom/control",
+      "custom/power"
+    ],
+    "custom/launcher": {
+      "format": "󰀻",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\"",
+      "tooltip-format": "桌面控制中心 · 右键剪贴板",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/clipboard\""
+    },
+    "clock": {
+      "locale": "zh_CN.UTF-8",
+      "format": "{:%H:%M}",
+      "tooltip-format": "<tt>{calendar}</tt>\n点击打开日历与系统面板",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/desktop-panel\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "pulseaudio": {
+      "format": "󰕾 {volume}%",
+      "format-muted": "󰖁 静音",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\"",
+      "on-click-middle": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+      "tooltip-format": "{desc}\n滚轮调音量 · 中键静音 · 右键声音面板",
+      "on-click-right": "pavucontrol",
+      "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+",
+      "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"
+    },
+    "tray": {
+      "spacing": 10,
+      "icon-size": 17
+    },
+    "custom/workspace1": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 1",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 1",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace2": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 2",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 2",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace3": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 3",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 3",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace4": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 4",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 4",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace5": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 5",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 5",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace6": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 6",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 6",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace7": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 7",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 7",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace8": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 8",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 8",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace9": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 9",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 9",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "custom/workspace10": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-labels\" 10",
+      "interval": 2,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "tooltip": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/workspace-switch\" 10",
+      "exec-on-event": true,
+      "max-length": 13
+    },
+    "network#ethernet": {
+      "interface": "enp6s0",
+      "format-ethernet": "󰈀 有线",
+      "format-disconnected": "󰈂 有线断开",
+      "format-disabled": "󰈂 有线关闭",
+      "tooltip-format": "有线 · {ifname}\n{ipaddr}",
+      "on-click": "nm-connection-editor",
+      "tooltip-format-ethernet": "有线 · {ifname}\n{ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+      "interval": 3
+    },
+    "network#wifi": {
+      "interface": "wlp7s0",
+      "format-wifi": "󰤨 {essid}",
+      "format-disconnected": "󰤭 无线未连接",
+      "format-disabled": "󰤭 无线已关闭",
+      "max-length": 12,
+      "tooltip-format-wifi": "Wi-Fi · {essid}\n信号 {signalStrength}% · {frequency} GHz\n{ifname} · {ipaddr}\n↓ {bandwidthDownBytes}  ↑ {bandwidthUpBytes}",
+      "tooltip-format-disconnected": "无线网卡未连接，点击管理连接",
+      "on-click": "nm-connection-editor",
+      "interval": 3
+    },
+    "name": "orbit-portrait",
+    "output": "DP-2",
+    "fixed-center": false,
+    "custom/system": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" system",
+      "interval": 3,
+      "return-type": "json",
+      "escape": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/desktop-panel\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/terminal\""
+    },
+    "mpris": {
+      "format": "{status_icon} {dynamic}",
+      "format-paused": "{status_icon} {dynamic}",
+      "status-icons": {
+        "playing": "󰎆",
+        "paused": "󰏤",
+        "stopped": "󰓛"
+      },
+      "dynamic-order": [
+        "title",
+        "artist"
+      ],
+      "dynamic-len": 19,
+      "title-len": 16,
+      "artist-len": 8,
+      "album-len": 0,
+      "max-length": 22,
+      "tooltip-format": "{player}\n{title}\n{artist}\n左键播放／暂停 · 右键下一首",
+      "on-click": "playerctl play-pause",
+      "on-click-right": "playerctl next",
+      "on-click-middle": "playerctl previous"
+    },
+    "bluetooth": {
+      "format": "󰂯",
+      "format-connected": "󰂱 {num_connections}",
+      "format-disabled": "󰂲",
+      "format-off": "󰂲",
+      "format-no-controller": "",
+      "tooltip-format": "蓝牙 · {status}\n点击打开设备设置",
+      "tooltip-format-connected": "蓝牙 · {num_connections} 台已连接\n{device_enumerate}\n点击打开设备设置",
+      "tooltip-format-enumerate-connected": "{device_alias}",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "custom/notifications": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" notifications",
+      "interval": 2,
+      "return-type": "json",
+      "escape": true,
+      "on-click": "swaync-client -t",
+      "on-click-right": "swaync-client -d",
+      "exec-on-event": true
+    },
+    "custom/control": {
+      "format": "󰒓",
+      "tooltip-format": "快捷设置 · 网络、声音、蓝牙、主题",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/control-center\""
+    },
+    "custom/power": {
+      "format": "󰐥",
+      "tooltip-format": "锁屏、注销与电源菜单",
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/power-menu\""
+    },
+    "custom/weather": {
+      "exec": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/bar-status\" weather",
+      "interval": 300,
+      "signal": 8,
+      "return-type": "json",
+      "format": "{text}",
+      "escape": true,
+      "on-click": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/weather-settings\"",
+      "on-click-right": "\"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/weather-settings\" --open"
+    }
+  }
+]

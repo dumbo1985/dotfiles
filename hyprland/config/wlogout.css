@@ -1,0 +1,26 @@
+* {
+    background-image: none;
+    font-family: "Noto Sans CJK SC", "MesloLGS Nerd Font Mono", sans-serif;
+    font-size: 20px;
+    text-shadow: none;
+}
+window { background-color: rgba(9, 11, 16, 0.94); }
+button {
+    color: #a6accd;
+    background-color: #0f111a;
+    border: 1px solid #232637;
+    border-radius: 24px;
+    margin: 0;
+    padding: 18px;
+    min-width: 140px;
+    min-height: 110px;
+    box-shadow: 0 6px 18px rgba(9, 11, 16, 0.28);
+    transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+button:hover, button:focus { background-color: #1a1c25; border-color: #82aaff; color: #89ddff; outline-color: #c792ea; outline-offset: 4px; outline-width: 2px; outline-style: solid; }
+button:active { background-color: #232637; }
+#lock { color: #89ddff; }
+#logout, #suspend { color: #c792ea; }
+#reboot { color: #ffcb6b; }
+#shutdown { color: #f07178; }
+#cancel { color: #929bc7; background-color: #090b10; }

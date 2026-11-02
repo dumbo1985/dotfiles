@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+selection=$(wofi --dmenu --prompt '表情与符号 · 选择后复制' --conf "$HYPR_CONFIG_DIR/wofi.conf" --style "$HYPR_CONFIG_DIR/wofi.css" <<'SYMBOLS'
+😀 开心
+😊 微笑
+😂 大笑
+🥰 喜爱
+🤔 思考
+👍 赞
+👎 不赞同
+👏 鼓掌
+🙏 感谢
+🎉 庆祝
+🔥 热门
+❤️ 喜欢
+✅ 完成
+❌ 错误
+⚠️ 注意
+💡 灵感
+🚀 启动
+📝 记录
+📌 置顶
+📁 文件
+→ 右箭头
+← 左箭头
+↑ 上箭头
+↓ 下箭头
+✓ 对勾
+✗ 叉号
+• 圆点
+… 省略号
+± 正负
+× 乘号
+÷ 除号
+≈ 约等于
+≠ 不等于
+≤ 小于等于
+≥ 大于等于
+∞ 无穷
+° 角度
+℃ 摄氏度
+α 阿尔法
+β 贝塔
+λ Lambda
+π 圆周率
+SYMBOLS
+) || exit 0
+[[ -n "$selection" ]] || exit 0
+printf '%s' "${selection%% *}" | wl-copy

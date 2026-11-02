@@ -1,0 +1,79 @@
+* {
+    font-family: "MesloLGS Nerd Font Mono", "Noto Sans CJK SC", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    min-height: 0;
+}
+window#waybar { background: transparent; color: #c0caf5; }
+.modules-left, .modules-center, .modules-right {
+    background: rgba(22, 22, 30, 0.96);
+    border: 1px solid rgba(122, 162, 247, 0.28);
+    border-radius: 14px;
+    padding: 4px 7px;
+}
+#custom-launcher {
+    color: #7dcfff;
+    font-size: 21px;
+    padding: 0 13px 0 9px;
+    border-right: 1px solid #292e42;
+    margin-right: 5px;
+}
+.workspace-label {
+    color: #9aa5ce;
+    padding: 0 7px;
+    margin: 1px 1px;
+    border-radius: 9px;
+    background: transparent;
+    transition: all 180ms ease;
+}
+.workspace-label.active {
+    color: #16161e;
+    font-weight: 700;
+    background-image: linear-gradient(115deg, #7aa2f7, #bb9af7);
+    box-shadow: 0 0 8px rgba(122, 162, 247, 0.25);
+}
+.workspace-label.visible { color: #7dcfff; background: #24283b; }
+.workspace-label.empty:not(.active) { color: #737aa2; padding: 0 6px; }
+.workspace-label.urgent { color: #16161e; background: #f7768e; }
+.workspace-label:hover { color: #c0caf5; background: #292e42; }
+#clock { color: #c0caf5; font-weight: 600; padding: 0 13px; }
+#custom-system { color: #bb9af7; padding: 0 9px; }
+#custom-system.hot { color: #f7768e; }
+#network { color: #7dcfff; padding: 0 8px; }
+#network.disconnected, #network.disabled { color: #737aa2; }
+#pulseaudio { color: #9ece6a; padding: 0 8px; }
+#pulseaudio.muted { color: #737aa2; }
+#bluetooth { color: #7aa2f7; padding: 0 8px; }
+#bluetooth.off, #bluetooth.disabled { color: #737aa2; }
+#mpris { color: #bb9af7; padding: 0 12px; border-right: 1px solid #292e42; }
+#mpris.paused { color: #9aa5ce; }
+#tray { padding: 0 9px; border-left: 1px solid #292e42; }
+#custom-weather { color: #e0af68; padding: 0 8px; font-size: 17px; }
+#custom-notifications { color: #a9b1d6; padding: 0 9px; font-size: 15px; }
+#custom-notifications.unread { color: #e0af68; }
+#custom-notifications.dnd { color: #737aa2; }
+#custom-control {
+    color: #7dcfff;
+    font-size: 18px;
+    padding: 0 10px;
+    border-left: 1px solid #292e42;
+}
+#custom-power { color: #bb9af7; font-size: 17px; padding: 0 9px 0 5px; }
+#custom-control:hover, #custom-power:hover, #custom-notifications:hover, #custom-weather:hover, #bluetooth:hover {
+    background: #292e42;
+    border-radius: 8px;
+}
+.orbit-portrait .workspace-label { padding: 0 5px; }
+.orbit-portrait .workspace-label.empty:not(.active) { padding: 0 4px; }
+.orbit-portrait #custom-launcher { padding: 0 9px 0 5px; }
+.orbit-portrait #network { padding: 0 6px; }
+.orbit-portrait #pulseaudio { padding: 0 6px; }
+.orbit-portrait #custom-notifications { padding: 0 7px; }
+tooltip {
+    background: #16161e;
+    color: #c0caf5;
+    border: 1px solid #414868;
+    border-radius: 12px;
+}
+tooltip label { padding: 8px; }

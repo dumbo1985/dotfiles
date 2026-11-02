@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Destructive actions require an explicit panel selection and local confirmation.
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+THEME_ROOT="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme"
+export PATH="$THEME_ROOT/bin:$PATH"
+confirm() {
+    zenity --question --title="$1" --text="$2" --ok-label="确认" --cancel-label="返回" --width=380
+}
+case "${1:-}" in
+    --lock) exec loginctl lock-session ;;
+    --logout)
+        confirm '注销 Hyprland' '注销将关闭本次桌面会话。请先保存工作。' || exit 0
+        exec hyprctl dispatch 'hl.dsp.exit()' ;;
+    --suspend)
+        loginctl lock-session
+        exec systemctl suspend ;;
+    --reboot)
+        confirm '重新启动' '重新启动会关闭所有应用。请先保存工作。' || exit 0
+        exec systemctl reboot ;;
+    --shutdown)
+        confirm '关闭电脑' '关机会关闭所有应用。请先保存工作。' || exit 0
+        exec systemctl poweroff ;;
+    '') ;;
+    *) printf '用法：power-menu\n' >&2; exit 2 ;;
+esac
+if pgrep -u "$(id -u)" -x wlogout >/dev/null; then
+    pkill -u "$(id -u)" -x wlogout
+    exit 0
+fi
+# Use logical geometry so the six controls stay compact on both 4K outputs.
+read -r PANEL_COLUMNS PANEL_SIDE PANEL_TOP < <(hyprctl monitors -j | python3 -c '
+import json,sys
+monitors=json.load(sys.stdin)
+m=next((m for m in monitors if m.get("focused")),monitors[0])
+w,h=m["width"],m["height"]
+if m.get("transform",0)%2:w,h=h,w
+w,h=w/m["scale"],h/m["scale"]
+columns=2 if h>w else 3
+side=max(28,int((w-(760 if columns==3 else 540))/2))
+top=max(48,int((h-(370 if columns==3 else 540))/2))
+print(columns,side,top)')
+# wlogout 1.1 expects a stream of objects, not a JSON array.
+layout_dir="${XDG_RUNTIME_DIR:-${TMPDIR:-/tmp}}/hypr-power-$(id -u)"
+mkdir -p "$layout_dir"
+chmod 700 "$layout_dir"
+python3 - "$HYPR_CONFIG_DIR/wlogout.json" "$layout_dir/layout" <<'PY'
+import json,sys
+from pathlib import Path
+buttons=json.loads(Path(sys.argv[1]).read_text())
+Path(sys.argv[2]).write_text('\n'.join(json.dumps(b,ensure_ascii=False) for b in buttons)+'\n')
+PY
+exec wlogout --protocol layer-shell --layout "$layout_dir/layout" --css "$HYPR_CONFIG_DIR/wlogout.css" \
+    --buttons-per-row "$PANEL_COLUMNS" --column-spacing 18 --row-spacing 18 \
+    --margin-left "$PANEL_SIDE" --margin-right "$PANEL_SIDE" --margin-top "$PANEL_TOP" --margin-bottom "$PANEL_TOP"

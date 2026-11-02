@@ -6,7 +6,9 @@
 
 1. Plugins install automatically on launch
 2. Wait for Mason to install LSP servers and tools (the first run can take a while)
-3. A colorscheme is loaded at random, so it may differ on each start
+3. Neovim and Neovide share 50 dark colorschemes from 33 theme plugins, including distinct variants; each launch chooses one at random, so consecutive launches can repeat
+
+Use `:echo g:colors_name` to see the current theme. Run `:Telescope colorscheme` to choose a theme, or `:Telescope colorscheme enable_preview=true` to preview it as you move through the list.
 
 ### Input method
 

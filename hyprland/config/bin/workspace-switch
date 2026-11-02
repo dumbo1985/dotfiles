@@ -1,0 +1,369 @@
+#!/usr/bin/env python3
+"""Random workspace transitions and a private, session-local thumbnail overview."""
+from __future__ import annotations
+
+import argparse
+import concurrent.futures
+import fcntl
+import hashlib
+import json
+import logging
+import os
+from pathlib import Path
+import random
+import shutil
+import signal
+import socket
+import subprocess
+import sys
+import threading
+import time
+
+sys.dont_write_bytecode = True
+CONFIG = Path(__file__).resolve().parent.parent
+DATA = Path(os.environ.get('XDG_DATA_HOME', str(Path.home() / '.local/share'))) / 'hypr-motion'
+SIGNATURE = os.environ.get('HYPRLAND_INSTANCE_SIGNATURE', 'default')
+SESSION = hashlib.sha256(SIGNATURE.encode()).hexdigest()[:12]
+RUNTIME = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')) / f'hypr-workspaces-{SESSION}'
+SOCKET = RUNTIME / 'control.sock'
+
+
+def query(name):
+    return json.loads(subprocess.check_output(['hyprctl', '-j', name], timeout=2))
+
+
+def evaluate(code):
+    result = subprocess.run(['hyprctl', 'eval', code], capture_output=True, text=True, timeout=2)
+    if result.returncode:
+        raise RuntimeError(result.stdout + result.stderr)
+
+
+def focus(target, style='slide', enabled=True):
+    assert 1 <= int(target) <= 10
+    assert style in ('slide', 'slidevert')
+    evaluate('hl.animation({leaf="workspaces",enabled=%s,speed=4.5,bezier="workspaceGlide",style="%s"}); '
+             'hl.dispatch(hl.dsp.focus({workspace=%d}))' % ('true' if enabled else 'false', style, target))
+
+
+def send(message):
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+        connection.settimeout(.5)
+        connection.connect(str(SOCKET))
+        connection.sendall(json.dumps(message).encode() + b'\n')
+        if connection.recv(32) != b'ok\n':
+            raise RuntimeError('Workspace service did not accept request')
+
+
+def start_service():
+    RUNTIME.mkdir(mode=0o700, parents=True, exist_ok=True)
+    state = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'dotfiles-hyprland'
+    state.mkdir(parents=True, exist_ok=True)
+    # The compositor owns this process, so it survives short-lived terminal clients.
+    import shlex
+    command = shlex.join(['/usr/bin/python3', '-u', str(Path(__file__).resolve()), '--daemon'])
+    command += ' >' + shlex.quote(str(state / 'workspace-overview.log')) + ' 2>&1'
+    evaluate('hl.exec_cmd(' + json.dumps(command) + ')')
+    for _ in range(30):
+        time.sleep(.05)
+        try:
+            send({'action': 'ping'})
+            return
+        except (OSError, RuntimeError):
+            continue
+    raise RuntimeError('Workspace overview could not start; see workspace-overview.log')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('target', nargs='?', type=int, choices=range(1, 11))
+    parser.add_argument('--mode', choices=['random', 'horizontal', 'vertical', 'overview'], default='random')
+    parser.add_argument('--overview', action='store_true')
+    parser.add_argument('--close', action='store_true')
+    parser.add_argument('--start', action='store_true')
+    parser.add_argument('--restart', action='store_true')
+    parser.add_argument('--daemon', action='store_true')
+    args = parser.parse_args()
+    if args.daemon:
+        daemon()
+        return
+    if args.restart:
+        try:
+            send({'action': 'quit'})
+            time.sleep(.15)
+        except OSError:
+            pass
+    message = {'action': 'ping'} if (args.start or args.restart) else {'action': 'close' if args.close else ('overview' if args.overview else 'switch'), 'target': args.target, 'mode': args.mode}
+    if message['action'] == 'switch' and args.target is None:
+        parser.error('provide a workspace number or --overview')
+    try:
+        send(message)
+    except (OSError, RuntimeError):
+        try:
+            start_service()
+            send(message)
+        except Exception as error:
+            logging.error('%s', error)
+            # A missing UI dependency must never disable normal workspace access.
+            if args.target:
+                focus(args.target, random.choice(['slide', 'slidevert']))
+            else:
+                raise SystemExit(1)
+
+
+def daemon():
+    os.umask(0o077)
+    RUNTIME.mkdir(mode=0o700, parents=True, exist_ok=True)
+    lock = open(RUNTIME / 'daemon.lock', 'w')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return
+    os.environ['GDK_BACKEND'] = 'wayland'
+    # GTK3 otherwise rounds 125% outputs up to 2x buffers (four times the
+    # pixels). The overview uses logical-size buffers and compositor scaling.
+    os.environ['GDK_SCALE'] = '1'
+    typelib = DATA / 'gtk-layer/usr/lib/x86_64-linux-gnu/girepository-1.0'
+    os.environ['GI_TYPELIB_PATH'] = str(typelib) + ':' + os.environ.get('GI_TYPELIB_PATH', '')
+    import gi
+    foreign = DATA / 'gtk-cairo/usr/lib/python3/dist-packages/gi'
+    if foreign.is_dir():
+        gi.__path__.append(str(foreign))
+    gi.require_version('Gtk', '3.0')
+    from gi.repository import GLib, Gtk
+    sys.path.insert(0, str(CONFIG / 'lib'))
+    from overview_ui import OverviewUI
+    service = WorkspaceService(GLib, Gtk, OverviewUI)
+    signal.signal(signal.SIGTERM, lambda *_: GLib.idle_add(service.quit))
+    signal.signal(signal.SIGINT, lambda *_: GLib.idle_add(service.quit))
+    service.run()
+
+
+class WorkspaceService:
+    def __init__(self, glib, gtk, ui_type):
+        self.glib, self.gtk = glib, gtk
+        self.ui = ui_type(self.select, self.close)
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self.generation = 0
+        self.capture_generation = 0
+        self.last_mode = None
+        self.visible_request = None
+        self.alive = True
+        self.socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        SOCKET.unlink(missing_ok=True)
+        self.socket.bind(str(SOCKET))
+        self.socket.listen(5)
+        self.restore_timer = None
+        self.cache_pending = False
+        self.snapshot_dir = RUNTIME / 'previews'
+        self.snapshot_dir.mkdir(mode=0o700, exist_ok=True)
+
+    def run(self):
+        threading.Thread(target=self.listen, daemon=True).start()
+        threading.Thread(target=self.events, daemon=True).start()
+        self.glib.timeout_add(800, self.cache_visible)
+        self.gtk.main()
+        self.alive = False
+        self.socket.close()
+        SOCKET.unlink(missing_ok=True)
+        self.executor.shutdown(wait=False, cancel_futures=True)
+        shutil.rmtree(self.snapshot_dir, ignore_errors=True)
+
+    def listen(self):
+        while self.alive:
+            try:
+                connection, _ = self.socket.accept()
+                with connection:
+                    connection.settimeout(.5)
+                    data = b''
+                    while b'\n' not in data and len(data) < 2048:
+                        chunk = connection.recv(2048)
+                        if not chunk:
+                            break
+                        data += chunk
+                    message = json.loads(data.split(b'\n')[0])
+                    self.glib.idle_add(self.handle, message)
+                    connection.sendall(b'ok\n')
+            except Exception:
+                if self.alive:
+                    logging.exception('Workspace request failed')
+
+    def events(self):
+        event_socket = Path(os.environ.get('XDG_RUNTIME_DIR', '')) / 'hypr' / SIGNATURE / '.socket2.sock'
+        while self.alive:
+            try:
+                with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+                    connection.connect(str(event_socket))
+                    with connection.makefile('r') as stream:
+                        for line in stream:
+                            if not self.alive:
+                                return
+                            event = line.partition('>>')[0]
+                            if event in ['workspacev2', 'openwindow', 'closewindow', 'movewindowv2', 'fullscreen', 'changefloatingmode']:
+                                self.glib.idle_add(self.schedule_cache)
+            except OSError:
+                time.sleep(1)
+
+    def metadata(self):
+        return query('monitors'), query('clients')
+
+    def capture(self, monitor):
+        if self.ui.is_visible() or not self.alive:
+            return
+        workspace = monitor['activeWorkspace']['id']
+        if not 1 <= workspace <= 10:
+            return
+        before = next((m for m in query('monitors') if m['name'] == monitor['name']), None)
+        if not before or before['activeWorkspace']['id'] != workspace:
+            return
+        # Runtime-only low resolution previews; never written to the repository.
+        destination = self.snapshot_dir / f'{workspace}.png'
+        temporary = self.snapshot_dir / f'{workspace}.next.png'
+        subprocess.run(['grim', '-o', monitor['name'], '-s', '.3', '-l', '1', str(temporary)], check=True,
+                       timeout=2, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        after = next((m for m in query('monitors') if m['name'] == monitor['name']), None)
+        if not after or after['activeWorkspace']['id'] != workspace or self.ui.is_visible() or not self.alive:
+            temporary.unlink(missing_ok=True)
+            return
+        os.replace(temporary, destination)
+
+    def schedule_cache(self):
+        self.capture_generation += 1
+        generation = self.capture_generation
+        self.glib.timeout_add(750, self.cache_visible, generation)
+        return False
+
+    def cache_visible(self, generation=None):
+        if not self.alive or self.ui.is_visible() or self.cache_pending:
+            return False
+        if generation is not None and generation != self.capture_generation:
+            return False
+        def job():
+            try:
+                # Never cache lock-screen contents.
+                if subprocess.run(['pgrep', '-u', str(os.getuid()), '-x', 'hyprlock'], stdout=subprocess.DEVNULL).returncode == 0:
+                    return
+                for monitor in query('monitors'):
+                    self.capture(monitor)
+            except Exception:
+                logging.exception('Workspace preview refresh failed')
+            finally:
+                self.cache_pending = False
+        self.cache_pending = True
+        self.executor.submit(job)
+        return False
+
+    def handle(self, message):
+        try:
+            action = message.get('action')
+            if action == 'quit':
+                self.quit()
+            elif action == 'ping':
+                pass
+            elif action == 'close':
+                self.close()
+            elif action in ['switch', 'overview']:
+                self.request(message)
+        except Exception:
+            logging.exception('Workspace command failed')
+            self.close()
+            target = message.get('target')
+            if isinstance(target, int) and 1 <= target <= 10:
+                focus(target)
+        return False
+
+    def request(self, message):
+        if message['action'] == 'overview' and self.ui.is_visible():
+            self.close()
+            return
+        self.generation += 1
+        self.capture_generation += 1
+        generation = self.generation
+        self.ui.hide()
+        self.restore_animation()
+        monitors, clients = self.metadata()
+        active = next((m for m in monitors if m.get('focused')), monitors[0])
+        current = active['activeWorkspace']['id']
+        target = message.get('target')
+        if target is not None and (not isinstance(target, int) or not 1 <= target <= 10):
+            raise ValueError('Invalid target workspace')
+        if message['action'] == 'overview':
+            mode = 'overview'
+            target = None
+        else:
+            if target == current or any(m['activeWorkspace']['id'] == target for m in monitors):
+                focus(target)
+                self.schedule_cache()
+                return
+            mode = message.get('mode', 'random')
+            if mode == 'random':
+                modes = ['horizontal', 'vertical', 'overview']
+                mode = random.choice([m for m in modes if m != self.last_mode])
+            self.last_mode = mode
+        logging.info('Workspace %s -> %s (%s)', current, target, mode)
+        if mode != 'overview':
+            focus(target, 'slidevert' if mode == 'vertical' else 'slide')
+            self.schedule_cache()
+            return
+        self.visible_request = generation
+        # Open from the background cache immediately. Screenshot capture must
+        # never block the keypress, nor delay behind another monitor's capture.
+        self.perform(generation, mode, active, clients, current, target)
+
+    def perform(self, generation, mode, monitor, clients, current, target):
+        if generation != self.generation or not self.alive:
+            return False
+        latest = query('monitors')
+        source = next((m for m in latest if m['name'] == monitor['name']), None)
+        if not source or source['activeWorkspace']['id'] != current:
+            return False
+        if mode != 'overview':
+            focus(target, 'slidevert' if mode == 'vertical' else 'slide')
+            self.schedule_cache()
+            return False
+        monitors = {m['id']: m for m in query('monitors')}
+        items = []
+        for workspace in range(1, 11):
+            windows = [w for w in clients if w['workspace']['id'] == workspace and not w.get('hidden')]
+            names = list(dict.fromkeys(w['class'] for w in windows))
+            image = self.snapshot_dir / f'{workspace}.png'
+            items.append({'id': workspace, 'title': ' · '.join(names),
+                          'image': str(image) if image.exists() else None, 'windows': windows,
+                          'monitor': monitors.get(windows[0]['monitor'], monitor) if windows else monitor})
+        self.ui.show(monitor, items, current, target)
+        return False
+
+    def select(self, target):
+        if self.restore_timer:
+            self.glib.source_remove(self.restore_timer)
+            self.restore_timer = None
+        focus(target, enabled=False)
+        def restore():
+            self.restore_timer = None
+            evaluate('hl.animation({leaf="workspaces",enabled=true,speed=4.5,bezier="workspaceGlide",style="slide"})')
+            self.schedule_cache()
+            return False
+        self.restore_timer = self.glib.timeout_add(150, restore)
+
+    def restore_animation(self):
+        if self.restore_timer:
+            self.glib.source_remove(self.restore_timer)
+            self.restore_timer = None
+            evaluate('hl.animation({leaf="workspaces",enabled=true,speed=4.5,bezier="workspaceGlide",style="slide"})')
+
+    def close(self):
+        self.generation += 1
+        self.ui.hide()
+        self.restore_animation()
+        self.schedule_cache()
+
+    def quit(self):
+        self.alive = False
+        self.ui.hide()
+        self.restore_animation()
+        self.gtk.main_quit()
+        return False
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+    main()

@@ -1,0 +1,21 @@
+# shellcheck shell=bash
+# Shared GTK / Qt appearance for apps launched by session helpers.
+GTK_THEME=$("${HYPR_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/hypr}/bin/app-theme" --print-gtk-theme) || GTK_THEME=Tokyonight-Dark
+export GTK_THEME
+# qt6ct also advertises the qt5ct key, so this selects each Qt major correctly.
+export QT_QPA_PLATFORMTHEME=qt5ct
+theme_qt_plugins="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/qt-plugins"
+case ":${QT_PLUGIN_PATH:-}:" in
+    *":$theme_qt_plugins:"*) ;;
+    *) QT_PLUGIN_PATH="$theme_qt_plugins${QT_PLUGIN_PATH:+:$QT_PLUGIN_PATH}" ;;
+esac
+export QT_PLUGIN_PATH
+unset theme_qt_plugins
+# Read fixed-position values without evaluating theme names as shell code.
+mapfile -t theme_cursor_values < <("${HYPR_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/hypr}/bin/cursor-switch" env)
+if [[ ${#theme_cursor_values[@]} -eq 5 ]]; then
+    export XCURSOR_THEME="${theme_cursor_values[0]}" XCURSOR_SIZE="${theme_cursor_values[1]}"
+    export HYPRCURSOR_THEME="${theme_cursor_values[2]}" HYPRCURSOR_SIZE="${theme_cursor_values[3]}"
+    export XCURSOR_PATH="${theme_cursor_values[4]}"
+fi
+unset theme_cursor_values

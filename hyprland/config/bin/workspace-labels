@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Compact workspace app labels for Waybar, sharing one short-lived IPC cache."""
+
+import fcntl
+import hashlib
+import html
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
+import tempfile
+import time
+
+
+def hypr_json(command):
+    result = subprocess.run(
+        ["hyprctl", command, "-j"], capture_output=True, text=True, timeout=2, check=True
+    )
+    return json.loads(result.stdout)
+
+
+def app_name(window):
+    app_class = window.get("class") or window.get("initialClass") or "应用"
+    normalized = app_class.casefold()
+    known = [
+        (r"google-chrome|chromium", "Chrome"),
+        (r"firefox", "Firefox"),
+        (r"brave", "Brave"),
+        (r"chatgpt|com\.openai|codex", "ChatGPT"),
+        (r"neovide", "Neovide"),
+        (r"code|vscodium", "Code"),
+        (r"wezterm|kitty|foot|alacritty|gnome-terminal|konsole", "终端"),
+        (r"feishu|lark", "飞书"),
+        (r"wechat|weixin", "微信"),
+        (r"evince|papers|okular", "PDF"),
+        (r"clash", "代理"),
+        (r"nautilus|dolphin|thunar", "文件"),
+        (r"pavucontrol|nm-connection-editor|gnome.*settings", "设置"),
+    ]
+    for pattern, name in known:
+        if re.search(pattern, normalized):
+            return name
+    name = app_class.rsplit(".", 1)[-1]
+    return name if len(name) <= 7 else name[:6] + "…"
+
+
+def build_labels():
+    clients = hypr_json("clients")
+    active = hypr_json("activeworkspace").get("id")
+    monitors = hypr_json("monitors")
+    visible = {monitor.get("activeWorkspace", {}).get("id") for monitor in monitors}
+    result = {}
+    for number in range(1, 11):
+        windows = [
+            window
+            for window in clients
+            if window.get("workspace", {}).get("id") == number
+            and window.get("mapped", True)
+            and not window.get("hidden", False)
+        ]
+        names = list(dict.fromkeys(app_name(window) for window in windows))
+        text = str(number)
+        if names:
+            text += " " + "·".join(names[:2])
+            if len(names) > 2:
+                text += f" +{len(names) - 2}"
+        classes = ["workspace-label"]
+        if number == active:
+            classes.append("active")
+        elif number in visible:
+            classes.append("visible")
+        if not windows:
+            classes.append("empty")
+        details = [f"工作区 {number} · {len(windows)} 个窗口"]
+        for window in windows:
+            app_class = window.get("class") or window.get("initialClass") or "未知应用"
+            title = window.get("title") or "无标题"
+            details.append(f"{app_name(window)} [{app_class}]\n{title}")
+        if not windows:
+            details.append("空工作区")
+        details.append(f"Super + {number % 10} 切换 · 点击进入")
+        result[str(number)] = {
+            "text": text,
+            "tooltip": html.escape("\n\n".join(details)),
+            "class": classes,
+        }
+    return result
+
+
+def cached_labels():
+    instance = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE", "default")
+    instance_hash = hashlib.sha256(instance.encode()).hexdigest()[:12]
+    runtime = os.environ.get("XDG_RUNTIME_DIR")
+    cache_dir = (Path(runtime) if runtime else Path.home() / ".cache") / "hypr-workspace-labels"
+    cache_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+    cache_file = cache_dir / f"{instance_hash}.json"
+    with (cache_dir / f"{instance_hash}.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if cache_file.exists() and time.time() - cache_file.stat().st_mtime < 0.8:
+            try:
+                return json.loads(cache_file.read_text())
+            except (json.JSONDecodeError, OSError):
+                pass
+        labels = build_labels()
+        descriptor, temp_name = tempfile.mkstemp(prefix=".labels-", dir=cache_dir)
+        try:
+            with os.fdopen(descriptor, "w") as stream:
+                json.dump(labels, stream, ensure_ascii=False)
+            os.replace(temp_name, cache_file)
+        finally:
+            Path(temp_name).unlink(missing_ok=True)
+        return labels
+
+
+def main():
+    if len(sys.argv) != 2 or sys.argv[1] not in {str(i) for i in range(1, 11)}:
+        raise SystemExit("Usage: workspace-labels 1..10")
+    number = sys.argv[1]
+    try:
+        payload = cached_labels()[number]
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError):
+        payload = {"text": number, "tooltip": "暂时无法读取工作区", "class": ["workspace-label"]}
+    print(json.dumps(payload, ensure_ascii=False))
+
+
+if __name__ == "__main__":
+    main()

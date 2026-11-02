@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+set -euo pipefail
+HYPR_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+export XDG_CURRENT_DESKTOP=Hyprland
+export XDG_SESSION_DESKTOP=Hyprland
+export XDG_SESSION_TYPE=wayland
+export PATH="${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin:$HOME/.local/bin:$PATH"
+"$HYPR_CONFIG_DIR/bin/cursor-switch" prepare || printf '鼠标设置准备失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/theme-switch" --startup || printf '登录主题选择失败，沿用现有外观。\n' >&2
+# shellcheck source=/dev/null
+source "$HYPR_CONFIG_DIR/lib/theme-env"
+"$HYPR_CONFIG_DIR/bin/install-launchers"
+"$HYPR_CONFIG_DIR/bin/app-theme" || printf '应用主题未完全应用，继续启动桌面。\n' >&2
+
+# GDM preserves the keyring/PAM login. Update D-Bus activation for portals.
+dbus-update-activation-environment --systemd \
+    WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_DESKTOP XDG_SESSION_TYPE PATH GTK_THEME QT_QPA_PLATFORMTHEME QT_PLUGIN_PATH XCURSOR_THEME XCURSOR_SIZE HYPRCURSOR_THEME HYPRCURSOR_SIZE XCURSOR_PATH \
+    || printf '无法更新 D-Bus 激活环境，请检查用户会话日志。\n' >&2
+systemctl --user restart xdg-desktop-portal.service \
+    || printf 'Portal 启动失败，桌面继续启动；请检查用户会话日志。\n' >&2
+
+"$HYPR_CONFIG_DIR/bin/desktop-start" || printf '部分桌面组件启动失败。\n' >&2
+if ! pgrep -u "$(id -u)" -x hypridle >/dev/null; then hypridle --config "$HYPR_CONFIG_DIR/hypridle.conf" & fi
+if ! pgrep -u "$(id -u)" -x fcitx5 >/dev/null; then fcitx5 -d || printf '输入法启动失败。\n' >&2; fi
+if ! pgrep -u "$(id -u)" -x nm-applet >/dev/null; then nm-applet --indicator & fi
+if ! pgrep -u "$(id -u)" -f '^/usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1' >/dev/null; then
+    /usr/lib/x86_64-linux-gnu/libexec/polkit-kde-authentication-agent-1 &
+fi
+
+"$HYPR_CONFIG_DIR/bin/wallpaper" || printf '壁纸启动失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/cursor-effects" || printf '鼠标动画未能加载。\n' >&2
+"$HYPR_CONFIG_DIR/bin/cursor-switch" apply || printf '鼠标设置未能完全应用。\n' >&2
+"$HYPR_CONFIG_DIR/bin/workspace-switch" --start || printf '工作区总览启动失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/file-preview" --start || printf '文件预览服务启动失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/window-layout" --start || printf '窗口布局记忆启动失败。\n' >&2
+"$HYPR_CONFIG_DIR/bin/theme-mode" restore || printf '场景恢复失败。\n' >&2

@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Choose cursor appearance, movement, shake zoom or size without changing on cancel."""
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+CONFIG = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CONFIG / 'lib'))
+from cursor_config import available_themes, catalog, load_settings
+
+MODE_NAMES = {'stretch': '拉伸 Stretch', 'tilt': '倾斜 Tilt', 'rotate': '旋转 Rotate', 'none': '关闭运动 None'}
+MODE_DETAILS = {
+    'stretch': '移动时沿方向拉伸，停下后恢复',
+    'tilt': '跟随移动方向轻微侧倾',
+    'rotate': '随移动方向旋转',
+    'none': '只关闭移动变形；摇动放大独立设置',
+}
+
+
+def clean(value):
+    return ' '.join(str(value).split())
+
+
+def marked(label, active):
+    return ('● 当前  ' if active else '○  ') + label
+
+
+def choose(prompt, choices):
+    if not choices:
+        return None
+    result = subprocess.run(['wofi', '--dmenu', '--prompt', prompt + ' · Esc 退出',
+                             '--conf', str(CONFIG / 'wofi.conf'), '--style', str(CONFIG / 'wofi.css'),
+                             '--cache-file', '/dev/null', '--width', '800', '--height', '540',
+                             '--insensitive', '--matching', 'contains', '--sort-order', 'default',
+                             '--define', 'line_wrap=word_char', '--define', 'allow_markup=false',
+                             '--define', 'allow_images=false'],
+                            input='\n'.join(choices) + '\n', capture_output=True, text=True)
+    if result.returncode != 0:
+        return None
+    return choices.get(result.stdout.rstrip('\n'))
+
+
+def root_choices(state, themes):
+    theme = themes.get(state['theme'], {})
+    name = clean(theme.get('name', state['theme']))
+    shake = state['shake']
+    return {
+        f'󰇀  外观 Appearance  —  {name}': ('theme',),
+        f'󰌌  运动效果 Motion  —  {MODE_NAMES[state["mode"]]}': ('mode',),
+        ('●' if shake else '○') + '  摇动放大 Shake  —  ' + ('已开启，选择关闭' if shake else '已关闭，选择开启')
+        + '；与运动效果独立': ('apply', 'shake', 'off' if shake else 'on'),
+        f'󰩨  尺寸 Size  —  当前 {state["size"]} px': ('size',),
+        '󰑐  恢复默认 Reset  —  默认外观、运动效果、摇动与尺寸': ('reset',),
+    }
+
+
+def theme_choices(state, themes):
+    choices = {}
+    for name in sorted(themes, key=lambda name: name != state['theme']):
+        theme = themes[name]
+        label = f'{clean(theme["name"])}  [{name}]  —  {clean(theme["description"])}'
+        choices[marked(label, name == state['theme'])] = ('apply', 'theme', name)
+    return choices
+
+
+def mode_choices(state):
+    return {marked(f'{MODE_NAMES[mode]}  —  {MODE_DETAILS[mode]}', mode == state['mode']): ('apply', 'mode', mode)
+            for mode in ('stretch', 'tilt', 'rotate', 'none')}
+
+
+def size_choices(state):
+    return {marked(f'{size} px', size == state['size']): ('apply', 'size', str(size)) for size in (24, 28, 32, 36)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('page', nargs='?', choices=['theme', 'mode', 'size'])
+    args = parser.parse_args()
+    state = load_settings()
+    page = (args.page,) if args.page else choose('鼠标设置', root_choices(state, catalog()))
+    if page is None:
+        return 0
+    if page[0] == 'theme':
+        themes = available_themes()
+        selected = choose(f'鼠标外观 · {len(themes)} 套已安装', theme_choices(state, themes))
+    elif page[0] == 'mode':
+        selected = choose('运动效果 · 摇动放大独立设置', mode_choices(state))
+    elif page[0] == 'size':
+        selected = choose('鼠标尺寸', size_choices(state))
+    elif page[0] == 'reset':
+        selected = choose('确认恢复鼠标默认设置', {'恢复默认  —  应用默认外观、运动效果、摇动与尺寸': ('apply', 'reset')})
+    else:
+        selected = page
+    if selected is None:
+        return 0
+    command = str(CONFIG / 'bin/cursor-switch')
+    os.execv(command, [command, *selected[1:]])
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
+        print('鼠标菜单暂不可用：' + str(error), file=sys.stderr)
+        raise SystemExit(1)

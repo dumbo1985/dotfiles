@@ -36,7 +36,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # lazygit/dust/fas
 
 ## ✨ 功能特性
 
-- 🎨 **多主题支持**：随机加载主题（tokyonight, kanagawa, catppuccin, rose-pine, sonokai, onenord）
+- 🎨 **50 种深色配色**：Neovim 与 Neovide 共用随机主题，来自 33 个主题插件，包含 Tokyo Night、Catppuccin、Nightfox 等主题的不同变体
 - 🔧 **LSP 支持**：完整的语言服务器协议支持，自动安装和配置
 - 🐛 **调试功能**：支持 Python、C/C++、Go 等语言的调试
 - 📝 **代码格式化**：自动格式化，支持多种语言

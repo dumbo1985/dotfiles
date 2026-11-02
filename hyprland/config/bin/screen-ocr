@@ -1,0 +1,11 @@
+#!/usr/bin/python3
+"""Recognize text in a selected screen region with the local OCR engine."""
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+from screen_ocr import main
+
+if __name__ == '__main__':
+    raise SystemExit(main())

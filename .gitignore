@@ -1,0 +1,6 @@
+# Local assistant notes
+/.workbuddy/
+
+# Generated Python bytecode
+__pycache__/
+*.py[cod]

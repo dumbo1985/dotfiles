@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Indirection avoids hyprctl 0.57 routing an eval containing the daemon name
+# to the daemon's own IPC socket before the compositor can execute it.
+set -euo pipefail
+exec "${XDG_DATA_HOME:-$HOME/.local/share}/hypr-theme/bin/hyprsunset" -t 5200

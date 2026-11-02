@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""Choose a weather city, clear it, or open that city's weather page."""
+import argparse
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import tempfile
+
+sys.dont_write_bytecode = True
+CONFIG = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CONFIG / 'lib'))
+import weather_status
+
+
+def refresh():
+    # Signal8 only refreshes modules explicitly declaring signal=8.
+    subprocess.run(['pkill', '-u', str(os.getuid()), '-RTMIN+8', '-x', 'waybar'], capture_output=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('city', nargs='?', help='城市名称；省略时打开输入框')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--clear', action='store_true', help='清除城市设置')
+    group.add_argument('--open', action='store_true', help='打开已设置城市的天气网页')
+    args = parser.parse_args()
+    if args.clear:
+        weather_status.CITY_FILE.unlink(missing_ok=True)
+        refresh()
+        return 0
+    city = args.city
+    if args.open:
+        city = weather_status.selected_city()
+        if city:
+            return subprocess.run(['xdg-open', weather_status.weather_url(city)]).returncode
+    if city is None or not city:
+        current = weather_status.selected_city()
+        result = subprocess.run(['wofi', '--dmenu', '--exec-search', '--prompt', '输入天气城市 · 中文或英文',
+                                 '--conf', str(CONFIG / 'wofi.conf'), '--style', str(CONFIG / 'wofi.css'),
+                                 '--cache-file', '/dev/null', '--height', '180',
+                                 '--define', 'allow_markup=false', '--define', 'allow_images=false'],
+                                input=(current + '\n') if current else '', text=True, capture_output=True)
+        if result.returncode:
+            return 0
+        city = result.stdout.rstrip('\n')
+        if not city.strip():
+            return 0
+    city = weather_status.valid_city(city)
+    with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=CONFIG, prefix='.weather-city-', delete=False) as file:
+        temporary = Path(file.name)
+        try:
+            file.write(city + '\n')
+            file.flush()
+            os.fsync(file.fileno())
+            os.replace(temporary, weather_status.CITY_FILE)
+        finally:
+            temporary.unlink(missing_ok=True)
+    refresh()
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        print(str(error), file=sys.stderr)
+        raise SystemExit(1)

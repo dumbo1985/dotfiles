@@ -1,0 +1,58 @@
+Desktop suite resources installed locally on 2026-10-29
+Target: Ubuntu 24.04 amd64, Hyprland 0.57.0, GTK3 3.24 / GTK4 4.14
+
+Runtime packages from Ubuntu repositories / configured Hyprland PPA:
+sway-notification-center=0.9.0-1build2
+wlogout=1.1.1-3build2
+cliphist=0.4.0-2ubuntu0.3
+papirus-icon-theme=20240201-1
+cava=0.7.4-1build2
+blueman=2.3.5-3build1
+notification-daemon=3.20.0-4build3
+python3-gi-cairo=3.48.2-1
+qt5ct=1.5-1build11
+qt6ct=0.9-2build2
+libqt6svg6=6.4.2-4ubuntu3
+hyprsunset=0.4.0-1ppa2
+fonts-font-awesome=5.0.10+really4.7.0~dfsg-4.1
+Swappy=1.5.1-2 (Debian official package; user-local extraction)
+
+Built from upstream:
+swww v0.11.2, a2864804e48533f4c70c63930d8cb24b394288ec
+https://github.com/LGFae/swww
+Tokyo Night GTK, 6c340e058e84c1975a038a8e5d1e384477225dc0
+https://github.com/Fausto-Korpsvart/Tokyo-Night-GTK-Theme
+GTK4 CSS adjusted for Ubuntu GTK4 4.14 parser compatibility.
+Qt6ct platformtheme has local dependency RUNPATH, no global LD_LIBRARY_PATH.
+
+Paths:
+~/.local/share/hypr-theme/{root,bin,qt-plugins}
+~/.local/share/themes/Tokyonight-Dark
+~/.local/share/icons/Papirus*
+~/.config/{gtk-3.0,gtk-4.0,qt5ct,qt6ct,swappy}
+~/.local/share/applications/hypr-*.desktop
+~/.cache/hypr-theme/ (downloaded packages, source and build logs)
+
+The foundational install.sh does not deploy the optional local resources.
+Source packages retain their original licenses under root/usr/share/doc.
+Only swaync is started as a notification server; extracted notification-daemon
+is an unused package dependency and is not started.
+
+Desktop workflow additions on 2026-10-30:
+Quick Look: Python GTK4, native NautilusPreviewer2 D-Bus API, system pdfinfo/pdftoppm.
+H.264 media decoding: gstreamer1.0-libav=1.24.1-1build1 (Ubuntu user-local extraction).
+~/.local/share/hypr-preview/root/usr/lib/x86_64-linux-gnu/gstreamer-1.0
+Activation: ~/.local/share/dbus-1/services/org.gnome.NautilusPreviewer.service
+
+OCR: isolated Ubuntu packages in ~/.local/share/hypr-ocr (no system package changes):
+tesseract-ocr=5.3.4-1build5
+libtesseract5=5.3.4-1build5
+liblept5=1.82.0-3build4
+tesseract-ocr-eng=1:4.1.0-2
+tesseract-ocr-chi-sim=1:4.1.0-2
+tesseract-ocr-osd=1:4.1.0-2
+Downloads: ~/.cache/hypr-ocr/packages
+Only OCR child processes receive private LD_LIBRARY_PATH and TESSDATA_PREFIX.
+
+Application cycling and layout memory use Hyprland IPC, no compositor plugins.
+Layout state: ~/.local/state/dotfiles-hyprland/window-layout.json (mode 0600).

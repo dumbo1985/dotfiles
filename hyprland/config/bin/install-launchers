@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+"""Expose desktop controls in the normal application launcher."""
+import os
+from pathlib import Path
+
+config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'hypr'
+data = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share'))
+applications = data / 'applications'
+applications.mkdir(parents=True, exist_ok=True)
+entries = [
+    ('control-center', '桌面控制中心', 'preferences-system', '通知 网络 蓝牙 勿扰 设置', []),
+    ('desktop-panel', '日历与系统面板', 'org.gnome.Calendar', '日历 音乐 CPU 内存', []),
+    ('window-switcher', '搜索已打开窗口', 'preferences-system-windows', '窗口 工作区 搜索', []),
+    ('clipboard', '剪贴板历史', 'edit-paste', '复制 粘贴 剪贴板', []),
+    ('emoji', '表情与符号', 'face-smile', '表情 emoji 符号', []),
+    ('music-visualizer', '音乐频谱', 'multimedia-volume-control', '音乐 频谱 Cava', []),
+    ('theme-picker', '切换桌面主题', 'preferences-desktop-theme', '主题 外观 配色 随机', []),
+    ('cursor-picker', '鼠标外观与动画', 'preferences-desktop-mouse', '鼠标 指针 光标 外观 动画 cursor', []),
+    ('power-menu', '桌面电源菜单', 'system-shutdown', '关机 重启 锁屏 注销', []),
+]
+for helper, name, icon, keywords, args in entries:
+    executable = str(config / 'bin' / helper).replace('\\', '\\\\').replace('"', '\\"')
+    content = '[Desktop Entry]\nType=Application\nVersion=1.0\n'
+    content += f'Name={name}\nComment=Hyprland 桌面套件\nExec="{executable}"'
+    content += ''.join(' ' + arg for arg in args)
+    content += f'\nIcon={icon}\nTerminal=false\nCategories=Utility;\nKeywords={keywords.replace(" ", ";")};\nNotShowIn=GNOME;Unity;KDE;\n'
+    (applications / f'hypr-{helper}.desktop').write_text(content)

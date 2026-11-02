@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""Choose a desktop palette or control randomization from the launcher."""
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+CONFIG = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(CONFIG / 'lib'))
+from theme_palette import palettes, settings
+
+
+def single_line(value):
+    return ' '.join(str(value).split())
+
+
+def menu_choices(available, state):
+    current = state.get('name', 'tokyo-night')
+    if not isinstance(current, str) or current not in available:
+        current = 'tokyo-night'
+    enabled = state.get('random_on_login', True) is True
+    # Keep frequent actions visible before the theme list, including on opening.
+    choices = {'󰒟  立即随机换一套  ·  Random': ['random']}
+    choices['󰑖  每次登录随机  ·  Auto  —  ' + ('已开启，点击关闭' if enabled else '已关闭，点击开启')] = ['auto', 'off' if enabled else 'on']
+    # Put the current theme below the actions; the remaining order stays stable.
+    ordered = sorted(available, key=lambda name: name != current)
+    for name in ordered:
+        palette = available[name]
+        marker = '● 当前' if name == current else '○'
+        title = single_line(palette['name'])
+        description = single_line(palette['description'])
+        choices[f'{marker}  {title}  [{name}]  —  {description}'] = [name]
+    return choices
+
+
+def main():
+    available = palettes()
+    choices = menu_choices(available, settings())
+    result = subprocess.run(['wofi', '--dmenu', '--prompt', f'{len(available)} 套桌面主题 · 中文 / English 搜索 · Esc 取消',
+                             '--conf', str(CONFIG / 'wofi.conf'), '--style', str(CONFIG / 'wofi.css'),
+                             '--cache-file', '/dev/null', '--width', '1000', '--height', '760',
+                             '--insensitive', '--matching', 'contains', '--sort-order', 'default',
+                             '--define', 'line_wrap=word_char', '--define', 'allow_markup=false',
+                             '--define', 'allow_images=false'],
+                            input='\n'.join(choices) + '\n', capture_output=True, text=True)
+    selected = result.stdout.rstrip('\n')
+    if result.returncode == 0 and selected in choices:
+        os.execv(str(CONFIG / 'bin/theme-switch'), [str(CONFIG / 'bin/theme-switch')] + choices[selected])
+
+
+if __name__ == '__main__':
+    main()

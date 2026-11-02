@@ -41,11 +41,40 @@
 
 ### 主题
 
-支持的主题（随机加载）：
-- tokyonight
-- kanagawa
-- catppuccin
-- rose-pine
-- sonokai
-- onenord
+Neovim 与 Neovide 共用以下 50 种深色配色，来自 33 个主题插件，包含不同配色变体。每次启动随机选择一种，连续启动可能重复：
 
+| 主题插件 | 参与随机选择的配色 |
+| --- | --- |
+| Tokyo Night | `tokyonight-night`, `tokyonight-storm`, `tokyonight-moon` |
+| Kanagawa | `kanagawa-wave`, `kanagawa-dragon` |
+| Catppuccin | `catppuccin-mocha`, `catppuccin-macchiato`, `catppuccin-frappe` |
+| Rose Pine | `rose-pine-main`, `rose-pine-moon` |
+| Sonokai | `sonokai` |
+| OneNord | `onenord` |
+| Gruvbox | `gruvbox` |
+| Nightfox | `nightfox`, `duskfox`, `nordfox`, `terafox`, `carbonfox` |
+| Everforest | `everforest` |
+| Nord | `nord` |
+| Dracula | `dracula`, `dracula-soft` |
+| GitHub | `github_dark_default`, `github_dark_dimmed`, `github_dark_high_contrast` |
+| OneDark | `onedark` |
+| Material | `material-oceanic`, `material-palenight`, `material-deep-ocean`, `material-darker` |
+| Nordic | `nordic` |
+| Moonfly | `moonfly` |
+| Nightfly | `nightfly` |
+| Ayu | `ayu-dark`, `ayu-mirage` |
+| Night Owl | `night-owl` |
+| Gruvbox Material | `gruvbox-material` |
+| Edge | `edge` |
+| VSCode | `vscode` |
+| Adwaita | `adwaita` |
+| Vague | `vague` |
+| Modus Themes | `modus_vivendi` |
+| TokyoDark | `tokyodark` |
+| Oxocarbon | `oxocarbon` |
+| Evergarden | `evergarden` |
+| Mellifluous | `mellifluous` |
+| Bamboo | `bamboo` |
+| Melange | `melange` |
+| Monokai Pro | `monokai-pro` |
+| Poimandres | `poimandres` |

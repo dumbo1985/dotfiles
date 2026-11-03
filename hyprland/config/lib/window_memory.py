@@ -38,7 +38,8 @@ OUTPUT = re.compile(r'[A-Za-z0-9_.:-]{1,128}\Z')
 EXCLUDED_APPS = {'org.gnome.nautiluspreviewer', 'nautilus-previewer', 'sushi',
                  'hypr-music-visualizer', 'hyprland-share-picker', 'xdg-desktop-portal-gtk',
                  'org.freedesktop.impl.portal.desktop.gtk', 'pinentry', 'pinentry-gtk-2',
-                 'polkit-gnome-authentication-agent-1', 'polkit-kde-authentication-agent-1'}
+                 'polkit-gnome-authentication-agent-1', 'polkit-kde-authentication-agent-1',
+                 'fcitx'}
 ALIASES = {'org.wezfurlong.wezterm': 'wezterm', 'org.neovide.neovide': 'neovide',
            'org.gnome.nautilus': 'nautilus', 'org.gnome.evince': 'evince',
            'google-chrome-stable': 'google-chrome', 'chromium-browser': 'chromium',
@@ -298,12 +299,16 @@ class LayoutMemory:
         document = document if isinstance(document, dict) else {}
         self.last_session = document.get('last_session')
         records = document.get('windows', [])
-        self.records = {item['id']: copy.deepcopy(item) for item in records[:500]
-                        if isinstance(item, dict) and isinstance(item.get('id'), str) and item.get('app')} if isinstance(records, list) else {}
+        records = [item for item in records[:500]
+                   if isinstance(item, dict) and isinstance(item.get('id'), str) and item.get('app')] if isinstance(records, list) else []
+        # Older sessions may have learned input-method popups as applications.
+        # Drop their saved geometry too, so it cannot become a restore template.
+        self.records = {item['id']: copy.deepcopy(item) for item in records
+                        if str(item['app']).casefold() not in EXCLUDED_APPS}
         self.by_address, self.pending, self.inflight, self.suppressed = {}, {}, set(), {}
         self.outputs = None
         self.quiet_until = 0
-        self.dirty = False
+        self.dirty = len(self.records) != len(records)
         self.slot_defaults = {}
         for record in self.records.values():
             key = record.get('app')

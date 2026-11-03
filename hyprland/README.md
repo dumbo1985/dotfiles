@@ -110,6 +110,7 @@ wofi --show drun --conf ~/.config/hypr/wofi.conf --style ~/.config/hypr/wofi.css
 `Super + Tab` 切应用，`Super + 反引号` 切同一应用的窗口；加 Shift 反向。
 `Super + Shift + O` 框选中英文识字，`Super + Ctrl + O` 使用代码模式。
 后台自动记住应用的显示器与工作区，浮动窗口也记住位置和大小。
+输入法候选框不参与窗口切换或布局记忆；旧版本误存的候选框位置会在服务启动时自动清理，避免输入时被拉回旧位置。
 完整说明见 [四项桌面工作流](MACOS.zh-CN.md)。
 
 ## 通知、网页链接与顶栏恢复

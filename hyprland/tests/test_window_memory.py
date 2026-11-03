@@ -31,6 +31,18 @@ class CycleTests(unittest.TestCase):
         self.assertNotEqual(memory.app_key(browser), memory.app_key(pwa))
         self.assertEqual(memory.visible_clients([window('0x4', 'org.gnome.NautilusPreviewer')]), [])
 
+    def test_input_candidates_are_excluded_but_input_settings_can_be_cycled(self):
+        editor = window('0x1', 'editor', history=0)
+        candidate = window('0x2', 'Fcitx', title='Fcitx5 Input Window', floating=True, history=1)
+        settings = window('0x3', 'fcitx5-config-qt', title='Fcitx Configuration', history=2)
+        clients = [editor, candidate, settings]
+
+        self.assertEqual(memory.visible_clients(clients), [editor, settings])
+        plan, _ = memory.plan_cycle(clients, editor['address'])
+        self.assertEqual((plan['target'], plan['count']), (settings['address'], 2))
+        plan, _ = memory.plan_cycle(clients, settings['address'])
+        self.assertEqual(plan['target'], editor['address'])
+
     def test_repeated_app_cycle_freezes_mru_instead_of_pingpong(self):
         clients = [window('0x1', 'editor', history=0), window('0x2', 'browser', history=1),
                    window('0x3', 'terminal', history=2), window('0x4', 'editor', history=3)]
@@ -78,6 +90,45 @@ class GeometryTests(unittest.TestCase):
 
 
 class LayoutTests(unittest.TestCase):
+    def test_loading_old_candidate_placement_removes_it_and_marks_state_dirty(self):
+        candidate = window('0x1', 'fcitx', title='Fcitx5 Input Window', floating=True)
+        candidate.update(at=[426, 1624], size=[128, 96])
+        candidate_record = dict(memory.placement(candidate, MONITORS), id='legacy-ime', slot=0)
+        regular_record = dict(memory.placement(window('0x2'), MONITORS), id='editor', slot=0)
+        document = {'version': 1, 'windows': [candidate_record, regular_record]}
+
+        tracker = memory.LayoutMemory(document)
+
+        self.assertEqual(tracker.document()['windows'], [regular_record])
+        self.assertNotIn('fcitx', tracker.slot_defaults)
+        self.assertTrue(tracker.dirty)
+        self.assertEqual(document['windows'], [candidate_record, regular_record])
+        self.assertFalse(memory.LayoutMemory({'windows': [regular_record]}).dirty)
+
+    def test_candidate_remaps_never_restore_while_regular_apps_still_do(self):
+        tracker = memory.LayoutMemory()
+        saved = window('0x1', title='project A', workspace=9, monitor=1)
+        candidate = window('0xfc', 'fcitx', title='Fcitx5 Input Window', floating=True)
+        self.assertEqual(tracker.observe([saved, candidate], MONITORS, baseline=True, now=1), [])
+
+        for now, candidates in [(2, []), (3, [candidate]), (4, [candidate]),
+                                (5, []), (6, [dict(candidate, address='0xfd')]),
+                                (7, [dict(candidate, address='0xfd')])]:
+            self.assertEqual(tracker.observe([saved, *candidates], MONITORS, now=now), [])
+            self.assertEqual(tracker.explicit_plans(candidates, MONITORS), [])
+        self.assertEqual({record['app'] for record in tracker.document()['windows']}, {'neovide'})
+        self.assertEqual(set(tracker.by_address), {saved['address']})
+        self.assertEqual(tracker.pending, {})
+
+        tracker.observe([], MONITORS, now=8)
+        reopened = window('0x2', title='project A')
+        self.assertEqual(tracker.observe([reopened, candidate], MONITORS, now=9), [])
+        plans = tracker.observe([reopened, candidate], MONITORS, now=10)
+        self.assertEqual([(plan['address'], plan['workspace'], plan['monitor']) for plan in plans],
+                         [('0x2', 9, 'DP-2')])
+        self.assertEqual([plan['address'] for plan in tracker.explicit_plans([reopened, candidate], MONITORS)],
+                         ['0x2'])
+
     def test_baseline_learns_without_plans_and_tracks_manual_moves(self):
         tracker = memory.LayoutMemory()
         client = window('0x1', title='project A')

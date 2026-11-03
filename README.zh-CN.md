@@ -46,6 +46,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # lazygit/dust/fas
 - 🎯 **输入法**：Ubuntu 使用桌面输入法（Fcitx5/Rime 等），无需插件切换；macOS 上的 `im-select` 自动切换仅在 `forMac` 分支启用
 - 🖥️ **Neovide 支持**：针对 Neovide GUI 的优化配置
 - 🧰 **整机快速迁移**：`install.sh` 一键把 nvim / clangd / blerc / 跳转命令 / 每日壁纸部署到新机器，幂等可重跑
+- 🪟 **可选 Hyprland 桌面**：20 套配色、工作区预览、通知定位应用、外部网页链接跟随 Chrome，以及顶栏崩溃自动恢复；使用[独立桌面安装流程](hyprland/README.md)
 
 ## 📋 目录
 
@@ -59,11 +60,14 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # lazygit/dust/fas
 | [键位映射](docs/zh/keymaps.md) | 全部快捷键速查表 |
 | [使用说明](docs/zh/usage.md) | 首次使用、格式化、调试配置、自定义方式 |
 | [故障排除](docs/zh/troubleshooting.md) | 常见报错与解法 |
+| [Hyprland 桌面](hyprland/README.md) | 独立安装、主题、快捷键、通知与链接跳转、顶栏恢复 |
 
 ## 📝 更新日志
 
 ### forUbuntu 分支（2026）
 
+- ✅ Hyprland 通知与外部网页链接按窗口当前位置跨工作区跳转，Waybar 顶栏崩溃后自动恢复
+- ✅ 新增可选 Hyprland 桌面套件：20 套配色、鼠标设置、工作区预览与统一启动器
 - ✅ 安装说明全面改写为 Ubuntu 24.04 流程，移除 macOS 专属步骤
 - ✅ 新增 FUSE 缺失时用 `--appimage-extract` 运行 AppImage 的通用方案
 - ✅ 新增 Markdown 渲染与浏览器预览（`<leader>mt` / `<leader>mp`）

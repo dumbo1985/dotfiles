@@ -46,6 +46,7 @@ bash ~/dotfiles/toolbox/install-extra-cli-tools.sh --dry-run  # tools outside ap
 - 🎯 **Input method**: Ubuntu uses the desktop IME (Fcitx5/Rime, etc.) with no plugin switching; `im-select` auto-switching is `forMac`-branch only
 - 🖥️ **Neovide support**: tuned for the Neovide GUI
 - 🧰 **Fast machine bootstrap**: `install.sh` deploys nvim / clangd / blerc / jump commands / daily wallpaper in one idempotent run
+- 🪟 **Optional Hyprland desktop**: 20 palettes, workspace previews, notification-to-window navigation, external Chrome link focus and automatic top-bar crash recovery; use the [separate desktop setup](hyprland/README.md)
 
 ## 📋 Table of Contents
 
@@ -59,11 +60,14 @@ The details live in `docs/en/`, split by topic:
 | [Keymaps](docs/en/keymaps.md) | The full keymap cheat sheet |
 | [Usage](docs/en/usage.md) | First run, formatting, debugging setup, customising |
 | [Troubleshooting](docs/en/troubleshooting.md) | Common errors and fixes |
+| [Hyprland desktop](hyprland/README.md) (Chinese) | Separate installation, themes, shortcuts, notification/link navigation and top-bar recovery |
 
 ## 📝 Changelog
 
 ### forUbuntu branch (2026)
 
+- ✅ Added dynamic notification and external-link window focus across Hyprland workspaces, plus automatic Waybar top-bar crash recovery
+- ✅ Added the optional Hyprland desktop suite with 20 palettes, cursor settings, workspace previews and a unified launcher
 - ✅ Rewrote the install guide for Ubuntu 24.04 and dropped macOS-only steps
 - ✅ Documented the general `--appimage-extract` workaround for hosts without FUSE
 - ✅ Added Markdown rendering and browser preview (`<leader>mt` / `<leader>mp`)

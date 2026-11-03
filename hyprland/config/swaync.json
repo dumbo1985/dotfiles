@@ -28,6 +28,12 @@
   "hide-on-clear": false,
   "hide-on-action": true,
   "script-fail-notify": true,
+  "scripts": {
+    "focus-notification-window": {
+      "exec": "/bin/sh -c \"${XDG_CONFIG_HOME:-$HOME/.config}/hypr/bin/notification-focus\"",
+      "run-on": "action"
+    }
+  },
   "widgets": [
     "label#heading",
     "buttons-grid#connectivity",

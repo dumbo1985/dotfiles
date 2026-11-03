@@ -2,6 +2,11 @@
 """Expose desktop controls in the normal application launcher."""
 import os
 from pathlib import Path
+import sys
+
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+from browser_open import install_desktop_entry
 
 config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'hypr'
 data = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share'))
@@ -25,3 +30,7 @@ for helper, name, icon, keywords, args in entries:
     content += ''.join(' ' + arg for arg in args)
     content += f'\nIcon={icon}\nTerminal=false\nCategories=Utility;\nKeywords={keywords.replace(" ", ";")};\nNotShowIn=GNOME;Unity;KDE;\n'
     (applications / f'hypr-{helper}.desktop').write_text(content)
+
+# Use the same desktop ID so HTTP/HTTPS associations and Chrome's default
+# browser status remain valid. Native new-window/incognito actions are kept.
+install_desktop_entry(config, data)

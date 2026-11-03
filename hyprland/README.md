@@ -112,6 +112,25 @@ wofi --show drun --conf ~/.config/hypr/wofi.conf --style ~/.config/hypr/wofi.css
 后台自动记住应用的显示器与工作区，浮动窗口也记住位置和大小。
 完整说明见 [四项桌面工作流](MACOS.zh-CN.md)。
 
+## 通知、网页链接与顶栏恢复
+
+在控制中心点击通知，会收起面板并聚焦对应应用的已有窗口。工作区实时查找，不固定绑定编号：飞书移到工作区 7 后，点击飞书通知就跟随跳到 7，不会把窗口搬到当前工作区。多个同类窗口优先最近使用的窗口；是否进一步打开具体聊天由应用决定。没有匹配窗口时不会自动重启应用。
+
+从飞书、微信等应用点击 HTTP/HTTPS 链接后，Chrome 按原方式打开标签页，桌面自动切到接收链接的 Chrome 窗口。通过用户级同名 `google-chrome.desktop` 启动入口实现，保留默认浏览器身份、新窗口和隐身菜单；已有独立用户启动入口不会被覆盖。Chrome 所在工作区也实时查找，不写死编号。只响应这些打开操作，保持全局 `focus_on_activate` 关闭，后台通知与网页更新不会因此切换工作区。SwayNC 0.9 的附加通知按钮也会触发窗口定位。
+
+顶栏由 `bin/topbar-guard` 独立守护，异常退出后约 2 秒重启；每分钟最多自动重试 5 次，正常停止、主题重启和退出会话时不重启。Dock 仍由独立进程运行。全屏应用会隐藏当前屏幕的顶栏，按 `Super + F` 退出全屏后显示；如果顶栏进程已退出，可在终端补启动缺失组件：
+
+```bash
+~/.config/hypr/bin/desktop-start
+tail -n 50 ~/.local/state/dotfiles-hyprland/waybar.log
+```
+
+`bin/install-launchers` 部署 Chrome 启动入口，`lib/browser_open.py` 负责链接打开与浏览器定位；`swaync.json` 的点击钩子调用 `bin/notification-focus`，并通过默认配置软链兼容 SwayNC 0.9 的配置重载。详细边界见 [桌面套件附录](DESKTOP-SUITE.zh-CN.md)。相关行为可离线验证，不会打开浏览器或操作真实窗口：
+
+```bash
+python3 -B -m unittest discover -s hyprland/tests
+```
+
 ## 主题与壁纸
 
 窗口、状态栏、菜单、通知与锁屏跟随当前主题。按 `Super + Shift + T` 从 Tokyo Night、Catppuccin、Nord、Gruvbox、Rosé Pine、Dracula、One Dark、Kanagawa 等 20 套配色中选择；默认每次登录随机且避开上次，配置重载不随机。

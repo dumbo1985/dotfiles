@@ -1,0 +1,13 @@
+#!/usr/bin/env python3
+"""SwayNC click hook: switch to an existing application window."""
+from pathlib import Path
+import os
+import sys
+
+sys.dont_write_bytecode = True
+data = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share'))
+os.environ['PATH'] = str(data / 'hypr-theme/bin') + ':' + os.environ.get('PATH', '/usr/bin:/bin')
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'lib'))
+from notification_focus import main
+
+raise SystemExit(main())

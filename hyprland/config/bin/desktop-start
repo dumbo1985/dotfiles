@@ -10,6 +10,13 @@ mkdir -p "$runtime_dir"
 chmod 700 "$runtime_dir"
 exec 9>"$runtime_dir/desktop-start.lock"
 flock 9
+# SwayNC 0.9 can fall back to its standard path when reloading a custom -c
+# config. Point that path at the same file so action hooks survive reloads.
+swaync_default="${XDG_CONFIG_HOME:-$HOME/.config}/swaync/config.json"
+if [[ ! -e "$swaync_default" && ! -L "$swaync_default" ]]; then
+    mkdir -p "$(dirname "$swaync_default")"
+    ln -s "$HYPR_CONFIG_DIR/swaync.json" "$swaync_default"
+fi
 launch() {
     local name=$1 command
     shift
@@ -39,7 +46,11 @@ wait_stopped() {
 ensure_bar() {
     local name=$1 config=$2 style=$3
     has_bar "$config" && return 0
-    launch "$name" waybar --config "$HYPR_CONFIG_DIR/$config" --style "$HYPR_CONFIG_DIR/$style" || return
+    if [[ $name == waybar ]]; then
+        launch "$name" "$HYPR_CONFIG_DIR/bin/topbar-guard" || return
+    else
+        launch "$name" waybar --config "$HYPR_CONFIG_DIR/$config" --style "$HYPR_CONFIG_DIR/$style" || return
+    fi
     for _ in {1..30}; do
         has_bar "$config" && return 0
         sleep .05
